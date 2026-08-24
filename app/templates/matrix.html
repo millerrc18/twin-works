@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% set active_page = 'dashboard' %}
+
+{% block cmdtitle %}<h1>{{ program_name }}<span class="sub num">{{ program }} · Operation Tracker</span></h1>{% endblock %}
+{% block cmdright %}
+  <span class="asof">data: {{ data_source|default('snapshot') }}</span>
+  {% include "partials/view_toggle.html" %}
+  <span class="badge {{ 'trained' if m.model_status=='TRAINED' else '' }}">{{ m.model_status }}</span>
+{% endblock %}
+
+{% block subbar %}
+<div class="caveat"><b>PRELIMINARY</b> —
+  {% if m.slotted %}columns = RTG delivery slots (fixed target); assigned serial fills each slot — reassign on a swap.{% else %}columns = units by contract.{% endif %}
+  Forecast = best-case floor + measured slip. Cure floor ≈ <span class="num">{{ m.cure_floor_days }}d</span>. Δ vs target.</div>
+{% endblock %}
+
+{% block head %}
+<style>
+.mx-wrap{overflow:auto;max-height:calc(100vh - 168px);}
+.mx-frame{display:inline-block;min-width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.mx{border-collapse:separate;border-spacing:0;font-size:12px;}
+.mx th,.mx td{padding:0;}
+.mx thead th{position:sticky;background:var(--panel);}
+.mx .corner{left:0;top:0;z-index:40;background:var(--panel);box-shadow:1px 0 0 var(--border),0 1px 0 var(--border);}
+.mx .rowhead{position:sticky;left:0;z-index:20;background:var(--panel);box-shadow:1px 0 0 var(--border);}
+.mx thead tr th{top:0;z-index:30;}
+.mx .opcol{min-width:290px;width:290px;text-align:left;}
+.mx .ucol{min-width:80px;text-align:center;}
+.gband{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 8px;color:var(--muted);background:var(--panel2);border-bottom:1px solid var(--border);border-left:2px solid var(--brand);}
+.gband.rh{border-left-color:#8b5cf6;} .gband.un{border-left-color:var(--faint);color:var(--faint);}
+.uhead{padding:8px 4px;border-bottom:1px solid var(--border);border-left:1px solid var(--border2);}
+.uhead .ser{font-weight:600;font-size:13px;} .uhead .so{font-size:10px;color:var(--faint);}
+.uhead.bumped .ser{color:var(--alert);}
+.grpsep{border-left:2px solid var(--border)!important;}
+.mrow th.rowhead{font-size:11px;font-weight:500;color:var(--muted);text-align:left;padding:3px 8px;}
+.mrow td{font-size:11px;text-align:center;padding:3px 4px;color:var(--muted);border-left:1px solid var(--border2);}
+.mrow.rtg th.rowhead,.mrow.rtg td{border-top:1px dotted var(--seam);border-bottom:1px dotted var(--seam);color:var(--text);font-weight:600;}
+.dpill{display:inline-block;min-width:42px;padding:1px 6px;border-radius:5px;font-size:11px;font-weight:600;}
+.dpill.late{background:var(--late-bg);color:var(--late-tx);}
+.dpill.latemild{background:transparent;border:1px solid var(--late-tx);color:var(--late-tx);}
+.dpill.early{background:transparent;border:1px solid var(--early-tx);color:var(--early-tx);}
+.dpill.on{background:transparent;color:var(--ontime-tx);}
+/* quieter milestone dividers — thin rule + left rail, not a heavy tinted band */
+.msband td{background:transparent;border-top:1px solid var(--border);border-left:3px solid var(--brand);
+  font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:6px 10px 3px;}
+.mx tbody tr.op td{border-bottom:1px solid var(--border2);height:29px;}
+.mx tbody tr.op:nth-of-type(even) td{background:color-mix(in srgb,var(--muted) 3%,transparent);}
+.mx tbody tr.op:hover td{background:color-mix(in srgb,var(--brand) 7%,transparent);}
+/* this-week ('today') reference — soft tint, does not fight WIP */
+.cell.tw{background:color-mix(in srgb,var(--brand) 6%,transparent);}
+/* column hover highlight — trace one unit top-to-bottom */
+.mx td.colhi, .mx th.colhi{background:color-mix(in srgb,var(--brand) 9%,transparent)!important;}
+.oplabel{text-align:left;padding:4px 10px;white-space:nowrap;line-height:1.25;}
+.oplabel .opn{color:var(--muted);font-weight:600;}
+.oplabel .desc{color:var(--text);}
+/* WC · hrs drops to a quiet second line so the op label never truncates */
+.oplabel .meta{display:block;color:var(--faint);font-size:10px;margin-top:1px;}
+.bandsum{color:var(--faint);font-weight:400;font-size:10px;text-transform:none;letter-spacing:0;margin-left:6px;}
+.cell{text-align:center;border-left:1px solid var(--border2);color:var(--muted);}
+/* completed trail recedes — dim ✓ so the sea of done doesn't compete */
+.cell.done{color:color-mix(in srgb,var(--done) 55%,var(--faint));font-weight:400;opacity:.7;}
+/* upcoming dates quiet by default; near-term (≤10d) stronger so the eye lands on imminent work */
+.cell.up{color:var(--faint);font-weight:400;}
+.cell.up.near{color:var(--text);font-weight:500;}
+.chip.wip{display:inline-block;padding:1px 6px;border-radius:5px;font-size:10.5px;font-weight:600;background:var(--wip-bg);color:var(--wip-tx);}
+/* cure/gate = context sub-rows, slimmer + lighter than ops */
+.mx tbody tr.cure td,.mx tbody tr.gate td{background:var(--panel2);height:22px;}
+.cure .oplabel{color:var(--cure);font-style:italic;font-size:10.5px;padding-top:2px;padding-bottom:2px;}
+.gate .oplabel{color:var(--muted);font-style:italic;font-size:10.5px;padding-top:2px;padding-bottom:2px;}
+.gate .oplabel .gk{color:var(--text);font-weight:600;font-style:normal;}
+.cdot{color:var(--cure);}
+.bumped-col{background:repeating-linear-gradient(45deg,transparent,transparent 5px,color-mix(in srgb,var(--alert) 9%,transparent) 5px,color-mix(in srgb,var(--alert) 9%,transparent) 10px);}
+.reassign{margin-top:5px;}
+.reassign select{font-size:10px;padding:1px 2px;width:100%;}
+.mxtoolbar{display:flex;align-items:center;gap:14px;margin-bottom:10px;flex-wrap:wrap;}
+.mxtgl{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;}
+.mxtgl input{cursor:pointer;}
+.mxbtn{font-size:12px;padding:4px 12px;border:1px solid var(--border);border-radius:7px;background:var(--panel);color:var(--text);cursor:pointer;}
+.mxbtn:hover{background:var(--panel2);}
+.mxlegend{display:inline-flex;gap:12px;align-items:center;margin-left:auto;font-size:11px;color:var(--muted);}
+.mxlegend span{display:inline-flex;align-items:center;gap:4px;}
+.slip{font-size:9.5px;font-weight:700;margin-left:3px;vertical-align:middle;}
+.slip.late{color:var(--late-tx);} .slip.early{color:var(--early-tx);}
+@media print{.mxtoolbar{display:none;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div x-data="{ open: {
+      {%- for row in m.grid %}{% if row.kind=='ms' %}'{{ row.code }}': {{ 'false' if row.complete else 'true' }},{% endif %}{% endfor -%}
+    }, showAll:false,
+    isOpen(c){ return this.showAll || this.open[c]; } }">
+<div class="mxtoolbar">
+  <span class="seg">
+    <a href="?view=matrix&filter=all" class="{{ 'on' if flt=='all' else '' }}">All</a>
+    <a href="?view=matrix&filter=behind" class="{{ 'on' if flt=='behind' else '' }}">Behind</a>
+    <a href="?view=matrix&filter=active" class="{{ 'on' if flt=='active' else '' }}">Active</a>
+  </span>
+  <label class="mxtgl"><input type="checkbox" x-model="showAll"> show completed ops</label>
+  <button class="mxbtn" onclick="window.print()">Print / PDF</button>
+  <span class="mxlegend">
+    <span><b style="color:var(--done)">✓</b> done</span>
+    <span class="chip wip" style="transform:scale(.85)">WIP</span>
+    <span><span class="num" style="color:var(--text)">09/04</span> near</span>
+    <span><span class="num faint">09/20</span> later</span>
+    <span><span style="color:var(--cure)">●</span> cure</span>
+    <span>◇ gate</span>
+  </span>
+</div>
+<div class="mx-wrap">
+  <div class="mx-frame">
+  <table class="mx">
+    <thead>
+      <!-- group bands -->
+      <tr>
+        <th class="corner opcol" rowspan="2" style="vertical-align:bottom;"><div class="gband" style="border:none;background:transparent;color:var(--faint);">Operation</div></th>
+        {% for g in m.groups %}
+        <th colspan="{{ g.span }}" class="gband {{ 'rh' if 'RH' in g.label else ('un' if 'Unassigned' in g.label or 'contract' in g.label else '') }} {{ 'grpsep' if not loop.first else '' }}">{{ g.label }}</th>
+        {% endfor %}
+      </tr>
+      <!-- serials -->
+      <tr>
+        {% for c in m.columns %}
+        {% set u = c.unit %}
+        {% set sep = 'grpsep' if (c.first_in_group) else '' %}
+        <th class="uhead ucol {{ 'bumped' if u and u.stalled else '' }} {{ sep }}">
+          {% if c.serial %}<div class="ser">{{ c.serial }}</div>{% if u %}<div class="so num">{{ u.so }}</div>{% endif %}
+          {% if u and u.stalled %}<div class="so" style="color:var(--alert)">STALLED</div>{% endif %}
+          {% else %}<div class="so">(empty)</div>{% endif %}
+          {% if c.kind=='slot' %}
+          <form method="post" action="/forecast/{{ program }}/reassign" class="reassign">
+            <input type="hidden" name="slot_id" value="{{ c.slot_id }}">
+            <select name="serial" onchange="this.form.submit()" aria-label="reassign slot">
+              <option value="">— unassign —</option>
+              {% for s in all_serials %}<option value="{{ s }}" {{ 'selected' if s==c.serial else '' }}>{{ s }}</option>{% endfor %}
+            </select>
+          </form>{% endif %}
+        </th>
+        {% endfor %}
+      </tr>
+      <!-- metric rows -->
+      {% for label, attr in [('Contract','commit'),('RTG target','rtg'),('Forecast P50','forecast'),('Δ vs target','delta')] %}
+      <tr class="mrow {{ 'rtg' if attr=='rtg' else '' }}">
+        <th class="rowhead">{{ label }}</th>
+        {% for c in m.columns %}
+        {% set u = c.unit %}
+        {% set sep = 'grpsep' if c.first_in_group else '' %}
+        {% if not u %}
+          <td class="{{ sep }}">{% if attr=='rtg' and c.target %}<span class="num">{{ c.target|fmt_date }}</span>{% else %}<span style="color:var(--faint)">—</span>{% endif %}</td>
+        {% elif u.stalled %}
+          <td class="{{ sep }}" style="color:var(--alert)">{% if attr=='forecast' %}idle <span class="num">{{ u.idle_days }}d</span>{% elif attr=='rtg' and u.rtg %}<span class="num">{{ u.rtg|fmt_date }}</span>{% else %}—{% endif %}</td>
+        {% elif attr=='delta' %}
+          {% set tip = 'Forecast ' ~ (u.forecast|fmt_date) ~ ' vs ' ~ u.target_kind ~ ' target ' ~ (u.target|fmt_date) ~ ' (' ~ ('+' if u.delta and u.delta>0 else '') ~ u.delta ~ 'd)' if u.delta is not none else '' %}
+          {% set slip %}{% if u.slip and u.slip>0 %} <span class="slip late" title="slipped {{ u.slip }}d since last review">↑{{ u.slip }}</span>{% elif u.slip and u.slip<0 %} <span class="slip early" title="pulled in {{ -u.slip }}d since last review">↓{{ -u.slip }}</span>{% endif %}{% endset %}
+          {% if u.delta is none %}<td class="{{ sep }}"><span style="color:var(--faint)">—</span></td>
+          {% elif u.delta > 2 %}<td class="{{ sep }}" title="{{ tip }}"><span class="dpill late num">▲ +{{ u.delta }}</span>{{ slip }}</td>
+          {% elif u.delta > 0 %}<td class="{{ sep }}" title="{{ tip }}"><span class="dpill latemild num">▲ +{{ u.delta }}</span>{{ slip }}</td>
+          {% elif u.delta < 0 %}<td class="{{ sep }}" title="{{ tip }}"><span class="dpill early num">▼ {{ u.delta }}</span>{{ slip }}</td>
+          {% else %}<td class="{{ sep }}" title="{{ tip }}"><span class="dpill on num">— 0</span>{{ slip }}</td>{% endif %}
+        {% elif attr=='rtg' %}
+          <td class="{{ sep }}">{% if u.rtg %}<span class="num">{{ u.rtg|fmt_date }}</span>{% else %}<span style="color:var(--faint);font-weight:400">no RTG</span>{% endif %}</td>
+        {% else %}
+          <td class="{{ sep }}"><span class="num">{{ u[attr]|fmt_date }}</span></td>
+        {% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </thead>
+    <tbody>
+      {% for row in m.grid %}
+        {% if row.kind == 'ms' %}
+        <tr class="msband" @click="open['{{ row.code }}']=!open['{{ row.code }}']" style="cursor:pointer">
+          <td colspan="{{ m.columns|length + 1 }}">
+            <span x-text="isOpen('{{ row.code }}')?'▾':'▸'" style="display:inline-block;width:12px"></span>
+            {{ row.name }}
+            {% if row.complete %}<span class="bandsum">— <span class="num">{{ row.op_count }}</span> ops complete</span>
+            {% elif row.done_count %}<span class="bandsum">— <span class="num">{{ row.done_count }}</span>/<span class="num">{{ row.op_count }}</span> done</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr class="op {{ row.kind }}" x-show="isOpen('{{ row.ms }}')">
+          <td class="rowhead oplabel">
+            {% if row.kind=='op' %}<span class="opn num">{{ row.opno }}</span> <span class="desc">{{ row.desc }}</span> <span class="meta num">· {{ row.wc }} · {{ row.hr }}h</span>
+            {% elif row.kind=='cure' %}<span class="cdot">●</span> <span class="desc" style="color:var(--cure)">{{ row.desc }}</span> <span class="meta num">· {{ row.hr }}h dwell</span>
+            {% else %}<span class="gk">◇ GATE</span> <span class="desc">{{ row.desc }}</span> <span class="meta num">· {{ row.hr }}h dwell</span>{% endif %}
+          </td>
+          {% for c in row.cells %}
+          {% set col = m.columns[loop.index0] %}
+          {% set sep = 'grpsep' if col.first_in_group else '' %}
+          {% set bump = 'bumped-col' if (col.unit and col.unit.stalled) else '' %}
+          <td data-col="{{ loop.index0 }}" class="cell {{ 'done' if c.state=='done' else ('up' if c.state=='upcoming' else '') }} {{ 'near' if c.near else '' }} {{ 'tw' if c.tw else '' }} {{ sep }} {{ bump }}">
+            {% if c.state=='done' %}<span style="font-size:11px">✓</span>
+            {% elif c.state=='wip' %}<span class="chip wip">WIP</span>
+            {% elif c.state=='upcoming' %}<span class="num">{{ c.text }}</span>
+            {% elif c.state in ('cure','gate') %}<span class="num" style="color:var(--faint);font-size:11px">{{ c.text }}</span>
+            {% else %}{{ c.text }}{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// column hover highlight — tint every cell in the hovered unit column
+(function(){
+  const tbl = document.querySelector('.mx');
+  if(!tbl) return;
+  let cur = null;
+  tbl.addEventListener('mouseover', e => {
+    const td = e.target.closest('[data-col]'); if(!td) return;
+    const col = td.getAttribute('data-col'); if(col===cur) return;
+    clearHi(); cur = col;
+    tbl.querySelectorAll('[data-col="'+col+'"]').forEach(el => el.classList.add('colhi'));
+  });
+  tbl.addEventListener('mouseleave', clearHi);
+  function clearHi(){ tbl.querySelectorAll('.colhi').forEach(el=>el.classList.remove('colhi')); cur=null; }
+})();
+</script>
+{% endblock %}

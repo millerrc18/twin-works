@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% set active_page = 'dashboard' %}
+
+{% block cmdtitle %}<h1>{{ program_name }}<span class="sub num">{{ program }} · Forecast</span></h1>{% endblock %}
+{% block cmdright %}
+  <span class="asof">data: {{ data_source|default('snapshot') }}</span>
+  {% include "partials/view_toggle.html" %}
+{% endblock %}
+
+{% block head %}
+<style>
+.ftable{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.ftable thead th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600;text-align:center;padding:9px 10px;background:var(--panel2);border-bottom:1px solid var(--border);}
+.ftable thead th:first-child{text-align:left;}
+.ftable td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--border2);color:var(--muted);}
+.ftable td:first-child{text-align:left;color:var(--text);font-weight:600;}
+.ftable tr:hover td{background:color-mix(in srgb,var(--brand) 4%,transparent);}
+.ftable tr.stalled td{background:color-mix(in srgb,var(--alert) 7%,transparent);}
+.dpill{display:inline-block;min-width:42px;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:600;}
+.dpill.late{background:var(--late-bg);color:var(--late-tx);}
+.dpill.latemild{background:transparent;border:1px solid var(--late-tx);color:var(--late-tx);}
+.dpill.early{background:transparent;border:1px solid var(--early-tx);color:var(--early-tx);}
+.dpill.on{background:transparent;color:var(--ontime-tx);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="padding:12px 12px 6px;margin-bottom:16px;">
+  <div style="font-size:11px;color:var(--faint);margin:0 2px 6px;">
+    Forecast vs RTG target — <span style="color:var(--early-tx);font-weight:600">■</span> on-time (P80 ≤ target) ·
+    <span style="color:var(--wip-bg);font-weight:600">■</span> at risk (P50 ≤ target &lt; P80) ·
+    <span style="color:var(--late-tx);font-weight:600">■</span> likely late (P50 &gt; target). Worst slip on top.
+  </div>
+  <div id="timeline"></div>
+</div>
+
+<table class="ftable">
+  <thead><tr>
+    <th>Unit</th><th>Pos</th><th>Phase</th><th>Target (RTG)</th><th>Sim floor</th><th>P50</th><th>P80</th><th>Δ vs target</th>
+  </tr></thead>
+  <tbody>
+    {% for f in forecasts %}
+    <tr class="{{ 'stalled' if f.stalled else '' }}">
+      <td>{{ f.serial }} <span class="num" style="color:var(--faint);font-weight:400">({{ f.so }})</span></td>
+      <td class="num">{{ f.maxop if f.maxop is not none else '—' }}</td>
+      <td>{{ f.milestone }}</td>
+      <td class="num">{{ f.commit|fmt_date }}</td>
+      {% if f.stalled %}
+      <td colspan="3" style="color:var(--alert);font-weight:600">STALLED — suppressed</td>
+      <td>—</td>
+      {% else %}
+      <td class="num" style="color:var(--faint)">{{ f.sim_finish|fmt_date }}</td>
+      <td class="num" style="color:var(--text);font-weight:600">{{ f.p50|fmt_date }}</td>
+      <td class="num">{{ f.p80|fmt_date }}</td>
+      <td>
+        {% if f.delta_contract is none %}<span style="color:var(--faint)">—</span>
+        {% elif f.delta_contract > 2 %}<span class="dpill late num">▲ +{{ f.delta_contract }}</span>
+        {% elif f.delta_contract > 0 %}<span class="dpill latemild num">▲ +{{ f.delta_contract }}</span>
+        {% elif f.delta_contract < 0 %}<span class="dpill early num">▼ {{ f.delta_contract }}</span>
+        {% else %}<span class="dpill on num">— 0</span>{% endif %}
+      </td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/charts.js?v=bullet4"></script>
+<script>
+  const data = {{ chart_json|safe }};
+  renderForecastBullet('timeline', data);
+</script>
+{% endblock %}

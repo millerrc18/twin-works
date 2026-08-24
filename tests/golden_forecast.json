@@ -1,0 +1,428 @@
+{
+  "AEGIS": [
+    {
+      "delta": null,
+      "maxop": 240,
+      "p50": null,
+      "p80": null,
+      "serial": "176",
+      "sim": null,
+      "so": "1442037",
+      "stalled": true
+    },
+    {
+      "delta": null,
+      "maxop": 170,
+      "p50": null,
+      "p80": null,
+      "serial": "178",
+      "sim": null,
+      "so": "1450617",
+      "stalled": true
+    },
+    {
+      "delta": -2,
+      "maxop": 240,
+      "p50": "2026-09-12",
+      "p80": "2026-09-16",
+      "serial": "180",
+      "sim": "2026-09-05",
+      "so": "1455178",
+      "stalled": false
+    },
+    {
+      "delta": -50,
+      "maxop": 160,
+      "p50": "2026-09-23",
+      "p80": "2026-09-27",
+      "serial": "181",
+      "sim": "2026-09-16",
+      "so": "1457856",
+      "stalled": false
+    },
+    {
+      "delta": -73,
+      "maxop": 157,
+      "p50": "2026-10-02",
+      "p80": "2026-10-06",
+      "serial": "182",
+      "sim": "2026-09-25",
+      "so": "1460448",
+      "stalled": false
+    },
+    {
+      "delta": -90,
+      "maxop": 100,
+      "p50": "2026-10-16",
+      "p80": "2026-10-20",
+      "serial": "183",
+      "sim": "2026-10-09",
+      "so": "1462205",
+      "stalled": false
+    }
+  ],
+  "ELEV": [
+    {
+      "delta": -1,
+      "maxop": 3700,
+      "p50": "2026-09-03",
+      "p80": "2026-09-06",
+      "serial": "LH 229",
+      "sim": "2026-08-27",
+      "so": "1452748",
+      "stalled": false
+    },
+    {
+      "delta": null,
+      "maxop": 1300,
+      "p50": null,
+      "p80": null,
+      "serial": "RH 229",
+      "sim": null,
+      "so": "1453861",
+      "stalled": true
+    },
+    {
+      "delta": 10,
+      "maxop": 4100,
+      "p50": "2026-08-31",
+      "p80": "2026-09-03",
+      "serial": "LH 232",
+      "sim": "2026-08-24",
+      "so": "1455596",
+      "stalled": false
+    },
+    {
+      "delta": 6,
+      "maxop": 3600,
+      "p50": "2026-09-03",
+      "p80": "2026-09-06",
+      "serial": "LH 233",
+      "sim": "2026-08-27",
+      "so": "1456550",
+      "stalled": false
+    },
+    {
+      "delta": 5,
+      "maxop": 3750,
+      "p50": "2026-09-02",
+      "p80": "2026-09-05",
+      "serial": "RH 231",
+      "sim": "2026-08-26",
+      "so": "1456551",
+      "stalled": false
+    },
+    {
+      "delta": 4,
+      "maxop": 2720,
+      "p50": "2026-09-15",
+      "p80": "2026-09-18",
+      "serial": "LH 234",
+      "sim": "2026-09-08",
+      "so": "1457061",
+      "stalled": false
+    },
+    {
+      "delta": 3,
+      "maxop": 3230,
+      "p50": "2026-09-07",
+      "p80": "2026-09-10",
+      "serial": "RH 232",
+      "sim": "2026-08-31",
+      "so": "1457063",
+      "stalled": false
+    },
+    {
+      "delta": -1,
+      "maxop": 2210,
+      "p50": "2026-09-17",
+      "p80": "2026-09-20",
+      "serial": "LH 235",
+      "sim": "2026-09-10",
+      "so": "1458317",
+      "stalled": false
+    },
+    {
+      "delta": 4,
+      "maxop": 2720,
+      "p50": "2026-09-15",
+      "p80": "2026-09-18",
+      "serial": "RH 233",
+      "sim": "2026-09-08",
+      "so": "1458318",
+      "stalled": false
+    },
+    {
+      "delta": -5,
+      "maxop": 1950,
+      "p50": "2026-09-20",
+      "p80": "2026-09-23",
+      "serial": "LH 236",
+      "sim": "2026-09-13",
+      "so": "1459236",
+      "stalled": false
+    },
+    {
+      "delta": -3,
+      "maxop": 1550,
+      "p50": "2026-09-22",
+      "p80": "2026-09-25",
+      "serial": "RH 234",
+      "sim": "2026-09-15",
+      "so": "1459237",
+      "stalled": false
+    },
+    {
+      "delta": -9,
+      "maxop": 1950,
+      "p50": "2026-09-23",
+      "p80": "2026-09-26",
+      "serial": "LH 237",
+      "sim": "2026-09-16",
+      "so": "1460167",
+      "stalled": false
+    },
+    {
+      "delta": 2,
+      "maxop": 2010,
+      "p50": "2026-09-20",
+      "p80": "2026-09-23",
+      "serial": "RH 235",
+      "sim": "2026-09-13",
+      "so": "1460168",
+      "stalled": false
+    },
+    {
+      "delta": -16,
+      "maxop": 1300,
+      "p50": "2026-09-23",
+      "p80": "2026-09-26",
+      "serial": "LH 238",
+      "sim": "2026-09-16",
+      "so": "1460758",
+      "stalled": false
+    },
+    {
+      "delta": -10,
+      "maxop": 1550,
+      "p50": "2026-09-22",
+      "p80": "2026-09-25",
+      "serial": "RH 236",
+      "sim": "2026-09-15",
+      "so": "1460759",
+      "stalled": false
+    },
+    {
+      "delta": -18,
+      "maxop": 700,
+      "p50": "2026-09-28",
+      "p80": "2026-10-01",
+      "serial": "LH 239",
+      "sim": "2026-09-21",
+      "so": "1461523",
+      "stalled": false
+    },
+    {
+      "delta": -14,
+      "maxop": 800,
+      "p50": "2026-09-25",
+      "p80": "2026-09-28",
+      "serial": "RH 237",
+      "sim": "2026-09-18",
+      "so": "1461524",
+      "stalled": false
+    },
+    {
+      "delta": -23,
+      "maxop": null,
+      "p50": "2026-09-30",
+      "p80": "2026-10-03",
+      "serial": "LH 240",
+      "sim": "2026-09-23",
+      "so": "1462352",
+      "stalled": false
+    },
+    {
+      "delta": -14,
+      "maxop": null,
+      "p50": "2026-10-02",
+      "p80": "2026-10-05",
+      "serial": "RH 238",
+      "sim": "2026-09-25",
+      "so": "1462353",
+      "stalled": false
+    }
+  ],
+  "RAD": [
+    {
+      "delta": null,
+      "maxop": 650,
+      "p50": null,
+      "p80": null,
+      "serial": "355",
+      "sim": null,
+      "so": "1357521",
+      "stalled": true
+    },
+    {
+      "delta": null,
+      "maxop": 9998,
+      "p50": null,
+      "p80": null,
+      "serial": "358",
+      "sim": null,
+      "so": "1357524",
+      "stalled": true
+    },
+    {
+      "delta": null,
+      "maxop": 9998,
+      "p50": null,
+      "p80": null,
+      "serial": "361",
+      "sim": null,
+      "so": "1360294",
+      "stalled": true
+    },
+    {
+      "delta": null,
+      "maxop": 9998,
+      "p50": null,
+      "p80": null,
+      "serial": "397",
+      "sim": null,
+      "so": "1379197",
+      "stalled": true
+    },
+    {
+      "delta": null,
+      "maxop": 695,
+      "p50": null,
+      "p80": null,
+      "serial": "430",
+      "sim": null,
+      "so": "1401814",
+      "stalled": true
+    },
+    {
+      "delta": null,
+      "maxop": 570,
+      "p50": null,
+      "p80": null,
+      "serial": "460",
+      "sim": null,
+      "so": "1414098",
+      "stalled": true
+    },
+    {
+      "delta": null,
+      "maxop": 775,
+      "p50": null,
+      "p80": null,
+      "serial": "509",
+      "sim": null,
+      "so": "1451434",
+      "stalled": true
+    },
+    {
+      "delta": 0,
+      "maxop": 760,
+      "p50": "2026-09-04",
+      "p80": "2026-09-08",
+      "serial": "511",
+      "sim": "2026-08-27",
+      "so": "1451436",
+      "stalled": false
+    },
+    {
+      "delta": 7,
+      "maxop": 770,
+      "p50": "2026-09-04",
+      "p80": "2026-09-08",
+      "serial": "514",
+      "sim": "2026-08-27",
+      "so": "1453339",
+      "stalled": false
+    },
+    {
+      "delta": 1,
+      "maxop": 720,
+      "p50": "2026-09-05",
+      "p80": "2026-09-09",
+      "serial": "517",
+      "sim": "2026-08-28",
+      "so": "1454080",
+      "stalled": false
+    },
+    {
+      "delta": null,
+      "maxop": 625,
+      "p50": null,
+      "p80": null,
+      "serial": "516",
+      "sim": null,
+      "so": "1454082",
+      "stalled": true
+    },
+    {
+      "delta": -3,
+      "maxop": 620,
+      "p50": "2026-09-08",
+      "p80": "2026-09-12",
+      "serial": "518",
+      "sim": "2026-08-31",
+      "so": "1456255",
+      "stalled": false
+    },
+    {
+      "delta": -3,
+      "maxop": 635,
+      "p50": "2026-09-08",
+      "p80": "2026-09-12",
+      "serial": "519",
+      "sim": "2026-08-31",
+      "so": "1458360",
+      "stalled": false
+    },
+    {
+      "delta": null,
+      "maxop": 530,
+      "p50": null,
+      "p80": null,
+      "serial": "520",
+      "sim": null,
+      "so": "1459009",
+      "stalled": true
+    },
+    {
+      "delta": -5,
+      "maxop": 570,
+      "p50": "2026-09-13",
+      "p80": "2026-09-17",
+      "serial": "521",
+      "sim": "2026-09-05",
+      "so": "1460451",
+      "stalled": false
+    },
+    {
+      "delta": -10,
+      "maxop": 570,
+      "p50": "2026-09-15",
+      "p80": "2026-09-19",
+      "serial": "522",
+      "sim": "2026-09-07",
+      "so": "1460931",
+      "stalled": false
+    },
+    {
+      "delta": -9,
+      "maxop": 570,
+      "p50": "2026-09-16",
+      "p80": "2026-09-20",
+      "serial": "523",
+      "sim": "2026-09-08",
+      "so": "1460932",
+      "stalled": false
+    }
+  ]
+}

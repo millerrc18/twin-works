@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RTG Tracker — Ops Command Center</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg-base: #0a0e1a;
+    --bg-panel: #0f1629;
+    --bg-card: #131c34;
+    --bg-elevated: #1a2540;
+    --border-dim: #1e2d4a;
+    --border-bright: #2a3f6a;
+    --text-primary: #e8edf8;
+    --text-secondary: #8a9bbf;
+    --text-muted: #4a5a7a;
+    --green-glow: #22c55e;
+    --green-dim: #166534;
+    --amber-glow: #f59e0b;
+    --amber-dim: #78350f;
+    --red-glow: #ef4444;
+    --red-dim: #7f1d1d;
+    --blue-glow: #3b82f6;
+    --purple-glow: #a855f7;
+    --cyan-glow: #06b6d4;
+  }
+
+  html.light {
+    --bg-base: #f1f5f9;
+    --bg-panel: #e8edf5;
+    --bg-card: #ffffff;
+    --bg-elevated: #f8fafc;
+    --border-dim: #cbd5e1;
+    --border-bright: #94a3b8;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Glowing status chips */
+  .chip-green {
+    background: rgba(34,197,94,0.12);
+    color: #4ade80;
+    border: 1px solid rgba(34,197,94,0.35);
+    box-shadow: 0 0 8px rgba(34,197,94,0.2);
+  }
+  .chip-amber {
+    background: rgba(245,158,11,0.12);
+    color: #fbbf24;
+    border: 1px solid rgba(245,158,11,0.35);
+    box-shadow: 0 0 8px rgba(245,158,11,0.2);
+  }
+  .chip-red {
+    background: rgba(239,68,68,0.12);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.35);
+    box-shadow: 0 0 10px rgba(239,68,68,0.25);
+  }
+  .chip-blue {
+    background: rgba(59,130,246,0.12);
+    color: #60a5fa;
+    border: 1px solid rgba(59,130,246,0.35);
+    box-shadow: 0 0 8px rgba(59,130,246,0.2);
+  }
+  .chip-purple {
+    background: rgba(168,85,247,0.12);
+    color: #c084fc;
+    border: 1px solid rgba(168,85,247,0.35);
+  }
+
+  /* KPI tile glows */
+  .tile-green-glow {
+    background: var(--bg-card);
+    border: 1px solid rgba(34,197,94,0.25);
+    box-shadow: 0 0 20px rgba(34,197,94,0.08), inset 0 0 30px rgba(34,197,94,0.03);
+  }
+  .tile-amber-glow {
+    background: var(--bg-card);
+    border: 1px solid rgba(245,158,11,0.3);
+    box-shadow: 0 0 20px rgba(245,158,11,0.1), inset 0 0 30px rgba(245,158,11,0.04);
+  }
+  .tile-red-glow {
+    background: var(--bg-card);
+    border: 1px solid rgba(239,68,68,0.35);
+    box-shadow: 0 0 24px rgba(239,68,68,0.15), inset 0 0 30px rgba(239,68,68,0.05);
+  }
+  .tile-neutral {
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+  }
+
+  /* Alarm banner pulse */
+  @keyframes alarm-pulse {
+    0%, 100% { box-shadow: 0 0 16px rgba(239,68,68,0.35); }
+    50% { box-shadow: 0 0 28px rgba(239,68,68,0.6); }
+  }
+  .alarm-pulse { animation: alarm-pulse 2.5s ease-in-out infinite; }
+
+  /* Scanline top bar effect */
+  .scanbar {
+    background: linear-gradient(135deg, #0d1829 0%, #111d35 50%, #0a1422 100%);
+    border-bottom: 1px solid var(--border-bright);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  }
+
+  /* Number display */
+  .kpi-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* Panel card base */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+  }
+
+  /* Divider glow line */
+  .glow-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent);
+  }
+
+  /* Constraint alarm block */
+  .constraint-alarm {
+    background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.04));
+    border: 1px solid rgba(239,68,68,0.4);
+    border-radius: 8px;
+  }
+
+  /* Theme toggle */
+  .toggle-track {
+    background: rgba(59,130,246,0.2);
+    border: 1px solid rgba(59,130,246,0.4);
+    transition: background 0.3s;
+  }
+
+  /* Utilization bar */
+  .util-bar-track {
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .util-bar-fill-red {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+    box-shadow: 0 0 8px rgba(239,68,68,0.5);
+  }
+  .util-bar-fill-green {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    box-shadow: 0 0 6px rgba(34,197,94,0.4);
+  }
+  .util-bar-fill-amber {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    box-shadow: 0 0 6px rgba(245,158,11,0.4);
+  }
+
+  /* Section header */
+  .section-header {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Light mode overrides */
+  html.light .chip-green { box-shadow: none; }
+  html.light .chip-amber { box-shadow: none; }
+  html.light .chip-red { box-shadow: none; }
+  html.light .tile-green-glow { box-shadow: none; border-color: #bbf7d0; }
+  html.light .tile-amber-glow { box-shadow: none; border-color: #fde68a; }
+  html.light .tile-red-glow { box-shadow: none; border-color: #fecaca; animation: none; }
+  html.light .alarm-pulse { animation: none; }
+  html.light .glow-line { background: #e2e8f0; }
+  html.light .constraint-alarm { background: rgba(239,68,68,0.04); border-color: #fca5a5; }
+  html.light .scanbar { background: #1e3a5f; border-bottom-color: #2d5a9e; }
+  html.light .scanbar * { color: #e8edf8 !important; }
+  html.light .util-bar-fill-red { box-shadow: none; }
+  html.light .util-bar-fill-green { box-shadow: none; }
+  html.light .util-bar-fill-amber { box-shadow: none; }
+  html.light body { color: #0f172a; }
+</style>
+</head>
+<body>
+
+<!-- TOP STATUS BAR -->
+<header class="scanbar sticky top-0 z-50 px-6 py-2">
+  <div class="flex items-center justify-between gap-4 max-w-screen-2xl mx-auto">
+    <!-- Left: Brand + program selector -->
+    <div class="flex items-center gap-5">
+      <div>
+        <div class="text-xs text-blue-400 mono tracking-widest uppercase mb-0.5">RTG TRACKER</div>
+        <div class="text-white font-bold text-sm tracking-tight">Forecast Command</div>
+      </div>
+      <div class="w-px h-8 bg-blue-900/60"></div>
+      <!-- Program selector tabs -->
+      <nav class="flex items-center gap-1">
+        <a href="B_ops_landing.html" class="px-3 py-1.5 rounded text-xs font-semibold bg-blue-600/30 text-blue-200 border border-blue-500/40 mono">ALL PROGRAMS</a>
+        <a href="B_ops_matrix.html" class="px-3 py-1.5 rounded text-xs text-blue-300/60 hover:text-blue-200 transition mono">531335 ELEVATOR ›</a>
+        <a href="B_ops_matrix.html" class="px-3 py-1.5 rounded text-xs text-blue-300/60 hover:text-blue-200 transition mono">C48178 RADOME ›</a>
+        <span class="px-3 py-1.5 rounded text-xs text-blue-300/40 mono">530349 AEGIS ›</span>
+      </nav>
+    </div>
+
+    <!-- Center: Global health indicators -->
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-amber-400" style="box-shadow:0 0 6px #f59e0b"></span>
+        <span class="text-xs text-blue-200/80 mono">MAE 7.1d</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-green-400" style="box-shadow:0 0 6px #22c55e"></span>
+        <span class="text-xs text-blue-200/80 mono">OTD ↑</span>
+      </div>
+      <!-- ALARM -->
+      <div class="flex items-center gap-2 px-3 py-1 rounded constraint-alarm alarm-pulse">
+        <svg class="w-3.5 h-3.5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <span class="text-xs font-bold text-red-300 mono tracking-wide">WC221 PAINT 118% UTIL — BINDING CONSTRAINT</span>
+      </div>
+    </div>
+
+    <!-- Right: Badges + clock + toggle -->
+    <div class="flex items-center gap-3">
+      <div class="text-right">
+        <div class="text-xs text-blue-300/60 mono">AS OF</div>
+        <div class="text-xs text-blue-200 mono font-semibold" id="asof-time">2026-08-22 08:00</div>
+      </div>
+      <div class="w-px h-8 bg-blue-900/60"></div>
+      <!-- Model badge -->
+      <div class="px-2 py-1 rounded text-xs chip-purple mono font-semibold tracking-wide">EMPIRICAL · n=8</div>
+      <!-- Theme toggle -->
+      <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-2.5 py-1 rounded border border-blue-700/40 text-xs text-blue-300 hover:border-blue-500/60 transition mono" id="theme-btn">
+        ☀ LIGHT
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- OVERALL HEALTH BANNER -->
+<div class="max-w-screen-2xl mx-auto px-6 pt-5 pb-2">
+  <div class="flex items-center justify-between px-5 py-3 rounded-lg" style="background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.03));border:1px solid rgba(245,158,11,0.25)">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3)">
+        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      </div>
+      <div>
+        <div class="text-sm font-bold text-amber-300 tracking-tight">SYSTEM STATUS: CAUTION</div>
+        <div class="text-xs text-amber-200/60 mono">33 total WIP · 7 behind or stalled · WC221 paint bottleneck active</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-6">
+      <div class="text-center">
+        <div class="kpi-num text-2xl text-white">33</div>
+        <div class="section-header mt-0.5">Total WIP</div>
+      </div>
+      <div class="text-center">
+        <div class="kpi-num text-2xl text-amber-400">7</div>
+        <div class="section-header mt-0.5">Behind / Stalled</div>
+      </div>
+      <div class="text-center">
+        <div class="kpi-num text-2xl text-red-400">118%</div>
+        <div class="section-header mt-0.5">WC221 Util</div>
+      </div>
+      <div class="text-center">
+        <div class="kpi-num text-2xl text-blue-300">7.1d</div>
+        <div class="section-header mt-0.5">Forecast MAE</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRAM CARDS GRID -->
+<main class="max-w-screen-2xl mx-auto px-6 py-4">
+  <div class="section-header mb-3">PROGRAM OVERVIEW — CLICK PROGRAM TO OPEN MATRIX</div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+    <!-- ════ G500 ELEVATOR — CAUTION ════ -->
+    <a href="B_ops_matrix.html" class="block group cursor-pointer">
+      <div class="tile-amber-glow rounded-xl p-5 h-full transition-all duration-200 hover:scale-[1.01]" style="box-shadow:0 0 20px rgba(245,158,11,0.1),inset 0 0 30px rgba(245,158,11,0.04)">
+        <!-- Card header -->
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <div class="section-header mb-1">CONTRACT 531335</div>
+            <div class="text-lg font-bold text-white tracking-tight">G500 Elevator</div>
+          </div>
+          <div class="flex flex-col items-end gap-1.5">
+            <span class="chip-amber text-xs px-2.5 py-1 rounded-full mono font-bold">CAUTION</span>
+            <span class="chip-blue text-xs px-2 py-0.5 rounded mono">EMPIRICAL</span>
+          </div>
+        </div>
+
+        <div class="glow-line mb-4"></div>
+
+        <!-- KPI Row -->
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="text-center">
+            <div class="kpi-num text-3xl text-white">17</div>
+            <div class="section-header mt-1">Active WIP</div>
+          </div>
+          <div class="text-center">
+            <div class="kpi-num text-3xl text-amber-400">6</div>
+            <div class="section-header mt-1">Behind</div>
+          </div>
+          <div class="text-center">
+            <div class="kpi-num text-3xl text-green-400">0</div>
+            <div class="section-header mt-1">Stalled</div>
+          </div>
+        </div>
+
+        <!-- Throughput + bias -->
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-blue-300/60 mono">Ships/wk</span>
+            <div class="flex items-center gap-2">
+              <span class="text-green-400 mono font-semibold">1.5 actual</span>
+              <span class="text-blue-300/40">vs</span>
+              <span class="text-blue-300/60 mono">1.4 target</span>
+              <span class="chip-green text-xs px-1.5 py-0.5 rounded mono">+7%</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-blue-300/60 mono">Model bias</span>
+            <span class="text-amber-400 mono">~7d optimistic</span>
+          </div>
+        </div>
+
+        <!-- WC util bar -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="section-header">WC221 PAINT UTIL</span>
+            <span class="text-red-400 mono font-bold text-xs">118%</span>
+          </div>
+          <div class="util-bar-track h-2">
+            <div class="util-bar-fill-red h-full rounded" style="width:100%"></div>
+          </div>
+          <div class="flex justify-between text-xs mt-1">
+            <span class="text-blue-300/40 mono">0%</span>
+            <span class="text-red-400/70 mono text-xs">↑ CONSTRAINT — 18% OVER</span>
+            <span class="text-blue-300/40 mono">100%</span>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-4 flex items-center justify-between">
+          <span class="text-xs text-blue-400/60 mono">LH+RH pairs · 11 columns active</span>
+          <span class="text-xs text-amber-400 group-hover:text-amber-300 mono font-semibold transition">VIEW MATRIX →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- ════ AERONOSE RADOME — CRITICAL ════ -->
+    <div class="tile-red-glow rounded-xl p-5 h-full alarm-pulse">
+      <!-- Card header -->
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <div class="section-header mb-1">CONTRACT C48178</div>
+          <div class="text-lg font-bold text-white tracking-tight">Aeronose Radome</div>
+        </div>
+        <div class="flex flex-col items-end gap-1.5">
+          <span class="chip-red text-xs px-2.5 py-1 rounded-full mono font-bold">CRITICAL</span>
+          <span class="chip-blue text-xs px-2 py-0.5 rounded mono">EMPIRICAL</span>
+        </div>
+      </div>
+
+      <div class="glow-line mb-4"></div>
+
+      <!-- KPI Row -->
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="text-center">
+          <div class="kpi-num text-3xl text-white">11</div>
+          <div class="section-header mt-1">Active WIP</div>
+        </div>
+        <div class="text-center">
+          <div class="kpi-num text-3xl text-amber-400">1</div>
+          <div class="section-header mt-1">Behind</div>
+        </div>
+        <div class="text-center">
+          <div class="kpi-num text-3xl text-red-400">7</div>
+          <div class="section-header mt-1">Stalled</div>
+        </div>
+      </div>
+
+      <!-- Throughput + bias -->
+      <div class="space-y-2 mb-4">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-blue-300/60 mono">Ships/wk</span>
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 mono font-semibold">0.5 actual</span>
+            <span class="text-blue-300/40">vs</span>
+            <span class="text-blue-300/60 mono">target ≥0.6</span>
+            <span class="chip-red text-xs px-1.5 py-0.5 rounded mono">LOW</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-blue-300/60 mono">Model bias</span>
+          <span class="text-amber-400 mono">~7.8d optimistic</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-blue-300/60 mono">7 parked/stalled</span>
+          <span class="text-red-400 mono">MRB holds + rework</span>
+        </div>
+      </div>
+
+      <!-- WC util bar -->
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="section-header">WC221 PAINT (SHARED)</span>
+          <span class="text-red-400 mono font-bold text-xs">118%</span>
+        </div>
+        <div class="util-bar-track h-2">
+          <div class="util-bar-fill-red h-full rounded" style="width:100%"></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="mt-4 flex items-center justify-between">
+        <span class="text-xs text-blue-400/60 mono">No matrix available yet</span>
+        <span class="text-xs text-red-400/60 mono">MATRIX PENDING</span>
+      </div>
+    </div>
+
+    <!-- ════ AEGIS REFLECTOR — WATCH ════ -->
+    <div class="tile-neutral rounded-xl p-5 h-full" style="border-color:rgba(59,130,246,0.2)">
+      <!-- Card header -->
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <div class="section-header mb-1">CONTRACT 530349</div>
+          <div class="text-lg font-bold text-white tracking-tight">Aegis Reflector</div>
+        </div>
+        <div class="flex flex-col items-end gap-1.5">
+          <span class="chip-blue text-xs px-2.5 py-1 rounded-full mono font-bold">WATCH</span>
+          <span class="text-xs px-2 py-0.5 rounded mono font-semibold" style="background:rgba(168,85,247,0.1);color:#c084fc;border:1px solid rgba(168,85,247,0.3)">DPAS RATED</span>
+        </div>
+      </div>
+
+      <div class="glow-line mb-4"></div>
+
+      <!-- KPI Row -->
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="text-center">
+          <div class="kpi-num text-3xl text-white">5</div>
+          <div class="section-header mt-1">Active WIP</div>
+        </div>
+        <div class="text-center">
+          <div class="kpi-num text-3xl text-green-400">0</div>
+          <div class="section-header mt-1">Behind</div>
+        </div>
+        <div class="text-center">
+          <div class="kpi-num text-3xl text-amber-400">2</div>
+          <div class="section-header mt-1">Stalled</div>
+        </div>
+      </div>
+
+      <!-- Throughput + bias -->
+      <div class="space-y-2 mb-4">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-blue-300/60 mono">Model bias</span>
+          <span class="text-amber-400 mono">~7.1d optimistic</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-blue-300/60 mono">RTG plan</span>
+          <span class="text-red-400/80 mono">NOT AVAILABLE</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-blue-300/60 mono">Units (176, 178)</span>
+          <span class="text-amber-400 mono">Stalled — investigation</span>
+        </div>
+      </div>
+
+      <!-- WC util bar (shared paint booth) -->
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="section-header">WC221 PAINT (SHARED)</span>
+          <span class="text-red-400 mono font-bold text-xs">118%</span>
+        </div>
+        <div class="util-bar-track h-2">
+          <div class="util-bar-fill-red h-full rounded" style="width:100%"></div>
+        </div>
+      </div>
+
+      <!-- DPAS notice -->
+      <div class="mt-3 px-3 py-2 rounded" style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2)">
+        <div class="text-xs text-purple-300 mono">⚑ DPAS DO-A6 priority — WC221 scheduling priority over non-rated work</div>
+      </div>
+
+      <!-- Footer -->
+      <div class="mt-3 flex items-center justify-between">
+        <span class="text-xs text-blue-400/60 mono">No RTG plan yet</span>
+        <span class="text-xs text-blue-400/40 mono">MATRIX PENDING</span>
+      </div>
+    </div>
+  </div><!-- /grid -->
+
+  <!-- WORK CENTER UTILIZATION PANEL -->
+  <div class="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+    <!-- WC util summary -->
+    <div class="lg:col-span-2 panel p-5">
+      <div class="section-header mb-3">WORK CENTER CAPACITY SNAPSHOT</div>
+      <div class="space-y-3">
+        <!-- WC 221 -->
+        <div class="flex items-center gap-3">
+          <div class="w-32 text-xs text-blue-200/70 mono flex-shrink-0">WC 221 · PAINT</div>
+          <div class="flex-1 util-bar-track h-3 rounded relative">
+            <div class="util-bar-fill-red h-full rounded" style="width:100%"></div>
+            <div class="absolute top-0 right-0 w-px h-full" style="background:rgba(255,255,255,0.3);left:84.7%"></div>
+          </div>
+          <div class="w-20 text-right">
+            <span class="text-red-400 mono font-bold text-sm">118%</span>
+            <span class="chip-red text-xs px-1.5 py-0.5 rounded mono ml-1">BOTTLENECK</span>
+          </div>
+        </div>
+        <!-- WC 32684 -->
+        <div class="flex items-center gap-3">
+          <div class="w-32 text-xs text-blue-200/70 mono flex-shrink-0">WC 32684 · ASSY</div>
+          <div class="flex-1 util-bar-track h-3 rounded">
+            <div class="util-bar-fill-amber h-full rounded" style="width:78%"></div>
+          </div>
+          <div class="w-20 text-right">
+            <span class="text-amber-400 mono font-bold text-sm">78%</span>
+            <span class="chip-amber text-xs px-1.5 py-0.5 rounded mono ml-1">WATCH</span>
+          </div>
+        </div>
+        <!-- WC 248 -->
+        <div class="flex items-center gap-3">
+          <div class="w-32 text-xs text-blue-200/70 mono flex-shrink-0">WC 248 · MARK</div>
+          <div class="flex-1 util-bar-track h-3 rounded">
+            <div class="util-bar-fill-green h-full rounded" style="width:42%"></div>
+          </div>
+          <div class="w-20 text-right">
+            <span class="text-green-400 mono font-bold text-sm">42%</span>
+            <span class="chip-green text-xs px-1.5 py-0.5 rounded mono ml-1">OK</span>
+          </div>
+        </div>
+        <!-- WC 32687 -->
+        <div class="flex items-center gap-3">
+          <div class="w-32 text-xs text-blue-200/70 mono flex-shrink-0">WC 32687 · INSP</div>
+          <div class="flex-1 util-bar-track h-3 rounded">
+            <div class="util-bar-fill-green h-full rounded" style="width:55%"></div>
+          </div>
+          <div class="w-20 text-right">
+            <span class="text-green-400 mono font-bold text-sm">55%</span>
+            <span class="chip-green text-xs px-1.5 py-0.5 rounded mono ml-1">OK</span>
+          </div>
+        </div>
+      </div>
+      <div class="glow-line mt-3"></div>
+      <div class="flex items-center gap-3 mt-2">
+        <div class="w-2 h-2 bg-blue-400/40 rounded-sm flex-shrink-0 relative"><div class="absolute inset-0" style="border-left:2px solid rgba(255,255,255,0.3)"></div></div>
+        <span class="text-xs text-blue-300/40 mono">Dashed line = 100% capacity</span>
+      </div>
+    </div>
+
+    <!-- Honesty / caveat panel -->
+    <div class="panel p-5 flex flex-col justify-between" style="border-color:rgba(168,85,247,0.2);background:rgba(168,85,247,0.04)">
+      <div>
+        <div class="section-header mb-3">MODEL TRANSPARENCY</div>
+        <div class="space-y-3">
+          <div class="flex items-start gap-2.5">
+            <div class="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(168,85,247,0.2)">
+              <svg class="w-3.5 h-3.5 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-purple-300 mono mb-0.5">EMPIRICAL · n=8</div>
+              <div class="text-xs text-blue-300/50 leading-relaxed">Best-case floor + measured slip. Model grows more accurate as n increases.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <div class="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(245,158,11,0.15)">
+              <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-amber-300 mono mb-0.5">~7d OPTIMISTIC BIAS</div>
+              <div class="text-xs text-blue-300/50 leading-relaxed">All forecasts skew early. Add buffer for commitments.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <div class="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 mt-0.5" style="background:rgba(239,68,68,0.1)">
+              <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-red-300 mono mb-0.5">NOT GUARANTEED DELIVERY</div>
+              <div class="text-xs text-blue-300/50 leading-relaxed">Forecast = floor, not ceiling. MRB, rework, constraint spikes not modeled.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 pt-3" style="border-top:1px solid rgba(168,85,247,0.2)">
+        <p class="text-xs text-blue-300/35 mono leading-relaxed">PRELIMINARY — forecast = best-case floor + measured slip, not guaranteed delivery</p>
+      </div>
+    </div>
+  </div><!-- /util grid -->
+
+</main>
+
+<!-- FOOTER -->
+<footer class="max-w-screen-2xl mx-auto px-6 py-4 mt-2">
+  <div class="flex items-center justify-between">
+    <div class="text-xs text-blue-300/30 mono">RTG TRACKER · OPS COMMAND CENTER · CONCEPT B</div>
+    <div class="flex items-center gap-4">
+      <a href="B_ops_matrix.html" class="text-xs text-blue-400/50 hover:text-blue-300 mono transition">531335 MATRIX →</a>
+      <span class="text-xs text-blue-300/20 mono">·</span>
+      <span class="text-xs text-blue-300/20 mono">PRELIMINARY DATA — NOT FOR COMMITMENTS</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Live clock
+  function updateClock() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const str = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    document.getElementById('asof-time').textContent = str;
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  // Theme toggle
+  function toggleTheme() {
+    const html = document.documentElement;
+    const btn = document.getElementById('theme-btn');
+    if (html.classList.contains('dark')) {
+      html.classList.remove('dark');
+      html.classList.add('light');
+      btn.textContent = '☾ DARK';
+    } else {
+      html.classList.remove('light');
+      html.classList.add('dark');
+      btn.textContent = '☀ LIGHT';
+    }
+  }
+</script>
+</body>
+</html>

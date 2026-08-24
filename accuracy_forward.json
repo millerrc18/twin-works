@@ -1,0 +1,27 @@
+{
+  "by_program": {
+    "RAD": {
+      "n": 2,
+      "mae": 10,
+      "bias": 10,
+      "hit7": 0
+    },
+    "ELEV": {
+      "n": 1,
+      "mae": 7,
+      "bias": 7,
+      "hit7": 100
+    }
+  },
+  "counts": {
+    "RAD": 2,
+    "ELEV": 1
+  },
+  "overall": {
+    "n": 3,
+    "mae": 9,
+    "bias": 9,
+    "hit7": 33
+  },
+  "note": "Forward-logged real ships only; scored once per serial at earliest logged forecast. Kept separate from the retrospective backtest."
+}

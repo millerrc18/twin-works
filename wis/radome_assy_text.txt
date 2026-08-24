@@ -1,0 +1,2069 @@
+REQUIRES CUSTOMER APPROVAL FORMCHECKBOX  YES  FORMCHECKBOX  NO
+Redline incorporation frequency (insert X as appropriate):
+
+After completion of each part (startup / pre FAI completion)
+
+Every 6 months (after full FAI completion)
+X
+Annual (mature program – units shipped for ≥ 24 consecutive months)
+Select month(s) for redline incorporation (insert X as appropriate – n/a for startups):
+
+January
+
+February
+
+March
+
+April
+
+May
+X
+June
+
+July
+
+August
+
+September
+
+October
+
+November
+
+December
+
+WI Number: 3700ED0001-101 ASSY
+Title: Assembly of AAP Nose Radome
+Marking: Export Administration Regulations (EAR)
+These items are controlled by the U.S. Government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations.
+
+The following shall be filled out upon issue of hard copy to floor:
+Initials
+Date
+Book location (plant/area):
+
+Total number of locations for this document:
+
+Verify all locations recorded at
+P:\Production control charts\WI TUI LOG\##MASTER Revision Listing:
+
+Verify Effective Documents table updated for all routers that reference this document (use query feature explained in “Search and Update Effective Documents Table” from IFS Tips):
+
+SIGNATURE
+Program Engineer:
+Joshua Lee
+Quality Engineer:
+Brian Mabe
+Program Manager:
+Ryan Miller
+Revision Sheet
+Date
+Revision Letter
+Description OF Changes
+Revised By: 
+Approval
+9 June 2023
+F
+Incorporate Redlines and address Pot Life reference.
+
+T Austin
+M Control
+7 June 2021
+G
+Incorporated following Redlines:Added mixing ratios for AMS-S-8802, PS 870 C-12, and AMS 3276Updated painting instructionsUpdated countersink depth gauge targetsCorrected number of allowed filler passes
+K Gross
+M Control
+8 Dec 2023
+H
+Incorporated WI Process Audit findings:Liquid Shim Puck Specimen TestingResistivity TestingMeasuring max. gap between ring/hinge to shell
+Clearly explained detail in ambiguous operations
+New format and organization of different OPs
+Incorporated following redlines:General note referencing MAF 762Tab left on radome during OP 580Sandpaper grit for chamferSpray release agent on assembly fixture prior to bonding ringsScuff sand radome shell and ring outer surface prior to bondingAccelerated liquid shim cure for shell to ring bondElectrical sealing/bonding process per ECM 60017
+Added following inspections:OP 621 Shim Gap InspectionOP 650 Fastener Flushness and Shore D InspectionOP 695 Lightning Diverter &amp; Electrical Bond InspectionOP 705 Inspection of Lightning Diverter Fillet Seal
+M Duty
+Windchill
+28 May 2025
+J
+Changed formatter per MV-MFG-TMP-13.16.1
+Redline incorporated onto the WI. 
+Perm. Redline: “ODI” changed to “Inspect”
+OP 590.2: Removed
+OP 621: Changed gap to 0.045” for ring to shell mating surface. Changed 0.060” from hinge to shell mating surface for both L/H and R/H
+OP 630: Hole diameters changed to 0.191” – 0.194” except specified holes with 0.192” – 0.196” for operators and inspectors
+OP 630.5: Omit operation, only seal in OP 680.5 for GAA100BD10
+OP 660.1.2: Changed diameters of the holes
+OP 660.2: diameter to 0.191” – 0.194” and removed “Go/No-Go” gauge
+OP 680.1.1: Changed diameter to 0.191” – 0.194”
+OP 680.5: Room temperature cure allowance for GAA100BD10
+OP 695.4: Lab test results included
+OP 775: Adjusted curing and verification methods for 00200054000
+J. Lee
+SharePoint DCC
+30 July 2025
+K
+Removed “Eng. Ref.” for audit reasoning
+Applicable Docs: Added MAF-762
+EMA Requirements: Reworded to “EMA” for all “EMA REQUIRMENTS” throughout document
+Table 1 – Reworded for clarity that originally mentions itself (Table 1)
+Quality Control Requirements: Added description to approved cloths
+580: Added “N/A” to blank Tool No.
+590.2: Returned sealing instructions
+600.1: Included “Non-Conformance” to “NC”
+600.2: Included “Assembly Fixture” to “AF”
+605.1.1: Included P/N for acetone
+608: Added “N/A” to blank Tool No.
+610.1.2: Specify application of Alodine
+and adjusted cure time
+612 and 625: Included “N/A” for Tools No.
+625.1.7: Limit sanding grit
+625.3.2: Specified Mold Release App.
+625.4.16: specified step to clean hinges
+625.4.17: Specified Touch-Up to be called in another document
+630: Included “N/A” for Tools
+630.1.2: Adjusted hole dimensions and drill stop availability
+630.1.4: Referenced target drilling dim.
+630.2: Adjusted drilling dimensions
+630.3: Target sub-flush and max. sub-flush included.
+630.3.1: Adjusted simplified countersinking process
+630.3.1: Referenced target CSK. Dim. And included figure for reference
+630.3.2: Referenced target CSK. Dim. And moved to OP 630.1.4
+630.3.2: Referenced target CSK. Dim. from shell to hinge
+630.4.3: Referenced Appendix 1
+630.4.4: Removed Alodine step
+635.1.1: Adjusted total holes required
+635.1.2: Elaborated on Grip Lengths and included acceptable table
+640: Included additional router signoff req. and adjusted total material qty.
+640.1.2: Adjusted total no. of materials required to perform operation 
+640.1.4: Referenced Appendix 7 for rivet requirements and to use a double action rivet gun
+640.1.5: Specified color to skip fasteners
+650.1: Changed max sub-flush dimensions
+650.1.1: Target sub-flush and max. sub-flush included but added target reference and referred to Appendix 7
+650.1.2: Included rules for the use of flushness gage
+OP 650: Included additional router signoff req.
+OP 660: Included “N/A” for Tools No. and added QA Operator ID on signoff req.
+660.1.1: Drill stop ref. and included picture reference
+660.1.2 and 660.2.1: Adjusted hole dim.
+660.3.1: Included clean countersunk holes
+660.3.2: All previous subsequent steps for applying Alodine has been removed
+660.3.3: Changed color in  REF _Ref149746403 \h Figure 56
+680: Included “N/A” for Tools No. and added QA Operator ID on signoff req.
+680.1.1: Adjusted hole dim.
+680.2.1: Adjusted hole dim. Inspect.
+680.3.1: Target sub-flush and max. sub-flush included.
+680.4.2: Adjusted and specified sandpaper requirements
+680.4.4: All previous subsequent steps for applying Alodine has been removed
+690.2.1: Referenced MAF-762 and clarified for cartridge use
+690.2.2: Redacted GAMPS Ref.
+690.3.3: Revert back to 20-25 in-lbs per GAMPS 2220
+695.2.2: Target sub-flush and max. sub-flush included.
+700.1.2: Referenced MAF-762 and clarified for cartridge use
+710.1.2: Added P/N for acetone
+710.1.3: Capped to 220 grit limit
+720: Added GAA100BD10 and updated router signoff requirements
+720.1.2: Included trim off tooling tab
+720.2.3: included 6 hour room temp cure as optional
+775: Updated router signoff requirements and removed “Dixie Cups” and “Popsicle Sticks”
+775.1.3: Simplified wording
+775.2.6: Reference to Appendix 1 for cleaning operations
+775.3.1: Added Note 3 for reference to Appendix 1
+775.5.1: Added a discard of sealant puck
+775.5.2: Use of sandpaper to removed difficult sealant adhesives
+Appendix 1: Referenced “Quality Control Requirements” 
+Appendix 7: Include rivet shaving/inspection
+Appendix 7, 1.2: Changed sub-flush to 0.020” maximum sub-flush 
+J. Lee
+SharePoint DCC
+
+Note: All changes pertaining to revision(s) will be in highlighted in “Blue” text.  When document revision occurs - change text back to black font and enter “new” revision changes in “blue”.
+Table of Contents
+ TOC \o "1-3" \h \z \u Revision Sheet PAGEREF _Toc204785088 \h 2
+Table of Contents PAGEREF _Toc204785089 \h 7
+Table of Figures PAGEREF _Toc204785090 \h 14
+APPLICABLE DOCUMENTS PAGEREF _Toc204785091 \h 18
+Gulfstream Documents PAGEREF _Toc204785092 \h 18
+GD Documents PAGEREF _Toc204785093 \h 18
+Tools PAGEREF _Toc204785094 \h 19
+Environmental Monitored Area (EMA) REQUIREMENTS PAGEREF _Toc204785095 \h 20
+GENERAL NOTES PAGEREF _Toc204785096 \h 21
+Quality Control Requirements PAGEREF _Toc204785097 \h 21
+Operation 580TRIM RADOME &amp; DRILL DRAIN HOLE PAGEREF _Toc204785098 \h 22
+TOOLS REQUIRED PAGEREF _Toc204785099 \h 22
+INSTRUCTIONS PAGEREF _Toc204785100 \h 22
+580.1Trim Prep PAGEREF _Toc204785101 \h 22
+580.2Trim Radome PAGEREF _Toc204785102 \h 23
+580.3Drill Drain Hole PAGEREF _Toc204785103 \h 25
+580.4Chamfer Radome Edge PAGEREF _Toc204785104 \h 26
+580.5ID Part PAGEREF _Toc204785105 \h 27
+580.6Inspect PAGEREF _Toc204785106 \h 28
+Operation 590SEAL EDGE, CHAMFER, AND DRAIN HOLE PAGEREF _Toc204785107 \h 28
+MATERIALS REQUIRED PAGEREF _Toc204785108 \h 28
+INSTRUCTIONS PAGEREF _Toc204785109 \h 28
+590.1Sealing Prep PAGEREF _Toc204785110 \h 28
+590.2Sealing PAGEREF _Toc204785111 \h 28
+Operation 600LOCATE RING DETAILS PAGEREF _Toc204785112 \h 29
+Router 3700ED0001-101 SUBRING PAGEREF _Toc204785113 \h 29
+TOOLS REQUIRED PAGEREF _Toc204785114 \h 29
+MATERIALS REQUIRED PAGEREF _Toc204785115 \h 30
+INSTRUCTIONS PAGEREF _Toc204785116 \h 30
+600.1Operator Expectations PAGEREF _Toc204785117 \h 30
+600.2Locate Upper/Lower Rings and Microswitch Stop PAGEREF _Toc204785118 \h 32
+600.3Locate Jury Struts and Splice Plates PAGEREF _Toc204785119 \h 33
+Operation 605ASSEMBLE RING PAGEREF _Toc204785120 \h 35
+Router 3700ED0001-101 SUBRING PAGEREF _Toc204785121 \h 35
+TOOLS REQUIRED PAGEREF _Toc204785122 \h 35
+MATERIALS REQUIRED PAGEREF _Toc204785123 \h 35
+INSTRUCTIONS PAGEREF _Toc204785124 \h 35
+605.1Prepare for Liquid Shim PAGEREF _Toc204785125 \h 35
+605.2Mixing Liquid Shim PAGEREF _Toc204785126 \h 35
+605.3Liquid Shim Puck Sample PAGEREF _Toc204785127 \h 36
+605.4Liquid Shim Application PAGEREF _Toc204785128 \h 37
+Operation 608DRILL SPLICE PLATES PAGEREF _Toc204785129 \h 38
+Router 3700ED0001-101 SUBRING PAGEREF _Toc204785130 \h 38
+TOOLS REQUIRED PAGEREF _Toc204785131 \h 38
+INSTRUCTIONS PAGEREF _Toc204785132 \h 39
+608.1Drill Ring PAGEREF _Toc204785133 \h 39
+608.2Inspect PAGEREF _Toc204785134 \h 40
+Operation 610ELECTRICAL BONDING RING DETAILS PAGEREF _Toc204785135 \h 40
+Router 3700ED0001-101 SUBRING PAGEREF _Toc204785136 \h 40
+MATERIALS REQUIRED PAGEREF _Toc204785137 \h 40
+610.1Fay Seal Splice Plates PAGEREF _Toc204785138 \h 40
+610.2Wet Install Fasteners PAGEREF _Toc204785139 \h 42
+Operation 612DRILL &amp; INSTALL FASTENERS ON JURY STRUT &amp; MICROSWITCH STOP PAGEREF _Toc204785140 \h 43
+TOOLS REQUIRED PAGEREF _Toc204785141 \h 43
+MATERIALS REQUIRED PAGEREF _Toc204785142 \h 43
+INSTRUCTIONS PAGEREF _Toc204785143 \h 44
+612.1Drill Jury Strut PAGEREF _Toc204785144 \h 44
+612.2Drill Microswitch Stop PAGEREF _Toc204785145 \h 44
+612.3Inspect PAGEREF _Toc204785146 \h 44
+612.4Wet Install Fasteners PAGEREF _Toc204785147 \h 44
+Operation 615RING INSPECTION PAGEREF _Toc204785148 \h 46
+Router 3700ED0001-101SUBRING PAGEREF _Toc204785149 \h 46
+INSTRUCTIONS PAGEREF _Toc204785150 \h 46
+615.1Ring Inspection PAGEREF _Toc204785151 \h 46
+Operation 620DRY FIT DETAILS FOR LIQUID SHIM PAGEREF _Toc204785152 \h 46
+TOOLS REQUIRED PAGEREF _Toc204785153 \h 46
+MATERIALS REQUIRED PAGEREF _Toc204785154 \h 47
+INSTRUCTIONS PAGEREF _Toc204785155 \h 47
+620.1Locate Stop Pad Details PAGEREF _Toc204785156 \h 47
+620.2Locate Hinges PAGEREF _Toc204785157 \h 48
+Operation 621SHIM GAP INSPECTION PAGEREF _Toc204785158 \h 49
+INSTRUCTIONS PAGEREF _Toc204785159 \h 49
+621.1Inspect Ring to Shell PAGEREF _Toc204785160 \h 49
+621.2Inspect Hinge to Shell PAGEREF _Toc204785161 \h 49
+Operation 625LIQUID SHIM DETAILS PAGEREF _Toc204785162 \h 50
+TOOLS REQUIRED PAGEREF _Toc204785163 \h 50
+MATERIALS REQUIRED PAGEREF _Toc204785164 \h 50
+INSTRUCTIONS PAGEREF _Toc204785165 \h 50
+625.1Liquid Shim Prep PAGEREF _Toc204785166 \h 50
+625.2Mix Liquid Shim PAGEREF _Toc204785167 \h 51
+625.3Liquid Shim Puck Sample PAGEREF _Toc204785168 \h 52
+625.4Liquid Shim Application PAGEREF _Toc204785169 \h 53
+Operation 630DRILL RADOME &amp; COUNTERSINK HOLES PAGEREF _Toc204785170 \h 57
+TOOLING REQUIRED PAGEREF _Toc204785171 \h 57
+MATERIALS REQUIRED PAGEREF _Toc204785172 \h 57
+INSTRUCTIONS PAGEREF _Toc204785173 \h 57
+630.1Drilling PAGEREF _Toc204785174 \h 57
+630.2Inspect PAGEREF _Toc204785175 \h 59
+630.3Countersink Holes PAGEREF _Toc204785176 \h 59
+630.4Prep for Seal PAGEREF _Toc204785177 \h 62
+Operation 635Measure Fastener Grip Length PAGEREF _Toc204785178 \h 62
+635.1Measure Fastener Grip Length PAGEREF _Toc204785179 \h 62
+Operation 640INSTALL FASTENERS PAGEREF _Toc204785180 \h 64
+MATERIALS REQUIRED PAGEREF _Toc204785181 \h 64
+INSTRUCTIONS PAGEREF _Toc204785182 \h 64
+640.1Wet Install Fasteners PAGEREF _Toc204785183 \h 64
+Operation 650FASTENER AND SHORE D INSPECTION PAGEREF _Toc204785184 \h 70
+INSTRUCTIONS PAGEREF _Toc204785185 \h 70
+650.1Inspect countersinks flush no deeper than -0.020” using a flushness gage. PAGEREF _Toc204785186 \h 70
+650.2Inspect Hi-Lok pins using a 2-1522 pin protrusion gauge PAGEREF _Toc204785187 \h 70
+650.3Inspect GAA100BD008 Pucks and Record Final Cure Hardness PAGEREF _Toc204785188 \h 72
+Operation 660DRILL &amp; INSTALL HINGE FASTENERS PAGEREF _Toc204785189 \h 73
+TOOLING REQUIRED PAGEREF _Toc204785190 \h 73
+MATERIALS REQUIRED PAGEREF _Toc204785191 \h 73
+INSTRUCTIONS PAGEREF _Toc204785192 \h 73
+660.1Drill Hinge to Ring Holes PAGEREF _Toc204785193 \h 73
+660.2Inspect PAGEREF _Toc204785194 \h 74
+660.3Install Hinge to Ring Fasteners PAGEREF _Toc204785195 \h 74
+Operation 670INSTALL GROUND STRAPS PAGEREF _Toc204785196 \h 76
+MATERIALS REQUIRED PAGEREF _Toc204785197 \h 76
+INSTRUCTIONS PAGEREF _Toc204785198 \h 76
+670.1Locate Ground Straps PAGEREF _Toc204785199 \h 76
+670.2Install Ground Straps – EMA OPERATION PAGEREF _Toc204785200 \h 78
+Operation 680DRILL &amp; COUNTERSINK SHELL FOR LDS PAGEREF _Toc204785201 \h 81
+TOOLING REQUIRED PAGEREF _Toc204785202 \h 81
+MATERIALS REQUIRED PAGEREF _Toc204785203 \h 82
+INSTRUCTIONS PAGEREF _Toc204785204 \h 82
+680.1Drill Shell for Diverters PAGEREF _Toc204785205 \h 82
+680.2Inspect PAGEREF _Toc204785206 \h 83
+680.3Countersink Holes PAGEREF _Toc204785207 \h 83
+680.4Prep for Seal PAGEREF _Toc204785208 \h 83
+680.5Seal Holes PAGEREF _Toc204785209 \h 83
+Operation 690DIVERTER INSTALLATION PAGEREF _Toc204785210 \h 84
+MATERIALS REQUIRED PAGEREF _Toc204785211 \h 84
+INSTRUCTIONS PAGEREF _Toc204785212 \h 85
+690.1Prep for Seal PAGEREF _Toc204785213 \h 85
+690.2Fay Seal Diverters PAGEREF _Toc204785214 \h 85
+690.3Install Fasteners PAGEREF _Toc204785215 \h 86
+Operation 695LDs &amp; ELECTRICAL BOND INSPECTION PAGEREF _Toc204785216 \h 88
+INSTRUCTIONS PAGEREF _Toc204785217 \h 88
+695.1Fay Seal Squeeze Out Inspection PAGEREF _Toc204785218 \h 88
+695.2Fastener Inspection PAGEREF _Toc204785219 \h 88
+695.3Electrical Bonding (EB) Resistivity Inspection PAGEREF _Toc204785220 \h 89
+695.4Lab Test Results PAGEREF _Toc204785221 \h 93
+Operation 700FILLET SEAL LIGHTNING DIVERTERS PAGEREF _Toc204785222 \h 94
+Note: N/A this operation if fay seal squeeze out inspection (OP 695.1) passed inspection. DO NOT remove tape placed by inspection in OP 695, if tape is in the way, contact inspector to have them move it away from LDS, as they will need to reference it in the next inspection. PAGEREF _Toc204785223 \h 94
+MATERIALS REQUIRED PAGEREF _Toc204785224 \h 94
+INSTRUCTIONS PAGEREF _Toc204785225 \h 94
+700.1Mix Sealant – EMA OPERATION PAGEREF _Toc204785226 \h 94
+700.2Fillet Seal Lightning Diverters PAGEREF _Toc204785227 \h 95
+Operation 705INSPECTION OF LIGHTNING DIVERTER FILLET SEAL PAGEREF _Toc204785228 \h 95
+Note: N/A this operation if fay seal squeeze out inspection (OP 695.1) passed inspection. PAGEREF _Toc204785229 \h 95
+INSTRUCTIONS PAGEREF _Toc204785230 \h 95
+705.1Inspect Fillet Seal of Lightning Diverters PAGEREF _Toc204785231 \h 95
+Operation 710INSTALL ENVIRONMENTAL SEAL PAGEREF _Toc204785232 \h 96
+MATERIALS REQUIRED PAGEREF _Toc204785233 \h 96
+INSTRUCTIONS PAGEREF _Toc204785234 \h 96
+710.1Preparation for Seal PAGEREF _Toc204785235 \h 96
+710.2Install Seal PAGEREF _Toc204785236 \h 96
+Operation 720PAINT PREP, PLUG HOLES PAGEREF _Toc204785237 \h 98
+NOTE: Operation 710 and Operation 720 may be done in either sequence. PAGEREF _Toc204785238 \h 98
+MATERIALS REQUIRED PAGEREF _Toc204785239 \h 98
+INSTRUCTIONS PAGEREF _Toc204785240 \h 98
+720.1Prep for Paint PAGEREF _Toc204785241 \h 98
+720.2Seal Radome Edge PAGEREF _Toc204785242 \h 98
+720.3Plug Countersinks in Shell PAGEREF _Toc204785243 \h 99
+Move radome to paint area for Operations 730 through 770. PAGEREF _Toc204785244 \h 100
+Operation 775ELECTRICAL SEALING PAGEREF _Toc204785245 \h 100
+Ensure Operation 730 through Operation 770 are completed and all recording lines in router have been filled out before starting work. Contact supervision if not complete. PAGEREF _Toc204785246 \h 100
+MATERIALS REQUIRED PAGEREF _Toc204785247 \h 100
+INSTRUCTIONS PAGEREF _Toc204785248 \h 100
+775.1Prep for Sealant PAGEREF _Toc204785249 \h 100
+775.2Mix and Apply Polysulfide – EMA OPERATION PAGEREF _Toc204785250 \h 101
+775.3Inspect PAGEREF _Toc204785251 \h 103
+775.4Cure PAGEREF _Toc204785252 \h 104
+775.5Inspect PAGEREF _Toc204785253 \h 104
+APPENDIX 1 – STANDARD CLEANING PROCESS PAGEREF _Toc204785254 \h 105
+PER GAMPS 4122: PAGEREF _Toc204785255 \h 105
+APPENDIX 2 – MIXING PROCESS FOR GAA100BD08 PAGEREF _Toc204785256 \h 106
+MIX GAA100BD08 PER THE FOLLOWING: PAGEREF _Toc204785257 \h 106
+APPENDIX 3 – MIXNG PROCESS FOR PS 870 C-12 PAGEREF _Toc204785258 \h 106
+MIX PS 870 C-12 PER THE FOLLOWING: PAGEREF _Toc204785259 \h 106
+APPENDIX 4 – SEALANT SQUEEZE-OUT CLEANING PROCESS PAGEREF _Toc204785260 \h 106
+CLEAN EXCESSES SQUEEZE-OUT PER GAMPS 7115: PAGEREF _Toc204785261 \h 106
+APPENDIX 5 – WET INSTALLATION PROCESS PAGEREF _Toc204785262 \h 107
+WET INSTALL FASTENERS PER GAMPS 7115: PAGEREF _Toc204785263 \h 107
+APPENDIX 6 – HOLE LOCATIONS ON RADOME SHELL PAGEREF _Toc204785264 \h 108
+LOCATE NON-NOMINAL GRIP LENGTH LOCATIONS PER GAMPS 2206: PAGEREF _Toc204785265 \h 108
+APPENDIX 7 – INSPECTION AND SHAVING INSTRUCTIONS OF THE NAS1921B06-04 RIVETS (FORWARD RIVETS FOR JURY STRUTS BOTH LEFT AND RIGHT HAND) PAGEREF _Toc204785266 \h 110
+
+Table of Figures
+ TOC \h \z \c "Figure" Figure 1: Trim Fixture PAGEREF _Toc204785267 \h 22
+Figure 2: Trim Table Shims PAGEREF _Toc204785268 \h 23
+Figure 3: Trim Saw PAGEREF _Toc204785269 \h 24
+Figure 4: Tab Location in Trim Fixture PAGEREF _Toc204785270 \h 24
+Figure 5: Tab Location Out of Trim Fixture PAGEREF _Toc204785271 \h 25
+Figure 6: Drain Hole Drill and Drill Bit PAGEREF _Toc204785272 \h 25
+Figure 7: -A03 Drain Hole Tool Detail PAGEREF _Toc204785273 \h 26
+Figure 8: Drain Hole Location PAGEREF _Toc204785274 \h 26
+Figure 9: Trim Edge Chamfer PAGEREF _Toc204785275 \h 27
+Figure 10: ID Part PAGEREF _Toc204785276 \h 27
+Figure 11: Ring Damage Example PAGEREF _Toc204785277 \h 31
+Figure 12: Rejectable Ring Damage PAGEREF _Toc204785278 \h 31
+Figure 13: Microswitch Stop Detail PAGEREF _Toc204785279 \h 32
+Figure 14: Ring Details Locations PAGEREF _Toc204785280 \h 33
+Figure 15: Jury Strut Location PAGEREF _Toc204785281 \h 34
+Figure 16: Splice Plate Location PAGEREF _Toc204785282 \h 34
+Figure 17: Test Specimen Shop Aid PAGEREF _Toc204785283 \h 36
+Figure 18: Jury Strut Cure PAGEREF _Toc204785284 \h 37
+Figure 19: Drill Stop PAGEREF _Toc204785285 \h 38
+Figure 20: Cleco for Drilling Splice Plate PAGEREF _Toc204785286 \h 39
+Figure 21: Applying Electrical Sealant PAGEREF _Toc204785287 \h 42
+Figure 22: Wet Install Jury Strut Fasteners PAGEREF _Toc204785288 \h 45
+Figure 23: Microswitch Stop Fasteners PAGEREF _Toc204785289 \h 45
+Figure 24: Stop Pad Locations PAGEREF _Toc204785290 \h 47
+Figure 25: Positioning Stop Pad PAGEREF _Toc204785291 \h 48
+Figure 26: Masking Hinges PAGEREF _Toc204785292 \h 48
+Figure 27: Plastic 0.020" Shims PAGEREF _Toc204785293 \h 49
+Figure 28: Masking Radome IML Edge PAGEREF _Toc204785294 \h 51
+Figure 29: Masking Ring Around Hinges PAGEREF _Toc204785295 \h 51
+Figure 30: Test Specimen Shop Aid PAGEREF _Toc204785296 \h 52
+Figure 31: Liquid Shim Stop Pads (Ring Mating Surface) PAGEREF _Toc204785297 \h 53
+Figure 32: Liquid Shim Ring Outer Surface PAGEREF _Toc204785298 \h 53
+Figure 33: Liquid Shim Application on Shell PAGEREF _Toc204785299 \h 54
+Figure 34: Lower Shell onto Ring PAGEREF _Toc204785300 \h 54
+Figure 35: Locating Tab PAGEREF _Toc204785301 \h 55
+Figure 36: Drill Basket PAGEREF _Toc204785302 \h 55
+Figure 37: Liquid Shim Hinges PAGEREF _Toc204785303 \h 56
+Figure 38: Drill Stop PAGEREF _Toc204785304 \h 58
+Figure 39. Upper Jury Strut Countersinks PAGEREF _Toc204785305 \h 59
+Figure 40. Sub-Flush Depth Requirements PAGEREF _Toc204785306 \h 60
+Figure 41: Aft Row Countersinks PAGEREF _Toc204785307 \h 60
+Figure 42: Stop Pad Countersinks PAGEREF _Toc204785308 \h 61
+Figure 43: Hinge to Shell Countersinks PAGEREF _Toc204785309 \h 61
+Figure 44: Determining Grip Length PAGEREF _Toc204785310 \h 62
+Figure 45: Aft Row Fasteners PAGEREF _Toc204785311 \h 65
+Figure 46: Drain Hole Shell Fasteners PAGEREF _Toc204785312 \h 65
+Figure 47: Hinge to Shell Fasteners PAGEREF _Toc204785313 \h 66
+Figure 48: Upper Jury Strut Rivets PAGEREF _Toc204785314 \h 66
+Figure 49: Lower Stop Pad Fasteners PAGEREF _Toc204785315 \h 67
+Figure 50: Upper Stop Pad Fasteners PAGEREF _Toc204785316 \h 68
+Figure 51: Torque MS21043-3 Nuts PAGEREF _Toc204785317 \h 69
+Figure 52. Taring the Flushness Gauge Prior to Measurement PAGEREF _Toc204785318 \h 70
+Figure 53: Pin Protrusion Limits and Gauge PAGEREF _Toc204785319 \h 71
+Figure 54: Drill Stop PAGEREF _Toc204785320 \h 73
+Figure 55: Metal Shim Shop Aid PAGEREF _Toc204785321 \h 74
+Figure 56: Hinge to Ring Fasteners PAGEREF _Toc204785322 \h 75
+Figure 57: Electrical Hardware Locations PAGEREF _Toc204785323 \h 77
+Figure 58: Diverter Strap Locater PAGEREF _Toc204785324 \h 77
+Figure 59: Locating Ground Straps PAGEREF _Toc204785325 \h 78
+Figure 60: 3700ED0008-7 Ground Strap PAGEREF _Toc204785326 \h 79
+Figure 61: 3700ED0008-1, -3, -5, -6 Ground Straps PAGEREF _Toc204785327 \h 80
+Figure 62: Ground Strap Stack Up PAGEREF _Toc204785328 \h 80
+Figure 63: Wet Installing Ground Strap Fasteners PAGEREF _Toc204785329 \h 81
+Figure 64: Wet Install Fasteners (Ring Side) PAGEREF _Toc204785330 \h 81
+Figure 65: Mask Diverter Strips PAGEREF _Toc204785331 \h 82
+Figure 66: Visible Sealant Squeeze-Out PAGEREF _Toc204785332 \h 86
+Figure 67: C275 Fastener Locations PAGEREF _Toc204785333 \h 87
+Figure 68: Milliohm Meter Setup PAGEREF _Toc204785334 \h 89
+Figure 69: Milliohm Meter Calibration Setup PAGEREF _Toc204785335 \h 90
+Figure 70: Resistivity Inspection Hardware Locations PAGEREF _Toc204785336 \h 91
+Figure 71: Resistivity Probe Locations PAGEREF _Toc204785337 \h 92
+Figure 72: Environmental Seal PAGEREF _Toc204785338 \h 97
+Figure 73: Plug Countersinks in Shell PAGEREF _Toc204785339 \h 99
+Figure 74 - Tool Shop Aid for P/N 00200054000 PAGEREF _Toc204785340 \h 101
+Figure 75 - Application of which Electrical Sealant is Applied PAGEREF _Toc204785341 \h 102
+Figure 76: Fastener Overcoat PAGEREF _Toc204785342 \h 102
+Figure 77: Wet Installation of Fasteners Process PAGEREF _Toc204785343 \h 107
+Figure 78: Ring to Shell Hole Locations PAGEREF _Toc204785344 \h 108
+Figure 79: Hinge to Shell Hole Locations PAGEREF _Toc204785345 \h 109
+Figure 80. Flush Head Fastener Seating Inspection PAGEREF _Toc204785346 \h 110
+Figure 81. Flush Head Rivet Pin Inspection PAGEREF _Toc204785347 \h 111
+Figure 82. Example of a Good Bulb Backside Finish PAGEREF _Toc204785348 \h 111
+Figure 83. Bad Finish Where Rivet Head and/or Stem that is Higher than the Composite Surface PAGEREF _Toc204785349 \h 112
+Figure 84. Example of Rivet Surface Coincides to the Composite Surface PAGEREF _Toc204785350 \h 112
+
+APPLICABLE DOCUMENTS
+Gulfstream Documents
+GAMPS 4122
+Solvent Wipe Cleaning
+GAMPS 8210
+Adhesive Bonding of Metallics and Non-Metallics, General Purpose
+GAMPS 2410
+Cast Plastic Shims-Requirements for Fabrication of
+GAMPS 2605
+Electrical Bonding Requirements
+GAMPS 2206
+Installation of Hi-Shear Type Fasteners in Clearance Fit Holes
+GAMPS 2114
+Shimming Process Specification
+GAMPS 7115
+Requirements for Sealing Pressurized, Unpressurized, and Environmental Areas
+GAMPS 2220
+Installation AND Inspection of Bolts/Screws and Nuts
+GAMPS 7601
+Conductive Adhesives and Sealants
+GAMPS 2202
+Installation of Solid and Tubular Rivets
+GAMPS 2203
+Installation of Blind Rivets
+GD Documents
+DRAWINGS / MODELS
+DWG 3700ED0002
+GVII Radome Shell Assembly
+DWG 3700ED0001
+GVII Radome Assembly
+DWG 3700ED0005
+GVII Radome Assembly Machined Details
+MAF 762
+Common Mixing Ratio Charts
+Tools
+3700TF0001-A01
+Trim Fixture
+3700TF0001-A03
+Drill Jig, Drain Hole
+3700AF0001
+Assembly Fixture (AF)
+3700AF0001-A05
+Drill Basket
+Environmental Monitored Area (EMA) REQUIREMENTS 
+There are certain operations in this document that must be performed in an “EMA”, Environmental Monitored Area”. The “EMA” area may be a temporary “EMA” area provided the conditions in  REF _Ref149746558 \h  \* MERGEFORMAT Table 1: Segregation of EMA Processes within the CCA Controlled Contamination Area.
+-2542031927350Table  SEQ Table \* ARABIC 1: Segregation of EMA Processes within the CCA Controlled Contamination Area
+Segregation by Distance
+Process That Disperse Particulates – Examples include Spraying Tackifier on tools or preforms
+50 feet (15 meters) from prepreg or uncured adhesive that is not covered
+Process That Disperse Fibers – Examples include: Minor Sanding, Cutting of dry fiber, Peel ply removal from cured parts
+20 feet (6 meters) from prepreg or uncured adhesive that is not covered
+Processes That Utilize A-Staged (Uncured) Resin – Examples include: Cold bonding such as potting inserts and potting core close-outs, Miscellaneous bonding with wet lay-up (Note: These processes have a tendency to spill resin on the workstation and therefore a separate workstation is required to prevent cross contamination.)
+Segregation by Partition
+All allowed EMA Processes must comply with the EMA REQUIREMENTS outlined in this document.
+Segregation by: Room within CCA, Permanent wall or partition of adequate height to prevent contamination by adjacent areas
+Segregation by Time
+All allowed EMA Processes must comply with the EMA REQUIREMENTS outlined in this document.
+CCA processes shall not be in the area when EMA processes are introduced. Worktables for EMA processes shall be cleaned before and after use.
+Areas shall be inspected after completion of EMA processes and cleaned as required before CCA processes are introduced.
+These operations will be identified as an EMA required process.
+The operators must ensure the area meets all requirements of Table 1: Segregation of EMA Processes within the CCA Controlled Contamination Area. The operators must post an EMA sign visible in the immediate area while these operations are in process.
+When the operations requiring EMA are complete, the area must be cleaned to remove any residue left during the EMA operations as required.
+The EMA sign may be removed from the area and normal operations may resume in that area.
+GENERAL NOTES
+These work instructions are to be followed when performing all Manufacturing and Inspection Operations on AAP Nose Radome Assemblies.
+These instructions describe Hole Drilling, Trimming, Countersinking, and Fastener Installation of AAP Nose Radomes required by Applicable Drawings and Specifications.
+Router 3700ED0001-101 shall be used in conjunction with these work instructions, unless otherwise stated in writing.
+Perform radome assembly operations in accordance with drawing 3700ED0001-101 requirements.
+Record lot numbers of paste adhesives, sealants, etc. in radome router (3700ED0001-101).
+Tasks requiring EMA segregation other than mixing of the resins will be designated at each individual operation.
+After mixing resins, MAF 101 sticker must be filled out and applied to all secondary containers.
+MS21043 Nuts and NASM 21043 Nuts meet the same requirements. Either can be used.
+Reference MAF 762 when mixing adhesives and sealants for appropriate mixing ratios.
+Quality Control Requirements
+The following approved GDMS P/N cloths can be used for all operations in this documents:
+EMAP P25 P25.6000 – “Cheesecloth”
+999919 – Hermitex cloth
+EMAP P25.6041 – Disposable Cloth
+997834 – PUREWIPE Cloth  
+TRIM RADOME &amp; DRILL DRAIN HOLE
+TOOLS REQUIRED
+Tool Number
+Description
+3700TF0001-A01
+Trim Fixture
+3700TF0001-A03
+Drill Jig, Drain Hole
+N/A
+1/8” Setback Trim Saw
+N/A
+5/16” Drill Bit
+N/A
+60 grit silicon carbide sandpaper and/or sanding block
+N/A
+220 grit silicon carbide sandpaper
+INSTRUCTIONS
+Trim Prep
+Wipe down all interfacing surfaces of the trim fixture using a dry cloth.
+Check the trim fixture for any potential interference with the shell. Contact engineering if interference is found before proceeding.
+Follow the standard cleaning process from  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1 on the OML surface of the radome.
+Place radome nose-down in radome trim fixture, tool number 3700TF0001-A01. Reference  REF _Ref150163779 \h  \* MERGEFORMAT Figure 1.
+
+Figure  SEQ Figure \* ARABIC 1: Trim Fixture
+Pin radome to fixture at centerline 0.000 using straight ¼” tooling pin.
+To help hold radome in trim fixture, place one or more heavy “shot bags” in the radome nose region, using a piece of sash cord to slowly lower the bags into the nose of the radome.
+Ensure there are three 0.020” metal shims attached 120° apart in the steel plate cutout at the bottom of the fixture. See  REF _Ref149633982 \h  \* MERGEFORMAT Figure 2 below for reference:
+
+Figure  SEQ Figure \* ARABIC 2: Trim Table Shims
+Trim Radome
+Trim entire edge of radome using a 1/8-inch setback trim saw, leaving the tab that locates the radome to the fixture. The tab should be no longer than 1” past the aft edge of the radome.
+Trim saw can be seen in  REF _Ref150164150 \h  \* MERGEFORMAT Figure 3.
+
+Figure  SEQ Figure \* ARABIC 3: Trim Saw
+Tab location in the trim table is shown below in  REF _Ref150168743 \h  \* MERGEFORMAT Figure 4:
+17151351229084TAB LOCATION
+00TAB LOCATION
+2945130168021030224921946155
+Figure  SEQ Figure \* ARABIC 4: Tab Location in Trim Fixture
+Measure the tab to 1” above the trim line and punch a single hole at the top of the tab.
+The tab should look like the tab shown in  REF _Ref150171846 \h  \* MERGEFORMAT Figure 5:
+179824452705TAB LOCATION
+TAB LOCATION
+center513690322493676827500
+Figure  SEQ Figure \* ARABIC 5: Tab Location Out of Trim Fixture
+Permissible to run saw over radome trim edge one additional time to achieve smoothness.
+Drill Drain Hole
+Drill the drain hole per the following:
+Use a 5/16” (dimeter tolerance of 0.312” ± 0.010”) drill bit shown in  REF _Ref150167844 \h  \* MERGEFORMAT Figure 6 below:
+ 
+Figure  SEQ Figure \* ARABIC 6: Drain Hole Drill and Drill Bit
+Drill in shell at centerline in trim fixture using -A03 tool details. See  REF _Ref150168016 \h  \* MERGEFORMAT Figure 7:
+435052216990380043498331150399322143881164000 
+Figure  SEQ Figure \* ARABIC 7: -A03 Drain Hole Tool Detail
+See  REF _Ref149634221 \h  \* MERGEFORMAT Figure 8 for tool detail placement.
+ 
+Figure  SEQ Figure \* ARABIC 8: Drain Hole Location
+Chamfer Radome Edge
+Remove radome from trim table and place in work dolly.
+Chamfer entire IML of aft trim edge 0.070” x 0.110” (± 0.010”), as shown in  REF _Ref149050400 \h  \* MERGEFORMAT Figure 9, using 60 grit silicon carbide sandpaper or sanding block for first pass, and 220 grit silicon carbide sandpaper to finish surface.
+Verify trim edge has been inspected prior to removing part from trim fixture.
+
+Figure  SEQ Figure \* ARABIC 9: Trim Edge Chamfer
+ID Part
+Mark part as follows:
+Mark SN on piece of 2” masking tape with a black Sharpie marker.
+Place tape on IML of radome, where the tape won’t interfere with lightning divert installation or ring.
+Mark part with SN shown on router and offal – offal being the edge trimmed out of the part. SNs should match.
+See acceptable tape location in  REF _Ref150172019 \h  \* MERGEFORMAT Figure 10.
+3154211966442002773818645243TAPE LOCATION
+0TAPE LOCATION
+2701456140635900
+Figure  SEQ Figure \* ARABIC 10: ID Part
+Inspect
+Inspect trim edge to 0.125” ± 0.010” using a Go/No-go block gauge.
+Verify chamfer is present.
+Inspect ID of part and serial number.
+Inspect drain hole diameter to 0.312” ± 0.010” using a Go/No-go pin gauge.
+
+Router Signoff Required
+Inspection Tool # and Calibration Date
+Record Operator ID# Number and Date
+
+SEAL EDGE, CHAMFER, AND DRAIN HOLE
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+GAA100BD10
+AR
+Paste Adhesive EA956
+INSTRUCTIONS
+Sealing Prep
+Vacuum dust from trim fixture as well as the radome trim edge and drain hole.
+Use a dry cloth to wipe away any remaining dust from around the trim edge and drain hole of the radome surface.
+Sealing
+Mix GAA100BD10 per the following:
+Reference MAF 762 for correct mixing ratio.
+Combine Part A and Part B and mix thoroughly.
+NOTE: Pot life for GAA100BD10 is 30 minutes. Use mix label MAF 101 on mixing cup. Ensure material is applied before end of specified pot life.
+Lightly coat the inside of the drain hole, trimmed edge, and chamfer.
+Record date/time last of the adhesive is applied in router.
+Allow to cure for 2 hours at 150°F or 6 hours at room temperature.
+Permissible to move onto next operation (ring assembly) while the part is curing.
+Router Signoff Required
+Record Lot # and Expiration Date GAA100BD10
+Record MV# and Calibration Date
+Scale
+Record Date/Time last of adhesive is applied
+Operator ID# and Date
+
+LOCATE RING DETAILS
+Router 3700ED0001-101 SUBRING
+TOOLS REQUIRED
+Tool Number
+Description
+3700AF0001
+Assembly Fixture (AF)
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+GAR111D3
+AR
+Release Agent MS-122XD
+3700ED0005-19
+1
+Microswitch Stop
+3700ED0005-1
+1
+Ring, Upper
+3700ED0005-101
+1
+Ring, Lower
+3700ED0005-9
+1
+Jury Strut
+3700ED0005-10
+1
+Jury Strut
+3700ED0005-5
+1
+Splice Plate, Left
+3700ED0005-6
+1
+Splice Plate, Right
+INSTRUCTIONS
+Operator Expectations
+This is a difficult assembly due to access issues, be patient and understand the areas you are working in and what parts can be affected due to the closeness of parts to each other.
+Take precautions when drilling or installing fasteners to protect the surfaces of the parts.
+When working take preventative measures such as making adjacent areas to lessen the change of inadvertent damage.
+Install the shims as defined in this assembly work instruction to prevent drill marks and tooling marks.
+Set the drill stops as defined in this assembly work instruction to prevent drill starts.
+NOTE: Any physical damage to any of the metal parts in this assembly must be inspected. Any removal or displacement of metal is not allowed and must be written up as a defect on a Non-Conformance (NC). This includes drill starts, scratches that displace material, and tooling marks.
+Scuffing of the primer is not a rejectable condition as long as there is no damage to the metal surface (no drill starts, no scratches that displace material, no tooling marks) reference  REF _Ref149050445 \h  \* MERGEFORMAT Figure 11.
+
+Figure  SEQ Figure \* ARABIC 11: Ring Damage Example
+The following are examples of rejectable conditions that MUST be submitted on MRB to Gulfstream.
+
+Figure  SEQ Figure \* ARABIC 12: Rejectable Ring Damage
+Locate Upper/Lower Rings and Microswitch Stop
+Prior to locating, follow the standard cleaning process from  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1 on the Assembly Fixture (AF).
+Check the ring mating surfaces of the AF to ensure no FOD or sharp edges exist that will scratch the details when located.
+Before loading ring onto fixture, spray all mating/interfacing surfaces of the AF with GAR111D3, or equivalent, if necessary.
+This step will depend on how much release agent was removed from the fixture during the cleaning process.
+Locate the 3700ED0005-19 microswitch stop using AF Detail D29 shown below in  REF _Ref149645700 \h  \* MERGEFORMAT Figure 13.
+
+Figure  SEQ Figure \* ARABIC 13: Microswitch Stop Detail
+Load the 3700ED0005-1 and 3700ED0005-101 rings in the AF as shown in  REF _Ref149049775 \h  \* MERGEFORMAT Figure 14.
+
+Figure  SEQ Figure \* ARABIC 14: Ring Details Locations
+NOTE: If needed remove the primer from the ring tooling holes using ½” reamer.
+Pin the -101 ring at (2) places near each end of the part and lightly bolt (1) place at the centerline of the part. Use the red circles in  REF _Ref149049775 \h  \* MERGEFORMAT Figure 14 for reference.
+Pin the -1 ring at (1) place at the centerline of the part and (2) places near each end, also referencing  REF _Ref149049775 \h  \* MERGEFORMAT Figure 14 above.
+Secure rings in place using metal details/bolts shown with yellow arrows in  REF _Ref149049775 \h  \* MERGEFORMAT Figure 14 above.
+Check gaps to ensure there is no more than 0.002” gap at any AF mating surface.
+Check gap from microswitch stop to ring surface to ensure gap is less than 0.030”.
+Locate Jury Struts and Splice Plates
+Locate the 3700ED0005-9 and 3700ED0005-10 jury strut fittings as shown in  REF _Ref149050598 \h  \* MERGEFORMAT Figure 15 and pin in place using a 0.466” pin.
+3673128205085View inside AF
+View inside AF
+1718614195580View outside AF
+View outside AF
+  
+Figure  SEQ Figure \* ARABIC 15: Jury Strut Location
+Equal shim the jury strut fittings at the AF attachments to center the fitting in the AF.
+Use 0.055” shims on each side of the jury strut.
+Ensure the jury strut cannot move side to side in the fixture.
+Secure jury strut with plastic clamp and check that gaps are less than 0.030” with feeler gauge.
+Locate the 3700ED0005-5 and 3700ED0005-6 splice plates at the burnished surfaces where the rings meet. Center the splice plates so that they fit into the curvature of the mating surface. Clamp in place using provided rubber tipped clamps shown in  REF _Ref149911381 \h  \* MERGEFORMAT Figure 16:
+
+Figure  SEQ Figure \* ARABIC 16: Splice Plate Location
+Remove jury struts and shims for bonding operation.
+Router Signoff Required
+Operator ID# and Date
+
+ASSEMBLE RING
+Router 3700ED0001-101 SUBRING
+TOOLS REQUIRED
+Tool Number
+Description
+SA0145
+Test Specimen Shop Aid
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+GAA100BD08
+AR
+EA 9394 Paste Adhesive (Pot Life 95 minutes)
+00805022001
+AR
+Frekote 700-NC Mold Release
+INSTRUCTIONS
+Prepare for Liquid Shim
+Remove all details except the rings.
+Solvent clean surfaces to be bonded (jury strut, ring details) with clean permitted cloths wet with acetone (P/N: 00095020000) just prior to application of the liquid shim. Reference standard cleaning process in  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1.
+Mixing Liquid Shim
+EMA OPERATION – Segregate Area per EMA REQUIREMENT SECTION
+Mix GAA100BD08 per the process in  REF _Ref203396804 \h  \* MERGEFORMAT appendix 2.
+NOTE: Pot Life for GAA100BD08 is 95 minutes. Ensure material is applied before end of specified Pot Life.
+Liquid Shim Puck Sample
+A plastic shim sample shall be made per the following:
+Minimum thickness of ¼ inch
+Surface area of approximately (1) one inch square or greater
+Fabricated under the same conditions as the production part
+Material from the same mix used to make the production shim shall be used to make the test specimen
+Test specimen shall be kept on the mixing table and identified by serial number and labeled with “ring”.
+Use an MAF 101 label as well.
+Make the specimen in the shop aid shown in  REF _Ref149650944 \h  \* MERGEFORMAT Figure 17:
+Before adding liquid shim sample in mold, paint on PN 00805022001Frekote into mold for easy puck removal.
+
+Figure  SEQ Figure \* ARABIC 17: Test Specimen Shop Aid
+Do not mix more than can be applied and located during the specified pot life.
+Liquid Shim Application
+The thickness of the adhesive applied shall be the minimum amount required to fill the assembled gap and to give a continuous and visible adhesive squeeze-out.
+Adhesive squeeze-out shall be visible and continuous around the edges of the mating parts.
+Apply a thin layer of adhesive to the mating surfaces of the microswitch stop and locate, it may be necessary to lift ring to locate part to tool detail.
+Note that the microswitch stop locating tool must remain on the AF until the ring is completely assembled.
+Apply a thin layer of adhesive to the mating surfaces of the jury strut flange and inner lip interface and locate jury struts to AF details.
+Record date/time last of the adhesive is applied in router.
+When bonding, locate the jury strut with the 0.466” pin and two 0.055” shims on each side.
+Firmly press jury struts into ring for proper seating, clamping in place for duration of 8 hour cure. Reference  REF _Ref149644742 \h  \* MERGEFORMAT Figure 18 below.
+
+Figure  SEQ Figure \* ARABIC 18: Jury Strut Cure
+Record all necessary information in the router and ensure all signoffs are accurately completed.
+END OF EMA PROCESS REQUIREMENTS
+Router Signoff Required
+Record Lot # and Expiration Date GAA100BD08
+Record MV# and Calibration Date
+Scale
+Record Operator ID# and Date
+
+DRILL SPLICE PLATES
+Router 3700ED0001-101 SUBRING
+TOOLS REQUIRED
+Tool Number
+Description
+N/A
+#40 Drill Bit
+N/A
+#19 Drill Bit
+#40 Drill Stop
+Custom Drill Stop
+#19 Drill Stop
+Custom Drill Stop
+NOTE: Drill stop setting – 0.3” from Bottom of Stop to End of Drill, reference  REF _Ref149644788 \h  \* MERGEFORMAT Figure 19 below.
+Protect the Part
+
+Figure  SEQ Figure \* ARABIC 19: Drill Stop
+Use Drill Stop to Control Drill Depth
+INSTRUCTIONS
+Drill Ring
+Drill #40 holes through the pilot holes in the -5 and -6 splice plates into the ring. Cleco in place as you go, see  REF _Ref149644856 \h  \* MERGEFORMAT Figure 20:
+
+Figure  SEQ Figure \* ARABIC 20: Cleco for Drilling Splice Plate
+Open the previously drilled holes to #19 (0.165-0.168”) as follows:
+Verify first hole drilled is correct size with a Go/No-go gage before proceeding
+Cleco as you go
+Once drilling operation is complete, deburr all splice plate mating holes on both details and ensure edge break common to any fasteners.
+Deburr holes per the following:
+Use the angled side of a straight razor blade on the metal surface and apply light pressure to remove any metal shavings.
+Be extremely careful not to damage part. 
+Following this, use a vacuum to clean all metal shavings off the AF and ring details.
+Inspect
+Inspect hole diameter to 0.165”-0.168” using a Go/No-go pin gage.
+Router Signoff Required
+Inspection Tool # and Calibration Date
+Record Operator ID# and Date
+
+ELECTRICAL BONDING RING DETAILS
+Router 3700ED0001-101 SUBRING
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+A13011
+AR
+Touch-N-Prep Pen
+GMS4112B-2
+AR
+Adhesive Electrically Conductive (Pot Life 2 hours)
+PS 870 C-12
+AR
+Corrosion Inhibitive Sealant
+GAB511AB5B3
+13
+Bolt, Protruding, Shear HD
+HST1070CY-5
+13
+Collar, Hi-Lite (GAN510AWB5)
+Fay Seal Splice Plates
+EMA OPERATION – MIX RESINS IN EMA AREA.
+Clean all bonding areas using the standard cleaning process in  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1.
+Alodine holes that were previously drilled using A13011. 
+Prepare the A13011 Alodine pen prior to use. Operators must wear powder-free gloves for this process. Alodine holes in metal parts using A13011. Perform two runs total. If required to apply Alodine onto tight spaces, utilize a chemical resistant swab (PureSwab chemical resistant foam swab or equivalent), EMAP P25.6000, EMAP P25.6041, 997834, or 999919 cloth by soaking it with Alodine. After applying the first coat, wait between 3-4 minutes before applying a second coat.
+WARNING: DO NOT RINSE OR PUDDLE ONTO THE PART! DO NOT WIPE AFTER APPLICATION!
+After second coat application, wait for A13011 to completely dry before continuing through process. Okay to prepare GMS4112B-2 while A13011 is drying.
+Mix GMS4112B-2 SEMKIT per the following:
+Semco 285 Mixing:
+50 strokes at 20 strokes/minute.
+Semco 388 Mixer:
+1 ½ minutes at 20 strokes/minute.
+NOTE: GMS4112B-2 Pot Life is 2 hours. Record Lot Number and Expiration Date in router.
+Apply blue promoter from SEMKIT before sealant application.
+Sealing must begin within one hour of cleaning.
+The sealant shall be applied to one of the faying surfaces with a pneumatic sealant gun.
+Apply sealant to the entire surface of the faying part, using a smooth-edged putty knife or spatula like tool to spread the sealant. Ensure to completely coat the entire faying surface.
+See an example in  REF _Ref150243506 \h  \* MERGEFORMAT Figure 21.
+211645542264600230756619976144317521370624036619131017605015398151722170
+Figure  SEQ Figure \* ARABIC 21: Applying Electrical Sealant
+The thickness of the sealant applied shall be the minimum amount required to fill the assembled faying surface and to give a continuous and visible sealant squeeze-out. 
+Sealant shall not be rolled or worked on a separate work surface (i.e. Palette, “sealant boards”, etc.) during application – due to it possibly reducing the squeeze-out life significantly.
+Sealant squeeze-out shall be visible and continuous around the edges of the faying parts.
+If squeeze-out is not visible, remove splice plate and use the same application method above, adding a considerable amount of sealant to ensure squeeze-out.
+Wet Install Fasteners
+EMA OPERATION – MIX RESINS IN EMA AREA.
+Mix PS 870 C-12 per the process in  REF _Ref203396474 \h  \* MERGEFORMAT appendix 3.
+NOTE: Pot Life for PS 870 C-12 is 12 hours. Use mix label MAF 101 on mixing cups. Ensure material is applied before end of specified Pot Life.
+Wet install (13) GAB511AB5B3 fasteners and (13) HST1070CY-5 collars with PS 870 C-12 through the rings into each splice plate. Refer to wet installation process  REF _Ref203396504 \h  \* MERGEFORMAT appendix 5.
+To clean up excess sealant squeeze out, follow cleaning process in  REF _Ref203396537 \h  \* MERGEFORMAT appendix 4.
+Router Signoff Required
+Record Lot # and Expiration Date A13011
+Record Lot # and Expiration Date GMS4112B-2
+Record Lot # and Expiration Date PS 870 C-12
+Record MV# and Calibration Date
+Scale
+Inspection Tool # and Calibration Date
+Record Operator ID# and Date
+
+DRILL &amp; INSTALL FASTENERS ON JURY STRUT &amp; MICROSWITCH STOP
+TOOLS REQUIRED
+Part Number
+Description
+N/A
+#40 Drill Bit
+N/A
+#19 Drill Bit
+#40 Drill Stop
+Custom Drill Stop
+#19 Drill Stop
+Custom Drill Stop
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+PS 870 C-12
+AR
+Sealant, Corrosion Inhibitive (Pot Life 12 Hours)
+NAS1919B05-3
+4
+Rivet, Pull
+GAB511AB5B3
+6
+Bolt, Protruding, Shear HD
+GAN510AA5
+6
+Collar, Hi-Lite
+INSTRUCTIONS
+Drill Jury Strut
+Remove ring from AF and perform the following operation on table.
+NOTE: Use drill stops to protect part from damage.
+Transfer drill (4) #19 holes through the (2) jury struts #40 holes into the ring. 
+Hole size tolerance is 0.165” - 0.168” diameter.
+From the inner lip of the ring assembly, transfer drill (4) #40 holes through the ring into the (2) jury struts.
+Open the previously drilled holes to #19 (0.165” - 0.168”) as follows:
+Verify first hole drilled is correct size with a Go/No-go gage before proceeding.
+Drill Microswitch Stop
+From the aft side of the ring assembly, transfer drill (2) #19 holes through the ring into the microswitch stop.
+Hole size tolerance is 0.165” - 0.168” diameter.
+Inspect
+Inspect hole diameter to 0.165” - 0.168” using a Go/No-go pin gauge.
+Wet Install Fasteners
+EMA OPERATION – MIX RESINS IN EMA AREA.
+Mix PS 870 C-12 per the process in  REF _Ref203396568 \h  \* MERGEFORMAT appendix 3.
+NOTE: Pot Life for PS 870 C-12 is 12 hours. Use mix label MAF 101 on mixing cup. Ensure material is applied before end of specified Pot Life.
+Wet install (4) NAS1919B05-3 rivets through the inner lip of the ring assembly into the jury struts. Refer to wet installation process in  REF _Ref203396577 \h  \* MERGEFORMAT appendix 5.
+Wet install (4) GAB511AB5B3 fasteners and (4) GAN510AA5 collars with PS 870 C-12 through the ring into the jury struts. Refer to wet installation process in  REF _Ref203396583 \h  \* MERGEFORMAT appendix 5.
+The collar goes on the inside of the radome, reference  REF _Ref149715996 \h  \* MERGEFORMAT Figure 22 below:
+
+Figure  SEQ Figure \* ARABIC 22: Wet Install Jury Strut Fasteners
+Wet install (2) GAB511AB5B3 fasteners and (2) GAN510AA5 collars with PS 870 C-12 through the ring into the microswitch stop. Refer to wet installation process in  REF _Ref203396696 \h  \* MERGEFORMAT appendix 5.
+The collar goes on the inside of the radome, see  REF _Ref149716116 \h  \* MERGEFORMAT Figure 23 below:
+2911338830138001882471183294(2) GAB511AB5B3
+(2) GAN510AA6
+00(2) GAB511AB5B3
+(2) GAN510AA6
+
+Figure  SEQ Figure \* ARABIC 23: Microswitch Stop Fasteners
+To clean up excess sealant squeeze out, follow the cleaning process in  REF _Ref203396734 \h  \* MERGEFORMAT appendix 4.
+Router Signoff Required
+Record Lot # and Expiration Date PS 870 C-12
+Record MV# and Calibration Date
+Scale
+Inspection Tool # and Calibration Date
+Record Operator ID# and Date
+
+RING INSPECTION
+Router 3700ED0001-101SUBRING
+INSTRUCTIONS
+Ring Inspection
+Inspect ring for any assembly damage.
+Router Signoff Required
+Record Inspector ID# and Date
+
+DRY FIT DETAILS FOR LIQUID SHIM
+TOOLS REQUIRED
+Part Number
+Description
+3700AF0001-A05
+Drill Basket
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+3700ED0005-13
+1
+Stop Pad, Lower, L/H
+3700ED0005-14
+1
+Stop Pad, Lower, R/H
+3700ED0005-15
+1
+Stop Pad, Upper, L/H
+3700ED0005-16
+1
+Stop Pad, Upper, R/H
+3700ED0006-101
+1
+Hinge Assembly, L/H
+3700ED0006-102
+1
+Hinge Assembly, R/H
+INSTRUCTIONS
+Locate Stop Pad Details
+Locate the -13, -14, -15, and -16 stop pad details as shown in  REF _Ref149050792 \h  \* MERGEFORMAT Figure 24.
+3892271276761000218175827552900016605252892095-102 HINGE
+00-102 HINGE
+39149782901594-101 HINGE
+00-101 HINGE
+
+Figure  SEQ Figure \* ARABIC 24: Stop Pad Locations
+Center the (4) stop pads as shown by the masking tape below in  REF _Ref149050822 \h  \* MERGEFORMAT Figure 25.
+Note: the “hook” of the stop fitting is positioned toward the inner surface of the radome/ring assembly.
+386683338258600220027538671500
+Figure  SEQ Figure \* ARABIC 25: Positioning Stop Pad
+Locate Hinges
+Locate the 3700ED0006-101 and 3700ED0006-102 hinges to the AF attachments using the pins shown in  REF _Ref149050842 \h  \* MERGEFORMAT Figure 26.
+Use 0.058” shims and 0.373” pin when locating.
+Mask the -1 ring around the hinges to aid in clean-up.
+
+Figure  SEQ Figure \* ARABIC 26: Masking Hinges
+Dry fit radome to completed ring and mark the outline of ring, jury struts, stop pads, and hinges to IML surface using a scribe.
+Equal shim ring into position using 0.020” plastic shims. Reference  REF _Ref149722205 \h  \* MERGEFORMAT Figure 27 below for shims.
+Insert them at several locations around radome surface to center the radome shell within the steel drill basket.
+
+Figure  SEQ Figure \* ARABIC 27: Plastic 0.020" Shims
+Router Signoff Required
+Record Operator ID# and Date
+
+SHIM GAP INSPECTION
+INSTRUCTIONS
+Inspect Ring to Shell
+Use a feeler gauge to measure ring to shell mating surface. Max allowed gap is 0.045”.
+Inspect Hinge to Shell
+Use a feeler gauge to measure hinge to shell mating surface on both L/H and R/H hinges. Max allowed gap is 0.060”.
+Router Signoff Required
+Record QA ID# and Date
+
+LIQUID SHIM DETAILS
+TOOLS REQUIRED
+Tool Number
+Description
+SA0145
+Test Specimen Shop Aid
+N/A
+180 grit or finer aluminum oxide abrasive sand paper
+N/A
+80 grit sandpaper or sanding block
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+GAA100BD08
+AR
+EA 9394 Paste Adhesive (Pot Life 95 minutes)
+00805022001
+AR
+Frekote 700-NC Mold Release
+INSTRUCTIONS
+Liquid Shim Prep
+Solvent clean the radome shell at the interface of the jury strut fittings, stop pads, microswitch stop, and hinges per the standard cleaning process in  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1.
+Solvent clean the interface of the rings, jury strut fittings, stop pads, microswitch stop, and hinges per the standard cleaning process in  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1.
+The cleaned surfaces shall be final cleaned using clean wiping cloths wet with acetone.
+Allow the surfaces to air dry for a minimum of 30 minutes.
+Mask the radome shell to aid in clean up, reference  REF _Ref149716548 \h  \* MERGEFORMAT Figure 28:
+
+Figure  SEQ Figure \* ARABIC 28: Masking Radome IML Edge
+Mask the -1 and -101 ring top surfaces periphery to aid in clean-up. See  REF _Ref149640999 \h  \* MERGEFORMAT Figure 29 below:
+
+Figure  SEQ Figure \* ARABIC 29: Masking Ring Around Hinges
+Scuff ring with 180 grit or finer aluminum oxide abrasive paper and IML of shell with 80 grit sandpaper on the interfacing surfaces.
+Mix Liquid Shim
+EMA OPERATION – Area must be segregated per EMA REQUIREMENT SECTION
+Mix GAA100BD08 per the process in  REF _Ref203396804 \h  \* MERGEFORMAT appendix 2.
+NOTE: Pot Life for GAA100BD08 is 95 minutes. Ensure material is applied before end of specified Pot Life.
+
+Liquid Shim Puck Sample
+A plastic shim sample shall be made per the following:
+Minimum thickness of ¼ inch
+Surface area of approximately (1) one inch square or greater
+Fabricated under the same conditions as the production part
+Material from the same mix used to make the production shim shall be used to make the test specimen
+Test specimen shall be kept on the mixing table and identified by serial number and labeled with “shell”.
+Use an MAF 101 label as well.
+Make the specimen in the shop aid shown in  REF _Ref149722320 \h  \* MERGEFORMAT Figure 30:
+Before adding liquid shim sample in mold, paint on PN 00805022011 Frekote into mold for easy puck removal.
+Use P/N: 00805022001 (Frekote 700-NC Loctite) to prepare the Shop Tool aid for use.
+Apply a first thin smooth coat of 00805022001 mold release in a continuous smooth motion. Wait 5 – 10 minutes at ambient temperature before applying a second coat of mold release.
+Repeat thin smooth coat application. Wait for 15 – 20 minutes at ambient temperature time after applying a second coat.
+
+Figure  SEQ Figure \* ARABIC 30: Test Specimen Shop Aid
+Do not mix more than can be applied and located during the specified pot life.
+Liquid Shim Application
+Adhesive squeeze-out shall be visible and continuous around the edges of the mating parts.
+Relocate ring assembly, if required – reposition the assembled ring on the AF using the same procedure from 620.1 and 620.2 operations.
+Apply a thin coat of mixed adhesive to the mating surface of the (4) stop pads, including some extra adhesive on the outside to fill the cavity beside each stop pad flush to the ring surface. Reference  REF _Ref149550591 \h  \* MERGEFORMAT Figure 31:
+
+Figure  SEQ Figure \* ARABIC 31: Liquid Shim Stop Pads (Ring Mating Surface)
+Apply a thin layer of adhesive to the mating surfaces of the jury struts. Apply extra adhesive at the interface of the jury strut flange to the ring.
+Apply a thin coat of mixed adhesive to the entire outside surface of the ring. Reference  REF _Ref149550757 \h  \* MERGEFORMAT Figure 32 below:
+
+Figure  SEQ Figure \* ARABIC 32: Liquid Shim Ring Outer Surface
+Apply a thin coat of adhesive to the inside of the radome shell, below the masked areas that have been scuff sanded for bonding. See liquid shim on radome surface below in  REF _Ref150427729 \h  \* MERGEFORMAT Figure 33.
+
+Figure  SEQ Figure \* ARABIC 33: Liquid Shim Application on Shell
+Lower the radome shell into position over the ring assembly as follows:
+ Have two operators lower the shell onto the ring as seen in  REF _Ref150427480 \h  \* MERGEFORMAT Figure 34.
+
+Figure  SEQ Figure \* ARABIC 34: Lower Shell onto Ring
+Lower the shell very carefully to ensure all shell to ring interfaces are reached at the same.
+Pin radome to the fixture at the tab left during trimming with short pin and push flush to radome surface to allow drill ring installation. Locating tab is pictured in  REF _Ref150427270 \h  \* MERGEFORMAT Figure 35 below.
+2711450442595Locating Tab
+00Locating Tab
+3136900696595002762250117919500
+Figure  SEQ Figure \* ARABIC 35: Locating Tab
+Lower the 3700AF0001-A05 drill basket into position over the shell. Reference  REF _Ref149717120 \h  \* MERGEFORMAT Figure 36:
+447381939956004413250135254900215846611118840041736891772230001836889174302000
+Figure  SEQ Figure \* ARABIC 36: Drill Basket
+Attach drill basket to AF details using the two provided 1/2” pins. See two pins located by blue boxes in  REF _Ref149717120 \h  \* MERGEFORMAT Figure 36 above.
+Note that the 3700AF0001 Dup 1 Assembly Fixture has larger pins for the drill basket.
+Insert 0.020” thick shim stock used to fill gap between drill basket and radome shell outer surface from dry fit OP 620.
+Insert them at several locations around radome surface to center the radome shell within the steel drill basket.
+Remove excess adhesive around entire radome with a dry approved cloth prior to continuing liquid shim operations.
+Apply a thin layer of adhesive to the mating surfaces of the hinges (4) places and locate hinges to AF details. Reference  REF _Ref149992231 \h  \* MERGEFORMAT Figure 37.
+Repeat locating process from previous dry fit.
+
+Figure  SEQ Figure \* ARABIC 37: Liquid Shim Hinges
+Press hinges firmly against shell to properly seat hinges.
+Record date/time last of the adhesive is applied in router.
+END OF EMA PROCESS REQUIREMENTS
+Any excess liquid shim adhesives from the squeeze out application found on either hinge (inside a hole or on the surface) shall be removed using the process in  REF _Ref203396849 \h  \* MERGEFORMAT appendix 4. Refer to  REF _Ref199850143 \h  \* MERGEFORMAT appendix 1, Quality Control Requirements, for the list of approved cloths to complete the cleaning process.
+If any primer paint or chemical converted Alodine has been removed during the clean-up process in subsection  REF _Ref204667313 \r \h 625.4.16, a touch-up process in accordance with WI 3700ED0001-101 PAINT shall be performed.
+Allow part to cure for a minimum of 8 hours at room temperature before drilling.
+Router Signoff Required
+Record Lot # and Expiration Date GAA100BD08
+Record MV# and Calibration Date
+Scale
+Record Date/Time last of adhesive is applied
+Record Operator ID# and Date
+
+DRILL RADOME &amp; COUNTERSINK HOLES
+TOOLING REQUIRED
+Part Number
+Description
+3700AF0001
+Assembly Fixture (AF)
+3700AF0001-A05
+Drill Basket
+N/A
+#11 Drill Bit/Stop
+N/A
+#10 Drill Bit
+100°, #11 Pilot
+Countersink
+MATERIALS REQUIRED
+INSTRUCTIONS
+NOTE: Prior to drilling record Date/Time in router, ensure a minimum of 8 hours has passed.
+DRILL STOP SETTINGS ARE ON DRILL BASKET
+Drilling
+Prior to drilling, check bushings in drill basket for wear. 
+Ensure the drill bit cannot be easily angled or moved around in the bushing.
+The bushing should ensure the drill bit is perpendicular to the surface being drilled.
+With a #11 drill bit that has the capabilities of drilling a 0.190” – 0.193” hole, drill all holes in drill basket.
+Use drill stop to control depth of the drill plunge as shown in  REF _Ref149550966 \h  \* MERGEFORMAT Figure 38.
+If no drill stop is available, do not proceed with this operation and notify Supervision or Engineering.
+Correct length drill stop locations are marked on drill basket.
+Hole tolerance is 0.190”-0.193” diameter. Except Holes 25, 26, 59, and 60 (refer to  REF _Ref152049877 \h  \* MERGEFORMAT Figure 78,  REF _Ref203056081 \h  \* MERGEFORMAT appendix 6) that are 0.192” – 0.196”, utilize a #10 drill bit.
+30139021142312 
+Figure  SEQ Figure \* ARABIC 38: Drill Stop
+Remove the drill basket from the AF.
+Countersink the (2) upper holes on each jury strut for a total of 4 holes. Reference  REF _Ref203641975 \h  \* MERGEFORMAT Figure 39 below. 
+The top of the jury strut countersink target reference (NOT a hard requirement) setting is Ø 0.375”.
+NOTE: If countersink does not have an #10 integral pilot, fillet relieving shall be required for all jury strut fasteners.
+
+Figure  SEQ Figure \* ARABIC 39. Upper Jury Strut Countersinks
+Inspect
+Inspect hole diameter to 0.190”-0.193” using a Go/No-go pin gauge except holes 25, 26, 59, 60 (refer  REF _Ref203056081 \h  \* MERGEFORMAT appendix 6) that are 0.192” – 0.196”.
+Record Tool # and Calibration Date in router.
+Countersink Holes
+NOTE: Countersink targets are set based on the flushness requirement for fastener heads to have a range from flush to no deeper than -0.020” with respect to the radome shell OML surface. The target reference to the sub-flush shall be -0.010”. The following countersink diameters are reference values to achieve an ideal sub-flush of -0.010” and are not strict requirements as shown in  REF _Ref204761228 \h  \* MERGEFORMAT Figure 40.
+
+Figure  SEQ Figure \* ARABIC 40. Sub-Flush Depth Requirements
+Countersink all shell to ring attachment holes (aft row) using 100° countersink with #11 pilot. Refer to  REF _Ref149739624 \h  \* MERGEFORMAT Figure 41 for reference to the aft row,  REF _Ref203641975 \h  \* MERGEFORMAT Figure 39 for the upper jury struts,  REF _Ref149739678 \h  \* MERGEFORMAT Figure 42 for the stop pads, and  REF _Ref149739709 \h  \* MERGEFORMAT Figure 43 based on the hinges.
+The aft row target countersink reference setting is Ø 0.294” (Reference  REF _Ref149739624 \h  \* MERGEFORMAT Figure 41).
+
+Figure  SEQ Figure \* ARABIC 41: Aft Row Countersinks
+The stop pad target countersink reference setting is Ø 0.390” (Reference  REF _Ref149739678 \h  \* MERGEFORMAT Figure 42).
+
+Figure  SEQ Figure \* ARABIC 42: Stop Pad Countersinks
+Countersink (20) shell to hinge attachment holes using 100° countersink with #11 pilot.
+The hinge attachment referenced target countersink setting is Ø 0.390” (Reference  REF _Ref149739709 \h  \* MERGEFORMAT Figure 43 below).
+
+Figure  SEQ Figure \* ARABIC 43: Hinge to Shell Countersinks
+Prep for Seal
+Deburr all mating holes and ensure edge break common to any fasteners.
+Deburr holes per the following:
+Use the angled side of a straight razor blade on the metal surface and apply light pressure to remove any metal shavings.
+Be extremely careful not to damage part. 
+Clean all countersunk surfaces, Refer to  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1 for instructions.
+Router Signoff Required
+Record Operator ID# and Date
+Record QA ID# and Date
+
+Measure Fastener Grip Length
+Measure Fastener Grip Length
+Using a Hi-Shear P/N 2-612 or equivalent grip gauge, measure (78) aft row and (20) hinge to shell holes drilled in Operation 630. Reference  REF _Ref151474477 \h  \* MERGEFORMAT Figure 44 below for how to determine grip length.
+
+Figure  SEQ Figure \* ARABIC 44: Determining Grip Length
+If any grip lengths are not nominal, note the hole location number per  REF _Ref203056081 \h  \* MERGEFORMAT appendix 6 and which grip length is to be used. Refer to OP 640 for which fasteners will be assigned to complete the installation process. Operators are to submit a Floor Stock Over/Under Issue (FOUI) sheet in an event that a non-ideal nominal grip length is found.
+A pin up to two grip lengths longer than called out in the engineering drawing is acceptable.
+A pin one grip length shorter than the drawing is acceptable.
+NAS1921 fasteners shall be determined via a numerical gauge tool similar to the Hi-Shear P/N 2-612 gauge. Refer to  REF _Ref203049940 \h  \* MERGEFORMAT Table 2 for the dimensional grip length requirement.
+Table  SEQ Table \* ARABIC 2. NAS1921 Fastener Acceptable Grip Lengths Category
+Grip Lengths for Fasteners NAS1921
+Grip Dash No.
+NAS1921B05
+NAS1921B06
+
+Grip Range (in.)
+Grip Range (in.)
+
+Minimum
+Maximum
+Minimum
+Maximum
+-04
+0.188
+0.250
+0.188
+0.250
+For any alternate grip lengths, place a piece of thin masking tape indicating which hole requires the alternate grip length to aid in installation.
+Note that for hinge to shell holes, document L/H or R/H hinge in router.
+Router Signoff Required
+Record Non-nominal Grip Lengths or N/A
+Record Operator ID# and Date
+
+INSTALL FASTENERS
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+GAB510DH6B4
+20
+Pin, Hi-Lok, Shear HD
+GAB510DH6B5
+8
+Pin, Hi-Lok, Shear HD
+GAB510DH6B7
+8
+Pin, Hi-Lok, Shear HD
+GAB510DG6B4
+60
+Pin, Hi-Lok, Shear HD
+GAB510DG6B6
+2
+Pin, Hi-Lok, Shear HD
+GAB510DG6B7
+8
+Pin, Hi-Lok, Shear HD
+GAN512NC3
+32
+Collar, Hi-Lite
+GAN510AA6
+70
+Collar, Hi-Lite
+00421399000
+4
+Rivet, Pull
+NAS1149DN0316K
+4
+Washers
+MS21043-3
+4
+Nuts
+PS 870 C-12
+AR
+Sealant, Corrosion Inhibitive (Pot Life 12 Hours)
+
+INSTRUCTIONS
+EMA OPERATION – Mix resins in EMA area per EMA Requirements.
+Wet Install Fasteners
+Mix PS 870 C-12 per the process in  REF _Ref203397003 \h  \* MERGEFORMAT appendix 3.
+NOTE: Pot Life for PS 870 C-12 is 12 hours. Use mix label MAF 101 on mixing cup. Ensure material is applied before end of specified Pot Life.
+Wet install the following hardware with PS 870 C-12 through the shell into the ring per the process in  REF _Ref203397041 \h  \* MERGEFORMAT appendix 5:
+(60) GAB510DG6B4 fasteners and (60) GAN510AA6 collars as shown in  REF _Ref149739830 \h  \* MERGEFORMAT Figure 45.
+26499311961312(60) GAB510DG6B4
+(60) GAN510AA6
+00(60) GAB510DG6B4
+(60) GAN510AA6
+30988007010402593975270510AFT ROW
+00AFT ROW
+161036012172950022809202148840157099019723100
+Figure  SEQ Figure \* ARABIC 45: Aft Row Fasteners
+(2) GAB510DG6B6 fasteners and (2) GAN510AA6 collars through the two holes on each side of the drain hole shown in  REF _Ref150431690 \h  \* MERGEFORMAT Figure 46.
+
+Figure  SEQ Figure \* ARABIC 46: Drain Hole Shell Fasteners
+Wet install the following hardware with PS 870 C-12 through the shell into the hinges:
+(20) GAB510DH6B4 fasteners and (20) GAN512NC3 collars as shown in  REF _Ref149739912 \h  \* MERGEFORMAT Figure 47.
+
+Figure  SEQ Figure \* ARABIC 47: Hinge to Shell Fasteners
+Wet install the following hardware through the top of each jury strut. Refer to  REF _Ref203055340 \h  \* MERGEFORMAT appendix 7) for rivet requirements. When pulling rivets, utilize a double action rivet gun.
+(4) 00421399000 pull rivets as shown in  REF _Ref149739970 \h  \* MERGEFORMAT Figure 48.
+
+Figure  SEQ Figure \* ARABIC 48: Upper Jury Strut Rivets
+Wet install fasteners with PS 870 C-12 into the stop pads as shown in  REF _Ref149555363 \h  \* MERGEFORMAT Figure 49 and  REF _Ref149555376 \h  \* MERGEFORMAT Figure 50.
+NOTE: When installing aft row, skip the (8) fasteners on each side of the (4) stop pads. Reference  REF _Ref149555363 \h  \* MERGEFORMAT Figure 49 and  REF _Ref149555376 \h  \* MERGEFORMAT Figure 50, skipped fasteners circled in yellow.
+(8) GAB510DH6B5 Fasteners
+(12) GAN512NC3 Collars
+(8) GAB510DH6B7 Fasteners
+(4) NAS1149DN0316K Washers
+(8) GAB510DG6B7 Fasteners
+(8) GAN510AA6 Collars
+(4) MS21043-3 Nuts
+
+Figure  SEQ Figure \* ARABIC 49: Lower Stop Pad Fasteners
+
+Figure  SEQ Figure \* ARABIC 50: Upper Stop Pad Fasteners
+Torque the MS21043-3 nuts to 15-25 in-lbs. as shown in  REF _Ref149802562 \h  \* MERGEFORMAT Figure 51. Torque target is 20 in-lbs.
+
+Figure  SEQ Figure \* ARABIC 51: Torque MS21043-3 Nuts
+Use protective shims on ring to prevent wrench damage.
+To clean up excess sealant squeeze out, follow cleaning process in  REF _Ref203397098 \h  \* MERGEFORMAT appendix 4.
+Router Signoff Required
+Record Lot # and Expiration Date PS 870 C-12
+Record MV# and Calibration Date Scale
+Record Tool# and Calibration Date
+Torque Wrench
+Record Operator ID# and Date
+Record QA ID# and Date
+
+FASTENER AND SHORE D INSPECTION
+INSTRUCTIONS
+Inspect countersinks flush no deeper than -0.020” using a flushness gage.
+Use a flushness gage to inspect the depth of the fastener heads. Verify that the  measurements are within a tolerance between flush and no deeper than -0.020” from the OML surface. The target reference for the sub-flush is -0.010”.
+Refer to  REF _Ref203055340 \h  \* MERGEFORMAT appendix 7) for requirements for four (4) 00421399000 rivets.
+Ensure most extreme point on each fastener is measured, OML surface contour and angularity allowances may impact flushness of different areas of the fastener head differently. 
+IMPORTANT: Always tare the flushness gage next to the OML surface prior to measuring the sub-flush of the fastener head as shown in  REF _Ref199854438 \h  \* MERGEFORMAT Figure 52 for reference.
+
+Figure  SEQ Figure \* ARABIC 52. Taring the Flushness Gauge Prior to Measurement
+Inspect Hi-Lok pins using a 2-1522 pin protrusion gauge
+Using the below REF _Ref150777362 \h  \* MERGEFORMAT  Table 3, measure the pin protrusion using a 2-1522 pin protrusion gauge as shown in  REF _Ref150777514 \h  \* MERGEFORMAT Figure 53 below.
+
+Table  SEQ Table \* ARABIC 3: Pin Protrusion Requirements
+Nominal Diameter (Inch)
+Pin Protrusion (Inch)
+
+Hi-Lok1
+Hi-Lite, Hi-Lite/Hi-Tigue1
+
+Minimum
+Maximum
+Minimum
+Maximum
+5/32
+0.302
+0.384
+0.270
+0.352
+3/16
+0.315
+0.397
+0.280
+0.362
+1/4
+0.385
+0.467
+0.310
+0.392
+5/16
+0.490
+0.572
+0.370
+0.452
+3/8
+0.535
+0.617
+0.410
+0.492
+7/16
+0.625
+0.707
+0.475
+0.557
+1/2
+0.675
+0.757
+0.515
+0.597
+5/8
+0.815
+0.897
+0.650
+0.732
+3/4
+1.040
+1.122
+0.885
+0.967
+NOTES: 1: Prefix: HL = Hi-Lock; HST = Hi-Lite; HSTB = Hi-Lite/Hi-Tigue.
+
+Figure  SEQ Figure \* ARABIC 53: Pin Protrusion Limits and Gauge
+Inspect GAA100BD008 Pucks and Record Final Cure Hardness
+Inspect hardness of GAA100BD008 puck specimens created during Ops 610 &amp; 620. 
+Ring ASSY puck from OP 610
+Shell to ring puck from OP 620
+Ensure minimum 24 hours and maximum 6 days since puck creation at time of shore D test.
+Using a durometer, measure the shore D hardness of the 2 pucks created in OP 610 and 620
+Minimum acceptable value after 24 hours and prior to 6 days is 78.
+Note: Ensure inspection occurs between minimum 24 hours and maximum 6 days from puck sample creation. Engineering can approve a full cure test in lieu of the 24 hour cure at manufacturing convenience per GAMPS 2410 Rev. F Table I.
+Router Signoff Required
+Record Tool# and Calibration Date
+Flushness Gage
+Record Tool# and Calibration Date
+Protrusion Gage
+Record Tool# and Calibration Date
+Durometer
+Record QA ID# and Date
+
+DRILL &amp; INSTALL HINGE FASTENERS
+TOOLING REQUIRED
+Part Number
+Description
+N/A 
+#40 Drill Bit/Stop
+N/A
+#11 Drill Bit
+SA0144
+Metal Shim Shop Aid
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+GAB511AB6B3
+8
+Pin, Hi-Lite, Shear HD
+GAN510AA6
+8
+Collar, Hi-Lite
+PS 870 C-12
+AR
+Corrosion Inhibitive Sealant
+INSTRUCTIONS
+Drill Hinge to Ring Holes
+From the aft side of the ring assembly, transfer drill (8) #40 holes through the ring into the (2) hinges.
+Use a drill stop to control drill depth as seen in the  REF _Ref149802839 \h  \* MERGEFORMAT Figure 54 below as reference.
+
+Figure  SEQ Figure \* ARABIC 54: Drill Stop
+Use a metal shim, with shop aid number SA0144, to protect the metal and laminate region behind the holes being drilled on the hinges shown in  REF _Ref149996312 \h  \* MERGEFORMAT Figure 55.
+
+Figure  SEQ Figure \* ARABIC 55: Metal Shim Shop Aid
+Step up to final size #11 and center drill previously opened holes.
+Hole size tolerance is 0.190”-0.193” diameter.
+Deburr holes per the following:
+Use the angled side of a straight razor blade on the metal surface and apply light pressure to remove any metal shavings.
+Be extremely careful not to damage part.
+Inspect
+Inspect hole diameter to 0.190”-0.193” using a pin gauge.
+Record Tool # and Calibration Date in router.
+Install Hinge to Ring Fasteners
+Clean all countersunk surfaces and holes using the process described in  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1.
+NOTE: Permissible to use PS 870 C-12 mixed in OP 640 if material is still within its Pot Life and has not left the EMA area.
+Mix PS 870 C-12 per the process in  REF _Ref203397171 \h  \* MERGEFORMAT appendix 3.
+NOTE: Pot Life for PS 870 C-12 is 12 hours. Use mix label MAF 101 on mixing cup. Ensure material is applied before end of specified Pot Life.
+Wet install (8) GAB511AB6B3 fasteners and (8) GAN510AA6 collars with PS 870 C-12 through the ring into the hinges. Reference the wet install process in  REF _Ref203396504 \h  \* MERGEFORMAT appendix 5.
+The collar goes on the inside of the radome. Reference the black circles in  REF _Ref149746403 \h  \* MERGEFORMAT Figure 56.
+3109898753856003118430484229002562722866250002489807604796004475576508000
+Figure  SEQ Figure \* ARABIC 56: Hinge to Ring Fasteners
+Router Signoff Required
+Record Lot # and Expiration Date PS 870 C-12
+Record MV# and Calibration Date
+Scale
+Inspection Tool # and Calibration Date
+Record Operator ID# and Date
+Record QA Operator ID# and Date
+
+INSTALL GROUND STRAPS
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+3700ED0008-1
+1
+Strap, Grounding
+3700ED0008-3
+2
+Strap, Grounding
+3700ED0008-5
+1
+Strap, Grounding
+3700ED0008-6
+1
+Strap, Grounding
+3700ED0008-7
+1
+Strap, Grounding
+GAS874AA1-9
+2
+Strap, Grounding
+GAB511AB6B5
+2
+Pin, Hi-Lite, Shear HD
+GAN510AA6
+9
+Collar, Hi-Lite, Shear
+GAB511AB6B3
+7
+Pin, Hi-Lite, Shear HD
+NAS1149A0332J
+4
+Washer, Flat
+GMS4112B-2
+AR
+Sealant, Corrosion Inhibitive (Pot Life 12 Hours)
+
+INSTRUCTIONS
+Locate Ground Straps
+Dry fit the 3700ED0008-1, -3, -5, and -6 grounding straps shown in  REF _Ref149566888 \h  \* MERGEFORMAT Figure 57.
+31808661304800043953687888480047640242317726003116097225188800133761423177260015688067815330014338303378835GAS874AA1-9
+00GAS874AA1-9
+262067134355780026324063403271002549046-685803700ED0008-7 Strap
+3700ED0007-7 Strip
+003700ED0008-7 Strap
+3700ED0007-7 Strip
+250362721889473700ED0008-1 Strap
+3700ED0007-1 Strip
+003700ED0008-1 Strap
+3700ED0007-1 Strip
+446232520333063700ED0008-3 Strap
+3700ED0007-3 Strip
+003700ED0008-3 Strap
+3700ED0007-3 Strip
+12965744260853700ED0008-6 Strap
+3700ED0007-5 Strip
+003700ED0008-6 Strap
+3700ED0007-5 Strip
+37380534401393700ED0008-5 Strap
+3700ED0007-5 Strip
+003700ED0008-5 Strap
+3700ED0007-5 Strip
+45775119804933700ED0008-3 Strap
+3700ED0007-3 Strip
+003700ED0008-3 Strap
+3700ED0007-3 Strip
+
+Figure  SEQ Figure \* ARABIC 57: Electrical Hardware Locations
+Align the ground straps using the locater shown below in  REF _Ref150946915 \h  \* MERGEFORMAT Figure 58.
+
+Figure  SEQ Figure \* ARABIC 58: Diverter Strap Locater
+Use the locater to simulate the diverter strip itself, reference  REF _Ref150947057 \h  \* MERGEFORMAT Figure 59.
+
+Figure  SEQ Figure \* ARABIC 59: Locating Ground Straps
+Temporarily insert a NASM24693-C275 fastener in the hole/strap.
+Perform the standard cleaning process from  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1 on all mating surfaces before bonding.
+Install Ground Straps – EMA OPERATION
+Mix GMS4112B-2 SEMKIT per the following:
+Semco 285 Mixing:
+50 strokes at 20 strokes/minute.
+Semco 388 Mixer:
+1 ½ minutes at 20 strokes/minute.
+NOTE: GMS4112B-2 Pot Life is 2 hours. Record Lot Number and Expiration Date in router.
+Wet install GAB511AB6B fasteners using GMS4112B-2 sealant from the aft side of the ring assembly with NAS1149A0332J washers and GAN510AA6 collars as follows:
+NOTE: The collar goes on the inside of the radome.
+3700ED0008-7 strap – (2) GAB511AB6B5 fasteners, (2) GAN510AA6 collars, (2) NAS1149A0332J washers. Reference  REF _Ref152657686 \h  \* MERGEFORMAT Figure 60 below, focusing on hardware in red box.
+3493135-6368100142303530333310041309722821106512381603786
+Figure  SEQ Figure \* ARABIC 60: 3700ED0008-7 Ground Strap
+3700ED0008-1, -3, -5, -6 straps – (5) GAB511AB6B3 fasteners, (5) GAN510AA6 collars, (5) NAS1149A0332J washers between collar and strap. Reference  REF _Ref152657854 \h  \* MERGEFORMAT Figure 61 below and corresponding hardware in red.
+3135572301901700111428316123200464234329179679923352870313
+Figure  SEQ Figure \* ARABIC 61: 3700ED0008-1, -3, -5, -6 Ground Straps
+GAS874AA1-9 – (2) GAB511AB6B3, (2) GAN510AA6, (4) NAS1149A0332J washer, one washer on each side of strap. Reference  REF _Ref150779462 \h  \* MERGEFORMAT Figure 62 for stack up.
+
+Figure  SEQ Figure \* ARABIC 62: Ground Strap Stack Up
+Make sure the holes align with the strips.
+Apply GMS4112B-2 to fasteners per the following:
+Apply sealant directly below fastener head, shown in blue in  REF _Ref149567636 \h  \* MERGEFORMAT Figure 63 below:
+28991892358610
+Figure  SEQ Figure \* ARABIC 63: Wet Installing Ground Strap Fasteners
+Prior to installing washers, once fastener is through ring, apply GMS4112B-2 on the foremost end of fastener from the ring, shown in blue in  REF _Ref149567637 \h  \* MERGEFORMAT Figure 64 below:
+272954887882600
+Figure  SEQ Figure \* ARABIC 64: Wet Install Fasteners (Ring Side)
+Router Signoff Required
+Record Lot # and Expiration Date GMS4112B-2
+Record Operator ID# and Date
+
+DRILL &amp; COUNTERSINK SHELL FOR LDS
+TOOLING REQUIRED
+Part Number
+Description
+N/A
+#11 Dreamer
+100°, #11 Pilot
+Countersink
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+GAA100BD10
+AR
+Paste Adhesive EA956 (Pot Life 30 Minutes)
+INSTRUCTIONS
+Drill Shell for Diverters
+Drill holes in radome shell with a #11 dreamer per the following
+Line up diverter strip on IML with the blue diverter plugs/anchors in the shell.
+While holding diverter inside radome, drill second hole from the bottom and cleco in place.
+Drill and cleco remaining holes.
+Place tape around diverters to aid in clean up, as seen in  REF _Ref150948918 \h  \* MERGEFORMAT Figure 65.
+
+Figure  SEQ Figure \* ARABIC 65: Mask Diverter Strips
+Hole tolerance is 0.190”-0.193” diameter.
+Inspect
+Inspect hole diameter to 0.190”-0.193” using a Go/No-go pin gauge.
+Countersink Holes
+Countersink (31) shell to diverter holes to be from flush to -0.020” maximum using 100° countersink with #11 pilot. The target reference to the sub-flush shall be -0.010”.
+For NASM24693 fasteners the target countersink setting is Ø 0.390”.
+Prep for Seal
+Deburr all mating holes and ensure edge break common to any fasteners.
+Deburr holes per the following:
+Use 180 grit or finer aluminum oxide abrasive paper to lightly sand holes smooth.
+Clean all drilled/countersunk holes as follows:
+Using approved wiping cloths (or cotton tipped sticks) wet with acetone solvent, clean each hole.
+Repeat until cloth shows no evidence of contamination.
+Seal Holes
+Mix GAA100BD10 per the following:
+Reference MAF 762 for correct mixing ratio.
+Combine Part A and Part B and mix thoroughly.
+NOTE: Pot Life for GAA100BD10 is 30 minutes. Use mix label MAF 101 on mixing cup. Ensure material is applied before end of specified Pot Life.
+Lightly coat each drilled hole.
+Allow to cure for 2 hours at 150°F or room temp. for 6 hours before diverter installation.
+Router Signoff Required
+Record Inspection Tool # and Calibration Date 
+Record Lot # and Expiration Date GAA100BD10 
+Record MV# and Calibration Date
+Scale
+Record Operator ID# and Date
+Record QA Operator ID# and Date
+
+DIVERTER INSTALLATION
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+3700ED0007-1
+1
+Diverter, Lightning
+3700ED0007-3
+2
+Diverter, Lightning
+3700ED0007-5
+2
+Diverter, Lightning
+3700ED0007-7
+1
+Diverter, Lightning
+AMS 3276 B-4
+AR
+AMS3276 Polysulfide Adhesive (Pot Life 4 Hours)
+00411317000
+22
+Screw, Flat HD
+NASM24693-C275
+9
+Screw, Flat HH
+NAS1149A0332J
+31
+Washer, Flat
+00411682000
+31
+Nut, Hex, Self-Locking
+INSTRUCTIONS
+Prep for Seal
+Clean all interfacing surfaces per the standard cleaning process in  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1.
+Fay Seal Diverters
+EMA OPERATION – Mix resins in EMA area
+Mix AMS 3276 B-4. Refer to  REF _Ref203048106 \h GD Documents (MAF 762) for the mixture ratio chart regarding to canisters (excluding SEMKIT, cartridge, etc.).
+For cartridge hand mixing:
+Pull dasher rod towards the neck of the cartridge so that mixing head is located at the nozzle end of cartridge.
+Insert the ram rod into the hole of the dasher rod.
+Push ram rod until approximately 10% of the material contained in the dasher rod has been expelled into the cartridge.
+For some materials, it may be necessary to tap ram rod with heel of hand or invert kit and lightly strike ram rod against hard surface to open valve.
+Slowly push the dasher rod into the cartridge while pushing on the ram rod to evenly expel the material contained in the dasher rod into cartridge.
+When the dasher rod reaches the cartridge plunger, all materials must be expelled from the dasher rod.
+Do NOT expel a large quantity of material from the dasher rod into the top or bottom of the cartridge.
+Remove ram rod and discard.
+To mix the material, rotate the dasher rod in a clockwise motion while moving it up and down the cartridge.
+Be sure to move dasher rod all the way to the top and bottom of the cartridge while mixing.
+Mix materials at least 50 strokes.
+On the last stroke, the dasher rod should be fully extended.
+Screw nozzle into cartridge and place cartridge into dispensing gun.
+
+NOTE: Pot Life for AMS 3276 B-4 is 4 hours. Use mix label MAF 101 mixing cup. Ensure material is applied before end of specified Pot Life.
+The sealant shall be applied to one of the faying surfaces with a pneumatic sealant gun with an application nozzle.
+If no application nozzle is available, notify supervision and/or engineering to supply acceptable alternative.
+Apply sealant to the entire surface of the faying part.
+The thickness of the sealant applied shall be the minimum amount required to fill the assembled faying surface and to give a continuous and visible sealant squeeze-out.
+Sealant shall not be rolled or worked on a separate work surface (i.e. palette, “sealant boards”, etc.) during application as, this may reduce the squeeze-out out life significantly.
+Sealant squeeze-out shall be visible and continuous around the edge of the faying parts. See an example of squeeze-out in  REF _Ref149662644 \h  \* MERGEFORMAT Figure 66.
+2641912126343104271369126365SEALANT SQUEEZE OUT
+00SEALANT SQUEEZE OUT
+350908191499400433007923173600 
+Figure  SEQ Figure \* ARABIC 66: Visible Sealant Squeeze-Out
+Record date/time last of the adhesive is applied in router.
+Install Fasteners
+NOTE: The following fasteners are NOT wet installed.
+Install (22) 00411317000 fasteners with NAS1149A0332J flat washers and 00411682000 nuts through the shell into the diverters.
+The washer and nut goes on the inside of the radome.
+Install (9) NASM24693-C275 fasteners with NAS1149A0332J flat washers and 00411682000 nuts through the shell into the diverters.
+The washer and nut goes on the inside of the radome.
+C275 fasteners are identified at the highlighted locations in  REF _Ref149567950 \h  \* MERGEFORMAT Figure 67.
+
+Figure  SEQ Figure \* ARABIC 67: C275 Fastener Locations
+Torque nuts between 20 - 25-inch pounds.
+Router Signoff Required
+Record Lot # and Expiration Date AMS 3276 B-4
+Record Tool# and Calibration Date
+Torque Wrench
+Record Operator ID# and Date
+
+LDs &amp; ELECTRICAL BOND INSPECTION
+INSTRUCTIONS
+Fay Seal Squeeze Out Inspection
+Inspect all (6) lightning diverters for continuous squeeze out along surfaces common to the radome shell.
+Continuous squeeze out is defined as sealant being visible at edge between the faying parts. See  REF _Ref149662644 \h  \* MERGEFORMAT Figure 66 for an example.
+For any areas that do not show signs of continuous squeeze out, place a piece of masking tape parallel to the lightning diverter where there is no squeeze out. Ensure tape is placed far enough from diverter strips to allow adequate room for fillet seal application.
+When inspection is complete, DO NOT WRITE MRB for any areas of non-continuous squeeze out. If any such areas exist, assembly operators will fillet seal these areas in OP 696, as allowed by GAMPS 7115 rev. R 3.5.7.7. 
+Fastener Inspection
+Inspect torque on (31) fasteners installed through the lightning diverters to shell to be 35 ± 5 in-lbs. using a calibrated torque wrench.
+Inspect (31) fastener heads on OML of radome. Use a flushness gage to inspect the depth of the fastener heads. Verify that the measurements are within tolerance between flush and no deeper than 0.020” from the OML surface. The target reference for the sub-flush is -0.010”. 
+Ensure most extreme part of fastener is measured. With OML profile tolerances and angularity tolerances, fastener may not have uniform flushness. For example, if one side is just sub flush, and directly across is significantly lower, measure the lower side.
+Inspect (31) washers on lightning diverters to be 0.438” +.020” / -0.005” in diameter using calibrated calipers.
+Electrical Bonding (EB) Resistivity Inspection
+Using an Extech 380560 High-Resolution Milliohm Meter or equivalent, inspect the EB resistivity per the following instructions.
+Note: The purpose of this inspection is to check the resistivity across each EB joint. As such, if one measurement fails, measure from another adjacent lightning diverter to determine the out of spec bond. This is especially important if lightning diverter 1 fails, as the GAS874AA1-9 grounding straps are measured from this diverter.
+It is important to note where each probe should be placed for each measurement. The intent of the inspection is to measure as close on either side of the EB joint as possible.
+Maximum allowable resistance across any measurement is 2.5mΩ.
+Calibrate the Milliohm Meter. 
+Ensure the meter is powered on, the appropriate buttons are in the “low” and “test” positions. Ensure the 20mΩ button is pressed. See  REF _Ref149807522 \h  \* MERGEFORMAT Figure 68.
+center10223500Figure  SEQ Figure \* ARABIC 68: Milliohm Meter Setup
+center47879000With the probes plugged in, stack them up so that both “Force” leads, and both “Sense” leads are contacting. See  REF _Ref149807588 \h  \* MERGEFORMAT Figure 69.
+Figure  SEQ Figure \* ARABIC 69: Milliohm Meter Calibration Setup
+Value should be 0.00mΩ to 0.02mΩ
+Measure the resistivity for the (6) lightning diverter ground straps.
+Refer to  REF _Ref149568178 \h  \* MERGEFORMAT Figure 70 below for labeling of diverters and ground straps.
+
+Figure  SEQ Figure \* ARABIC 70: Resistivity Inspection Hardware Locations
+Clamp one probe around the aftmost nut on [1] diverter.
+Clamp the next probe to the [2] diverter ground strap. Make sure this probe is placed on the ground strap itself, not any hardware on the lightning diverter.
+Refer to  REF _Ref149568382 \h  \* MERGEFORMAT Figure 71 for probe locations.
+
+Figure  SEQ Figure \* ARABIC 71: Resistivity Probe Locations
+Record reading in the router.
+Repeat for ground straps [2] – [6]. Reference  REF _Ref149807717 \h  \* MERGEFORMAT Table 4 below for probe locations.
+Table  SEQ Table \* ARABIC 4: Placement of Probes for EB Joint Inspection
+Diverter
+Probe 1
+Probe 2
+1
+Nut of [1]
+Ground strap of [2]
+2
+Nut of [2]
+Ground strap of [3]
+3
+Nut of [3]
+Ground strap of [4]
+4
+Nut of [4]
+Ground strap of [5]
+5
+Nut of [5]
+Ground strap of [6]
+6
+Nut of [6]
+Ground strap of [1]
+Measure the resistivity for the (2) GAS874AA1-9 grounding straps.
+Clamp one probe around the [1] diverter ground strap. This will remain in place while measuring the (2) GAS874AA1-9 grounding straps.
+Clamp the second probe on the exposed copper area nearest the ring of [A] GAS874AA1-9 grounding strap. This may be difficult to access, if it is not accessible, contact engineering for direction. The GAS874AA1-9 straps have ~1mΩ of resistivity from end to end.
+Record data in the router for [A] GAS874AA1-9 grounding strap.
+Remove the second probe from [A] GAS874AA1-9 grounding strap and clamp on the exposed copper area nearest the ring of [B] GAS874AA1-9 grounding strap.
+Record data in the router for [B] GAS874AA1-9 grounding strap.
+If any values do not read, press the 200mΩ button on the Milliohm Meter and try reading with that. Any values exceeding 20mΩ with the initial setup will show up as a “1” digit in the far-left slot and nothing else. It is important to know whether the EB joint has a high resistance value (&gt;20mΩ) or there is no continuity (unreadable resistivity).
+Lab Test Results
+Look up ELab number written down in router at Operation 575.
+Verify all testing passed
+Print and attach results on back of router
+NOTE: If PCP DOES NOT PASS, write up on MRB immediately and notify the program manufacturing and/or quality engineer.
+Router Signoff Required
+Record Tool # and Calibration Date (Milliohm Meter)
+Record QA Operator ID# and Date
+Print and Attach E-Lab Test Report onto Router, Initiate MRB if E-Lab Test Failed
+
+FILLET SEAL LIGHTNING DIVERTERS
+Note: N/A this operation if fay seal squeeze out inspection (OP 695.1) passed inspection. DO NOT remove tape placed by inspection in OP 695, if tape is in the way, contact inspector to have them move it away from LDS, as they will need to reference it in the next inspection.
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+AMS 3276 B-4
+AR
+AMS3276 Polysulfide Adhesive (Pot Life 4 Hours)
+INSTRUCTIONS
+Mix Sealant – EMA OPERATION
+It is permissible to use sealant mixed prior to inspection if the Pot Life is still viable and the material is clearly workable.
+Mix AMS 3276 B-4. Refer to  REF _Ref203048106 \h GD Documents (MAF 762) for the mixture ratio chart regarding to canisters (excluding SEMKIT, cartridge, etc.).
+For cartridge hand mixing:
+Pull dasher rod towards the neck of the cartridge so that mixing head is located at the nozzle end of cartridge.
+Insert the ram rod into the hole of the dasher rod.
+Push ram rod until approximately 10% of the material contained in the dasher rod has been expelled into the cartridge.
+For some materials, it may be necessary to tap ram rod with heel of hand or invert kit and lightly strike ram rod against hard surface to open valve.
+Slowly push the dasher rod into the cartridge while pushing on the ram rod to evenly expel the material contained in the dasher rod into cartridge.
+When the dasher rod reaches the cartridge plunger, all materials must be expelled from the dasher rod.
+Do NOT expel a large quantity of material from the dasher rod into the top or bottom of the cartridge.
+Remove ram rod and discard.
+To mix the material, rotate the dasher rod in a clockwise motion while moving it up and down the cartridge.
+Be sure to move dasher rod all the way to the top and bottom of the cartridge while mixing.
+Mix materials at least 50 strokes.
+On the last stroke, the dasher rod should be fully extended.
+Screw nozzle into cartridge and place cartridge into dispensing gun.
+NOTE: Pot Life for AMS 3276 B-4 is 4 hours. Use mix label MAF 101 mixing cup. Ensure material is applied before end of specified Pot Life.
+Fillet Seal Lightning Diverters
+Apply a continuous bead of sealant at the juncture of the lightning diverter strips and radome shell at areas marked by masking tape placed in OP 695. Extend fillet seal ~0.500” past each end of the tape to ensure coverage.
+The fillet must extend up the surface on the lightning diverters and approximately the same length along the shell to create a concave shape when applied.
+Note: This may be accomplished by running a fresh cleaning cloth, with no solvent applied, along the length of the bead to achieve a concave shape. Be careful when using this method to avoid removing too much sealant and creating voids.
+To clean up excess sealant, follow cleaning process in  REF _Ref203397262 \h  \* MERGEFORMAT appendix 4.
+Router Signoff Required
+Record Lot # and Expiration Date AMS 3276 B-4
+Record Operator ID# and Date
+
+INSPECTION OF LIGHTNING DIVERTER FILLET SEAL
+Note: N/A this operation if fay seal squeeze out inspection (OP 695.1) passed inspection.
+INSTRUCTIONS
+Inspect Fillet Seal of Lightning Diverters
+Using the tape placed in the radome during the first lightning diverter inspection, inspect all areas lacking fay seal squeeze out for presence of fillet seal.
+Fillet seal should be continuous, concave, and cover enough of the lightning diverter and shell to ensure no moisture will get under the lightning diverter.
+If fillet seal is acceptable, remove tape from lightning shell and approve inspection.
+If fillet seal is not acceptable, create an MRB and contact engineering for disposition. Leave masking tape on part.
+Router Signoff Required
+Record QA Operator ID# and Date
+
+INSTALL ENVIRONMENTAL SEAL
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+GAA100D1
+AR
+RTV 108 (RTV 100 series)
+W034CS7416
+1
+AR-14-111-2 Environmental Seal
+INSTRUCTIONS
+Preparation for Seal
+Clean all interfacing surfaces per the standard cleaning process in  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1.
+Prepare the mating surface of the rubber seal per the following:
+Scuff with 80 grit sandpaper and clean with acetone (P/N: 00095020000 drum to fill the canister) to remove mold release or other surface contaminants.
+Prepare the mating surface of the ring, shown in  REF _Ref149568768 \h  \* MERGEFORMAT Figure 72 per the following:
+Scuff with 180 grit to 220 grit abrasive sandpaper or medium to fine scotch Brite pads.
+Wipe with acetone. Wipe until no residue remains.
+Install Seal
+During seal installation, use RTV to form fillet on either side of flange mating surface, see  REF _Ref149568768 \h  \* MERGEFORMAT Figure 72 below, RTV is shown in red.
+3761842981100RING MATING SURFACE
+00RING MATING SURFACE
+283083027406600030193701302991
+Figure  SEQ Figure \* ARABIC 72: Environmental Seal
+
+Install environmental seal W034CS7416 to aft end of radome using GAA100D1 per the following:
+Bead RTV along the center of mating surface of the ring as the seal is being installed.
+Start at bottom center and tape the seal in place as it is installed.
+Ensure that seal is centered on mating ring flange.
+Trim seal to end at bottom center, and then lightly apply RTV to both ends of the seal to create a splice joint.
+No sealant is to create a hard spot in the seal by filling the inner cavity.
+Following the cure of the RTV, and the tape has been removed, go back, and run bead of RTV on the inside and outside of seal.
+Router Signoff Required
+Record Lot # and Expiration Date GAA100D1
+Record Operator ID# and Date
+
+PAINT PREP, PLUG HOLES
+NOTE:  REF _Ref149812369 \r \h  \* MERGEFORMAT Operation 710 and  REF _Ref149812394 \r \h  \* MERGEFORMAT Operation 720 may be done in either sequence.
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+GAA100BD08
+AR
+EA 9394 Paste Adhesive (Pot Life 95 Minutes)
+GAA100BD10
+AR
+Paste Adhesives EA956 (Pot Life 30 Minutes)
+INSTRUCTIONS
+Prep for Paint
+Chip excessive adhesive off from around the stop pads – being extremely careful not the damage the exposed metal of the stop pad or the ring itself. Also chip any excess adhesive from around the shell and ring mating surface.
+Carefully trim off tooling tab. Reference in Operation  REF _Ref203052595 \r \h 580.4 for chamfering.
+Clean surface of radome OML per the standard cleaning process in  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1.
+Seal Radome Edge
+Mix GAA100BD10 per the following:
+Reference MAF 762 for correct mixing ratio.
+Combine Part A and Part B and mix thoroughly.
+NOTE: Pot Life for GAA100BD10 is 30 minutes. Use mix label MAF 101 on mixing cup. Ensure material is applied before end of specified Pot Life.
+Seal mating surface between radome shell and ring.
+Allow to cure for 2 hours at 150°F or 6 hour cure at room temperature.
+Plug Countersinks in Shell
+Mix GAA100BD08 per the process in  REF _Ref203397331 \h  \* MERGEFORMAT appendix 2.
+NOTE: Pot Life for GAA100BD08 is 95 minutes. Use mix label MAF 101 on mixing cup. Ensure material is applied before end of specified Pot Life.
+Fill heads of all screws, Hi-lite heads, and seal around the edge of the ring and shell with GAA100BD08.
+Make sure there are no voids in the sealant between the ring and shell.
+See filled heads of screws and Hi-lite heads in  REF _Ref150173293 \h  \* MERGEFORMAT Figure 73 below:
+
+Figure  SEQ Figure \* ARABIC 73: Plug Countersinks in Shell
+Record date/time last of the adhesive is applied in router.
+Allow to air dry 1 hour then place in oven 1 hour at 150°F. Alternate cure is 8 hours at room temperature.
+Router Signoff Required
+Record Lot # and Expiration Date GAA100BD08
+Record Lot # and Expiration Date GAA100BD10
+Record MV# and Calibration Date
+Scale
+Record Operator ID# and Date
+Record QA ID# and Date
+
+Move radome to paint area for Operations 730 through 770.
+ELECTRICAL SEALING 
+Ensure Operation 730 through Operation 770 are completed and all recording lines in router have been filled out before starting work. Contact supervision if not complete.
+MATERIALS REQUIRED
+Part Number
+Qty
+Description
+00200054000
+AR
+AMS-S-8802 Sealant, Polysulfide (Pot Life 30 minutes)
+00805022001
+AR
+Frekote 700-NC Loctite
+N/A
+AR
+Shop Tool Aid (SA0145), 0.8 in. depth, metal
+INSTRUCTIONS
+Prep for Sealant
+Clean all surfaces to be sealed per the standard cleaning process from  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1.
+Ensure that the shop aid tool (SA0145) is available prior to starting of this operation. If the sealant is cured and received it’s hard value, remove the sealant. If not, utilize a new Shop Tool Aid S/N: SA0145 as shown in  REF _Ref198634379 \h  \* MERGEFORMAT Figure 74.
+
+Figure  SEQ Figure \* ARABIC 74 - Tool Shop Aid for P/N 00200054000
+Ensure that the Shop Tool Aid has been thoroughly cleaned and dried. No prior mold release should be present. Reference to  REF _Ref199850147 \h  \* MERGEFORMAT appendix 1 on general cleaning procedures.
+Use P/N: 00805022001 (Frekote 700-NC Loctite) to prepare the Shop Tool aid for use.
+Apply a first thin smooth coat of 00805022001 mold release in a continuous smooth motion. Wait 5 – 10 minutes at ambient temperature before applying a second coat of mold release.
+Repeat OP 775.1.5. Wait for 15 – 20 minutes at ambient temperature time after applying a second coat.
+Mix and Apply Polysulfide – EMA OPERATION
+Mix 00200054000 per the following:
+Mix according to the ratio indicated on MAF 762.
+Mix Part A and Part B separately to uniformity.
+Thoroughly mix contents of both parts of the kit together.
+Avoid leaving unmixed areas around the sides or bottom of the mixing container.
+Make sure to use excess electrical sealant to be applied onto the Shop Aid Tool.
+NOTE: Pot Life for 00200054000 is 30 minutes. Use mix label MAF 101 on mixing cup. Ensure material is applied before end of specified Pot Life.
+If used two batches, identify roughly where the 00200054000 will be applied as shown in  REF _Ref194934365 \h  \* MERGEFORMAT Figure 75 - Application of which Electrical Sealant is Applied . 
+Utilize the router to reference which batch is being applied onto.
+
+Figure  SEQ Figure \* ARABIC 75 - Application of which Electrical Sealant is Applied 
+The sealant shall be applied to the washer(s), fastener head, locking devices (i.e. lock ring) and tail extending the sealant approximately ¼ inch beyond the periphery of the aforementioned components.
+Overcoat fastener heads of lightning diverter strips and touch up splice plates as needed with sealant.
+See an example of acceptable polysulfide overcoat in  REF _Ref149998459 \h  \* MERGEFORMAT Figure 76.
+11493501978025FASTENER OVERCOAT
+00FASTENER OVERCOAT
+19210961536286001010975503638004975861392320004088130147320FASTENER OVERCOAT
+00FASTENER OVERCOAT
+409102639690000 
+Figure  SEQ Figure \* ARABIC 76: Fastener Overcoat
+Overcoat exposed copper on ring side of the (2) GAS874AA1-2 straps.
+NOTE: Scratches in primer is not included as exposed burnish. Scratched primer will be touched up in paint. Metal damage should be written up on MRB.
+The fastener tail shall consist of the driven head, collar, pin, and protruding threads, as applicable.
+If required, clean the spilled electrical sealant. Refer to  REF _Ref199850143 \h  \* MERGEFORMAT appendix 1 (refer to “ REF _Ref204244658 \h  \* MERGEFORMAT Quality Control Requirements” for approved cloths) for the cleaning process.
+Apply the excess electrical sealant (00200054000) onto the Shop Tool Aid and ensure that the finish would be overfilled and not to be depressed to accurately record the Shore A hardness results.
+NOTE: Puck Shop Aid Tool must remain with the part at all times.
+Record date/time last of the adhesive is applied in router.
+Inspect
+Visually inspect the electrical sealant is in the correct locations and coverage is sufficient. THIS INCLUDES THE BACKSIDE OF THE RING AS WELL.
+NOTE 1: Make sure to leave no exposed burnish (intentionally exposed metal) on lightning diverter strips or surface of the ring.
+NOTE 2: Touch up of the sealant is acceptable, if touch-up is needed, record the material information in the router.
+NOTE 3: If excess electrical sealant is found spilled onto the radome, refer to  REF _Ref199850143 \h  \* MERGEFORMAT appendix 1 (refer to “ REF _Ref204244658 \h  \* MERGEFORMAT Quality Control Requirements” for approved cloths) for the cleaning process. Perform this process until spilled sealant is removed.
+Verify that the electrical sealant is at least flush to the aluminum surface of the Shop Aid Tool.
+Verify that the Shop Aid Tool specimen is marked with the associated S/N. 
+Cure
+Cure the radome within the following. Electrical sealant shall be cured a minimum of 40 hours regardless of oven or ambient cure:
+Method 1: Oven Cure (NOTE: Permissible for radome to be moved in and out of the oven for manufacturing convenience):
+Primary Temperature: 90°F +/- 5°F
+Alternative Temperature: 77°F +/- 5°F
+OR
+Method 2: Ambient Cure
+Inspect
+Inspect the electrical sealant (00200054000) applied onto the Shop Tool Aid with the use of a Shore A durometer.
+The minimum hardness value to reach shall be a value of 35.
+Once inspected/recorded, discard the 00200054000 puck.
+In an event that during curing in which electrical sealant may have bubbled or splattered, perform the following cleaning steps:
+Refer to  REF _Ref199850143 \h  \* MERGEFORMAT appendix 1 (refer to “ REF _Ref204244658 \h  \* MERGEFORMAT Quality Control Requirements” for approved cloths) for the cleaning process to remove the sealant.
+FOR COMPOSITES ONLY: If difficult to remove, use an aluminum oxide sandpaper that has a grit of 180 or finer to remove those difficult to clean off electrical sealant. HANDLE WITH EXTREME CARE. DO NOT DAMAGE THE COMPOSITE SURFACE
+Complete until no electrical sealant spillage has been removed. Refer to  REF _Ref199850143 \h  \* MERGEFORMAT appendix 1 (refer to “ REF _Ref204244658 \h  \* MERGEFORMAT Quality Control Requirements” for approved cloths) to complete the cleaning process.
+Router Signoff Required
+Record Lot # and Expiration Date 00200054000
+Record MV# and Calibration Date
+Scale
+Record Operator ID# and Date
+Record QA ID# and Date
+Record Cure Time and Temperature
+Record Hardness Values and Inspection Tool #
+
+Once recorded the hardness values, return unit to paint for operations 780 through 790. Ensure all operations have been completed and recording lines have been filled out in the router.
+APPENDIX 1 – STANDARD CLEANING PROCESS
+PER GAMPS 4122:
+Dispense solvent onto a clean AMS 3819 (or equivalent) cloth. Reference “Quality Control Requirements” in General Notes section of this Work Instruction for the list of approved AMS 3819 cloths. Do not dip cloth into solvent container.
+Rub the surface to be cleaned with solvent soaked cloth. Do not allow solvent to evaporate to dryness.
+Dry by wiping with a clean, dry AMS 3819 (or equivalent) cloth.
+Frequently exchange dirty cloth for clean one.
+Repeat above operations until the cloth shows no dirt, dust, etc.
+Check for cleanliness and re-clean parts which show visible contamination or discoloration of the cloth.
+Protect part from contamination.
+APPENDIX 2 – MIXING PROCESS FOR GAA100BD08
+MIX GAA100BD08 PER THE FOLLOWING:
+Check the kit shelf life before mixing.
+If refrigerated, allow to warm to room temperature before opening.
+Thoroughly mix each component separately in its original container.
+Mix appropriate amounts of Part A and Part B, reference MAF 762, weighing each component to an accuracy of ± 0.1 gram.
+Stir the components thoroughly until there are no streaks, and a uniform consistency is achieved.
+Use an MAF 101 sticker on mixing cup.
+Record lot number and expiration date in router.
+APPENDIX 3 – MIXNG PROCESS FOR PS 870 C-12
+MIX PS 870 C-12 PER THE FOLLOWING:
+Thoroughly stir Part A and B in their separate containers until an even consistency is obtained.
+Mix appropriate amounts of each component, reference MAF 762.
+Thoroughly mix approximately 7 to 10 minutes.
+Be sure to scrape the sides and bottom of the container to include all the compound in the mixture.
+Assure uniform blending and scrape mixing tool periodically to remove unmixed compound.
+APPENDIX 4 – SEALANT SQUEEZE-OUT CLEANING PROCESS
+CLEAN EXCESSES SQUEEZE-OUT PER GAMPS 7115:
+Take a dry approved cleaning cloth, and wipe sealant off in one direction.
+Lightly dampen an approved cleaning cloth with GAS115A1 solvent – DO NOT apply excess cleaning solvent.
+Do not allow GAS115A1 solvent to wet the sealant which is to remain on the assembly.
+Remove the selected sealant by wiping in one direction only – wipe from the clean area towards the contaminated area.
+Follow the damp solvent wiping by wiping with a dry approved cloth to remove the solvent and any remaining sealant.
+NOTE: Over-contamination of the solvent and cleaning cloth will cause spreading of solvated sealant over the assembly surfaces.
+Repeat steps above as often as necessary using fresh areas of cleaning cloth lightly dampened with fresh solvent.
+When all sealant and solvent have been completely removed by wet and dry wiping, complete the cleaning operation by wiping the remaining solvent residue from the surface using an approved cloth wetted with acetone.
+APPENDIX 5 – WET INSTALLATION PROCESS
+WET INSTALL FASTENERS PER GAMPS 7115:
+Any contamination such as metal filings must be removed from the fastener hole.
+The sealant must be applied to all of the faying surfaces of the fastener such as the shaft or shank, to the underside of the fastener, washer, and nut. The application of sealant may be to the hole and countersink, see sealant locations in yellow in  REF _Ref151012326 \h  \* MERGEFORMAT Figure 77.
+179557876634300
+Figure  SEQ Figure \* ARABIC 77: Wet Installation of Fasteners Process
+When installing “lock bolt” type fasteners, care should be taken not to apply the sealant to the threaded portion of the shaft.
+When the fastener is installed through structure in which a faying seal exists that is still within the assembly time, the squeeze-out of the faying seal can be used to affect a wet installed condition. If the faying surface sealant exceeds assembly time, additional sealant must be added to meet requirements.
+There must be evidence of sealant squeeze-out around the entire periphery of the fastener head and tail. Over coating the fastener periphery is acceptable on fasteners where there is no evidence of sealant squeeze-out. Excess sealant must be removed with a clean, lint free cloth. To facilitate removal of excess sealant, solvent cleaning per Appendix 4 may be instituted.
+APPENDIX 6 – HOLE LOCATIONS ON RADOME SHELL
+LOCATE NON-NOMINAL GRIP LENGTH LOCATIONS PER GAMPS 2206:
+Reference  REF _Ref152049877 \h  \* MERGEFORMAT Figure 78 below to find numbered ring to shell hole locations.
+                 
+Figure  SEQ Figure \* ARABIC 78: Ring to Shell Hole Locations
+Document hole location numbers in router as applicable.
+Reminder: these location numbers only include shell to ring holes and the (4) upper jury strut holes.
+Reference  REF _Ref152080174 \h  \* MERGEFORMAT Figure 79 below to find labeled hinge to shell hole locations.
+
+Figure  SEQ Figure \* ARABIC 79: Hinge to Shell Hole Locations
+Document hole location letter as applicable in router. Also note whether it is L/H or R/H hinge in parentheses beside location letter.
+
+APPENDIX 7 – INSPECTION AND SHAVING INSTRUCTIONS OF THE NAS1921B06-04 RIVETS (FORWARD RIVETS FOR JURY STRUTS BOTH LEFT AND RIGHT HAND)
+NOTE: At the completion of installing the fasteners in OP 640, follow the below instructions for inspection rivets and shaving the rivet heads.
+NOTE: Inspecting the (4) 00421399000 (NAS1921B06-04 RIVETS) must be done within the 12 hrs. pot life of the GD# PS 870 C-12 sealant.
+STEP 1 INSPECTION:
+SEATING – Refer to  REF _Ref200026356 \h  \* MERGEFORMAT Figure 80
+Head in contact with surface no less than 50% of circumference.
+Check head gap using .004 feeler gage. Gage should not be able to be inserted under the head of the fastener.
+
+Figure  SEQ Figure \* ARABIC 80. Flush Head Fastener Seating Inspection
+LOCK COLLAR
+Visually verify the lock collar is not cracked / damaged (no magnification should be used)
+Verify the lock collar is seated. It should be flush to below the head of the fastener or max 0.020” above the head of the fastener.
+
+PIN (STEM) – Refer to  REF _Ref200027130 \h  \* MERGEFORMAT Figure 81
+Measure the pin (stem) protrusion to the head of the fastener.
+Measure from the edge of the pin, NOT THE CENTER.
+Requirement: +0.025” / -0.012”
+
+Figure  SEQ Figure \* ARABIC 81. Flush Head Rivet Pin Inspection
+
+BULB (BACK SIDE) – Refer to  REF _Ref200027354 \h  \* MERGEFORMAT Figure 82
+Verify the bulb is in contact with the structure. Example below of a good bulb.
+
+Figure  SEQ Figure \* ARABIC 82. Example of a Good Bulb Backside Finish
+Step 2: Shaving the Stem of the Recently Installed NAS1921B06-04 Rivets
+With the use of a rivet shaver, shave only the pin and/or lock collars as needed to have a flush surface finish. Reference  REF _Ref200029216 \h  \* MERGEFORMAT Figure 83, continue to shave until stem and pin are flush to sub-flush with the composite surface. 
+
+DO NOT shave head of the fastener.
+DO NOT contact the composite surface when shaving the rivet collar and/or stem. 
+Shave stem / collars the minimum amount to meet the flushness requirement. 
+It is OK for the stem / collar to sit above the head of the fastener so long as they are flush to sub flush to the composite surface as shown in  REF _Ref200088156 \h  \* MERGEFORMAT Figure 84.
+Minimal incidental contact with the head of the fastener is acceptable.
+Use the letters/numbers as a guideline. If the letters/numbers have not been obscured, then continue the process as normal. If too much material has been removed, contact Inspection to write an MRB.
+
+Figure  SEQ Figure \* ARABIC 83. Bad Finish Where Rivet Head and/or Stem that is Higher than the Composite Surface
+
+Figure  SEQ Figure \* ARABIC 84. Example of Rivet Surface Coincides to the Composite Surface

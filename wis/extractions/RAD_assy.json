@@ -1,0 +1,126 @@
+{
+  "program": "RAD",
+  "source_file": "wis/WI 3700ED0001-101 ASSY.docx",
+  "provider": "claude-opus-4-7",
+  "cures": [
+    {
+      "op": 590,
+      "label": "GAA100BD10 edge seal cure: 2hr@150F OR 6hr RT",
+      "dwell_value": 6,
+      "dwell_unit": "hr",
+      "gate": "cure before next",
+      "source_quote": "Allow to cure for 2 hours at 150F or 6 hour cure at room temperature"
+    },
+    {
+      "op": 610,
+      "label": "Jury strut GAA100BD08 cure clamped: 8hr",
+      "dwell_value": 8,
+      "dwell_unit": "hr",
+      "gate": "clamp full cure",
+      "source_quote": "clamping in place for duration of 8 hour cure"
+    },
+    {
+      "op": 620,
+      "label": "Liquid shim RT cure before drilling: min 8hr",
+      "dwell_value": 8,
+      "dwell_unit": "hr",
+      "gate": "cure before drilling",
+      "source_quote": "minimum of 8 hours at room temperature before drilling"
+    },
+    {
+      "op": 625,
+      "label": "Liquid shim GAA100BD10 cure: 2hr@150F OR 6hr RT",
+      "dwell_value": 6,
+      "dwell_unit": "hr",
+      "gate": "Shore D gate",
+      "source_quote": "2 hours at 150F or 6 hours at room temperature"
+    },
+    {
+      "op": 650,
+      "label": "GAA100BD008 puck Shore D: min24hr/max6day, >=78",
+      "dwell_value": 24,
+      "dwell_unit": "hr",
+      "gate": "Shore D>=78",
+      "source_quote": "minimum 24 hours and maximum 6 days since puck creation"
+    },
+    {
+      "op": 690,
+      "label": "GAA100BD10 hole seal cure before diverter: 2hr@150F OR 6hr RT",
+      "dwell_value": 6,
+      "dwell_unit": "hr",
+      "gate": "before diverter install",
+      "source_quote": "2 hours at 150F or room temp for 6 hours before diverter installation"
+    },
+    {
+      "op": 710,
+      "label": "GAA100BD10 edge seal cure: 2hr@150F OR 6hr RT",
+      "dwell_value": 6,
+      "dwell_unit": "hr",
+      "gate": "cure before next",
+      "source_quote": "cure for 2 hours at 150F or 6 hour cure at room temperature"
+    },
+    {
+      "op": 710,
+      "label": "Plug countersink cure: 1hr air+1hr oven@150F OR 8hr RT",
+      "dwell_value": 8,
+      "dwell_unit": "hr",
+      "gate": "cure before next",
+      "source_quote": "air dry 1 hour then place in oven 1 hour at 150F. Alternate cure is 8 hours at room temperature"
+    },
+    {
+      "op": 720,
+      "label": "Environmental seal RTV cure",
+      "dwell_value": null,
+      "dwell_unit": null,
+      "gate": "following RTV cure",
+      "source_quote": "Following the cure of the RTV"
+    },
+    {
+      "op": 775,
+      "label": "Electrical sealant 00200054000: min 40hr cure",
+      "dwell_value": 40,
+      "dwell_unit": "hr",
+      "gate": "min 40hr",
+      "source_quote": "cured a minimum of 40 hours regardless of oven or ambient cure"
+    },
+    {
+      "op": 775,
+      "label": "Electrical sealant Shore A gate >=35",
+      "dwell_value": null,
+      "dwell_unit": null,
+      "gate": "Shore A>=35",
+      "source_quote": "minimum hardness value to reach shall be a value of 35"
+    },
+    {
+      "op": 775,
+      "label": "Mold release wait 5-10min",
+      "dwell_value": 5,
+      "dwell_unit": "min",
+      "gate": "wait",
+      "source_quote": "Wait 5-10 minutes"
+    },
+    {
+      "op": 775,
+      "label": "Mold release ambient wait 15-20min",
+      "dwell_value": 15,
+      "dwell_unit": "min",
+      "gate": "wait",
+      "source_quote": "Wait 15-20 minutes at ambient"
+    },
+    {
+      "op": null,
+      "label": "Acetone air dry min 30min",
+      "dwell_value": 30,
+      "dwell_unit": "min",
+      "gate": "air dry",
+      "source_quote": "air dry for a minimum of 30 minutes"
+    }
+  ],
+  "complexity": {
+    "char_count": 109282,
+    "op_count": 12,
+    "hold_points": 85,
+    "cure_mentions": 24,
+    "inspection_points": 108
+  }
+}

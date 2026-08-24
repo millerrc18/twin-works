@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name|default("RTG Tracker") }}{% endblock %}</title>
+  <script>if(localStorage.getItem('rtg-theme')==='dark')document.documentElement.classList.add('dark');</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class'}</script>
+  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --canvas:#f7f8fa;--panel:#ffffff;--panel2:#fbfcfd;--border:#e5e7eb;--border2:#eef0f3;
+    --text:#1a1f2e;--muted:#4b5563;--faint:#6b7383;--upcoming:#556070;--brand:#2f6fdb;--done:#1e7a44;
+    --wip-bg:#f5a623;--wip-tx:#1a1200;--late-bg:#fbe3e3;--late-tx:#b42318;
+    --early-bg:#dff3e6;--early-tx:#1e7a44;--ontime-tx:#4b5563;--cure:#6b4fb0;
+    --alert:#c0392b;--seam:#c7ccd6;--focus:#2f6fdb;
+  }
+  .dark{
+    --canvas:#0f1117;--panel:#161b27;--panel2:#1a2030;--border:#242b3a;--border2:#1f2634;
+    --text:#e6e9ef;--muted:#b3bccb;--faint:#8b95a7;--upcoming:#aab3c2;--brand:#5b8def;--done:#4ade80;
+    --wip-bg:#b9791f;--wip-tx:#ffe4b0;--late-bg:#4a1d1d;--late-tx:#ff8a80;
+    --early-bg:#123524;--early-tx:#6ee7a0;--ontime-tx:#b3bccb;--cure:#a78bda;
+    --alert:#ff6b5e;--seam:#3a4152;--focus:#5b8def;
+  }
+  [x-cloak]{display:none!important;}
+  *{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;}
+  .num{font-family:'JetBrains Mono',ui-monospace,'Cascadia Code',Consolas,monospace;font-variant-numeric:tabular-nums;}
+  body{margin:0;background:var(--canvas);color:var(--text);font-size:13px;transition:background .15s,color .15s;}
+  a{color:inherit;text-decoration:none;}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:1px;border-radius:4px;}
+  .layout{display:flex;height:100vh;overflow:hidden;}
+  /* sidebar */
+  .side{width:224px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;}
+  .brand{height:52px;display:flex;align-items:center;gap:9px;padding:0 18px;border-bottom:1px solid var(--border2);}
+  .logo{width:26px;height:26px;border-radius:7px;background:var(--brand);display:flex;align-items:center;justify-content:center;}
+  .brand b{font-size:14px;font-weight:600;letter-spacing:-.01em;}
+  .nav{flex:1;padding:14px 10px;overflow:auto;}
+  .nlabel{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:6px 8px;margin-top:8px;}
+  .nlink{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;color:var(--muted);font-size:13px;margin-bottom:1px;cursor:pointer;}
+  .nlink:hover{background:var(--panel2);color:var(--text);}
+  .nlink.active{background:color-mix(in srgb,var(--brand) 12%,transparent);color:var(--brand);font-weight:500;}
+  .nlink .cnt{font-size:11px;}
+  .sfoot{padding:12px;border-top:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;gap:6px;}
+  .pill{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:500;}
+  .pill.live{background:color-mix(in srgb,var(--done) 14%,transparent);color:var(--done);}
+  .pill.snap{background:var(--panel2);color:var(--muted);border:1px solid var(--border);}
+  .connect{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--brand);color:#fff;font-weight:500;}
+  .tgl{width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .tgl:hover{background:var(--panel2);}
+  /* main + command bar */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .cmd{min-height:52px;flex-shrink:0;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:16px;}
+  .cmd h1{font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;}
+  .cmd .sub{color:var(--faint);font-size:12px;margin-left:8px;}
+  .cmd .right{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap;}
+  .asof{color:var(--faint);}
+  .alert{color:var(--alert);font-weight:600;}
+  .alert .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--alert);margin-right:5px;vertical-align:middle;}
+  .badge{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-weight:500;}
+  .badge.trained{background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);border-color:transparent;}
+  .content{flex:1;overflow:auto;padding:22px;}
+  /* shared components */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .seg{display:inline-flex;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:2px;font-size:12px;}
+  .seg a{border:none;background:transparent;color:var(--muted);padding:4px 11px;border-radius:6px;cursor:pointer;font-weight:500;}
+  .seg a.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .caveat{padding:7px 22px;font-size:11.5px;color:var(--muted);border-bottom:1px solid var(--border2);background:var(--panel2);}
+  .caveat b{color:var(--text);}
+  select{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:6px;}
+  @media print{.side,.tgl{display:none;}.main{overflow:visible;}.content{overflow:visible;padding:0;}}
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 13L8 3l5 10" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.2 10h5.6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+      <b>RTG Tracker</b>
+    </div>
+    <nav class="nav">
+      <div class="nlabel">Workspace</div>
+      <a href="/" class="nlink {{ 'active' if active_page=='dashboard' else '' }}">Dashboard</a>
+      <div class="nlabel">Programs</div>
+      <a href="/forecast/ELEV" class="nlink {{ 'active' if program=='ELEV' else '' }}"><span>G500 Elevator</span></a>
+      <a href="/forecast/RAD" class="nlink {{ 'active' if program=='RAD' else '' }}"><span>Aeronose Radome</span></a>
+      <a href="/forecast/AEGIS" class="nlink {{ 'active' if program=='AEGIS' else '' }}"><span>Aegis Reflector</span></a>
+      <div class="nlabel">Tools</div>
+      <a href="/levers" class="nlink {{ 'active' if active_page=='levers' else '' }}">Levers</a>
+      <a href="/admin/model-status" class="nlink {{ 'active' if active_page=='admin' else '' }}">Admin</a>
+    </nav>
+    <div class="sfoot">
+      {% if data_source=='live' %}<span class="pill live">● live IFS</span>
+      {% else %}<a href="/connect" class="connect">Connect IFS</a>{% endif %}
+      <button class="tgl" onclick="rtgTheme()" title="Toggle theme" aria-label="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.2" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v1.6M8 13.4V15M15 8h-1.6M2.6 8H1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1M12.9 12.9l-1.1-1.1M4.2 4.2L3.1 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="cmd">
+      <div>{% block cmdtitle %}<h1>{{ app_name|default("RTG Tracker") }}</h1>{% endblock %}</div>
+      <div class="right">{% block cmdright %}
+        <span class="asof">data: {{ data_source|default('snapshot') }}</span>
+      {% endblock %}</div>
+    </div>
+    {% block subbar %}{% endblock %}
+    <div class="content">{% block content %}{% endblock %}</div>
+  </div>
+</div>
+<script>
+function rtgTheme(){document.documentElement.classList.toggle('dark');localStorage.setItem('rtg-theme',document.documentElement.classList.contains('dark')?'dark':'light');}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

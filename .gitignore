@@ -1,0 +1,43 @@
+# ---- python ----
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- secrets & data (NEVER commit — DBs hold encrypted OAuth tokens) ----
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+*_tmp.db
+*.sqlite
+*.sqlite3
+.env
+.env.*
+
+# ---- large raw Work Instructions / office docs (exceed GitHub 100MB file limit) ----
+# keep the extracted .txt + JSON caches, NOT the source binaries
+wis/*.docx
+wis/*.pdf
+*.docx
+*.pptx
+*.xlsx
+
+# ---- generated / local artifacts ----
+program_snapshots/
+*.log
+probe_*.html
+*.bak
+app/templates_bak/
+*.js.bak
+
+# ---- OS / editor ----
+~$*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% set active_page = 'levers' %}
+
+{% block cmdtitle %}<h1>Levers<span class="sub">where to act</span></h1>{% endblock %}
+{% block cmdright %}<span class="asof">systemic bottleneck + what-if · deterministic</span>{% endblock %}
+
+{% block head %}
+<style>
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:1100px){.lgrid{grid-template-columns:1fr;}}
+.h2{font-size:13px;font-weight:600;margin:0 0 10px;}
+.btable{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;margin-top:12px;}
+.btable th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600;padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+.btable th:first-child{text-align:left;}
+.btable td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border2);color:var(--muted);}
+.btable td:first-child{text-align:left;color:var(--text);font-weight:600;}
+.btable tr.over td{background:color-mix(in srgb,var(--alert) 7%,transparent);}
+.over-txt{color:var(--alert);font-weight:600;}
+.shared{font-size:10px;color:var(--brand);}
+.runbtn{background:var(--brand);color:#fff;font-size:13px;padding:6px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:500;}
+.note{font-size:11px;color:var(--muted);margin-top:10px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lgrid">
+  <div class="card">
+    <div class="h2">Bottleneck load — peak weekly utilization</div>
+    <div id="bottleneck" style="height:250px"></div>
+    <table class="btable">
+      <thead><tr><th>WC</th><th>Avail/wk</th><th>Peak</th><th>Util</th><th>Over</th></tr></thead>
+      <tbody>
+        {% for b in bottlenecks %}
+        <tr class="{{ 'over' if b.util_pct and b.util_pct>100 else '' }}">
+          <td>{{ b.wc }}{% if b.shared %} <span class="shared">shared</span>{% endif %}</td>
+          <td class="num">{{ b.avail_per_wk }}</td>
+          <td class="num">{{ b.peak_demand }}</td>
+          <td class="num {{ 'over-txt' if b.util_pct and b.util_pct>100 else '' }}">{{ b.util_pct }}%</td>
+          <td class="num">{{ b.weeks_over }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="note">Util &gt;100% = chronic constraint. The chronic bottleneck isn't always the lever that helps <i>this week</i> — try scenarios →</p>
+  </div>
+
+  <div class="card">
+    <div class="h2">What-if: add capacity</div>
+    <form hx-post="/levers/run" hx-target="#lever-result" hx-swap="innerHTML" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      <select name="preset" style="flex:1;min-width:220px;padding:6px 8px;font-size:13px;">
+        {% for key, label in presets %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+      </select>
+      <button class="runbtn">Run scenario</button>
+    </form>
+    <div id="lever-result" style="font-size:13px;color:var(--faint)">Pick a scenario and run it to see which units move.</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/charts.js?v=bullet4"></script>
+<script>renderBottleneckBar('bottleneck', {{ chart_json|safe }});</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{
+  "program": "AEGIS",
+  "source_file": "wis/WI 00999000563.docx",
+  "provider": "claude-opus-4-7",
+  "note": "Autoclave/edge cures (ops 110/140/190) are IFS MACH_RUN-sourced, not WI-timed; the validator sets those aside. WI-extractable cures below are the Epocast ring bond + sealer/primer/topcoat dries.",
+  "cures": [
+    {
+      "op": 160,
+      "label": "Ring bond Epocast 1636 min 12hr RT cure",
+      "dwell_value": 12,
+      "dwell_unit": "hr",
+      "gate": "cure before next",
+      "source_quote": "Cut the Epocast about 1/8\" (.125) above the skin with the Sawzall and sand"
+    },
+    {
+      "op": 270,
+      "label": "Epoxy sealer (MIL-C-22750) bake/dry; primer within 6hr",
+      "dwell_value": 6,
+      "dwell_unit": "hr",
+      "gate": "primer within 6hr of bake",
+      "source_quote": "DURING APPLICATION OF THE EPOXY SEALER COAT, TEMPERATURE SHALL BE MAINTAINED BETWEEN 50 AND 95F"
+    },
+    {
+      "op": 290,
+      "label": "Primer flash + dry-to-recoat before topcoat",
+      "dwell_value": 4,
+      "dwell_unit": "hr",
+      "gate": "dry before topcoat",
+      "source_quote": "Reduce primer with 6-8 ounces of thinner per MIL-T-81772, type II"
+    },
+    {
+      "op": 300,
+      "label": "GATE — Topcoat 24hr cure before finish insp / paint-adhesion",
+      "dwell_value": 24,
+      "dwell_unit": "hr",
+      "gate": "24hr topcoat cure",
+      "source_quote": "Reduce mixed topcoat to a viscosity of 20-40 seconds in a #2 Zahn cup"
+    }
+  ],
+  "complexity": {
+    "char_count": 579520,
+    "op_count": 7,
+    "hold_points": 62,
+    "cure_mentions": 29,
+    "inspection_points": 71
+  }
+}

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RTG FORECASTER — TERMINAL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg:       #0a0c0e;
+    --bg2:      #111418;
+    --bg3:      #1a1f26;
+    --border:   #1e2730;
+    --border2:  #2a3440;
+    --amber:    #f5a623;
+    --amber-dim:#7a5210;
+    --green:    #39ff6e;
+    --green-dim:#1a4a2a;
+    --red:      #ff4455;
+    --red-dim:  #4a1020;
+    --cyan:     #00d4ff;
+    --cyan-dim: #003848;
+    --white:    #e8edf2;
+    --grey:     #5a6a78;
+    --grey2:    #3a4858;
+    --purple:   #b87fff;
+    --orange:   #ff8c2a;
+    --yellow:   #ffe066;
+    --label:    #8ab4c8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-x: hidden;
+  }
+
+  /* TOP COMMAND BAR */
+  .cmd-bar {
+    background: var(--bg2);
+    border-bottom: 2px solid var(--amber);
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .cmd-logo {
+    color: var(--amber);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+  .cmd-input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 3px 8px;
+    outline: none;
+  }
+  .cmd-input::placeholder { color: var(--grey); }
+  .fn-keys {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .fk {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--label);
+    font-size: 10px;
+    padding: 2px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .fk.active { border-color: var(--amber); color: var(--amber); }
+  .fk:hover { background: var(--border); color: var(--white); }
+
+  /* TICKER STRIP */
+  .ticker-wrap {
+    background: #080a0c;
+    border-bottom: 1px solid var(--border);
+    padding: 4px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker-inner {
+    display: inline-block;
+    animation: scroll-left 40s linear infinite;
+  }
+  .ticker-inner:hover { animation-play-state: paused; }
+  @keyframes scroll-left {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .tick-item {
+    display: inline-block;
+    padding: 0 20px;
+    font-size: 11px;
+    border-right: 1px solid var(--border2);
+  }
+  .tick-label { color: var(--label); }
+  .tick-up   { color: var(--green); }
+  .tick-dn   { color: var(--red); }
+  .tick-flat { color: var(--grey); }
+  .tick-warn { color: var(--amber); }
+  .tick-sep  { color: var(--border2); padding: 0 8px; }
+
+  /* STATUS BAR (sub-header) */
+  .status-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 5px 12px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .kpi-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .kpi-label {
+    font-size: 9px;
+    color: var(--label);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .kpi-val {
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-sub {
+    font-size: 9px;
+    color: var(--grey);
+  }
+  .kpi-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--border2);
+  }
+  .honesty-badge {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+  .badge-pill {
+    background: var(--amber-dim);
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    font-size: 9px;
+    padding: 2px 8px;
+    letter-spacing: 0.12em;
+  }
+  .badge-caveat {
+    font-size: 9px;
+    color: var(--grey);
+    font-style: italic;
+  }
+
+  /* SECTION HEADER */
+  .section-hdr {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title {
+    color: var(--cyan);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+  }
+  .section-hint {
+    color: var(--grey);
+    font-size: 9px;
+  }
+
+  /* WATCHLIST TABLE */
+  .watchlist-wrap {
+    padding: 0 12px 8px;
+    overflow-x: auto;
+  }
+  table.watchlist {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+  .watchlist thead tr {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border2);
+  }
+  .watchlist th {
+    padding: 5px 10px;
+    text-align: right;
+    font-size: 9px;
+    color: var(--label);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .watchlist th:first-child { text-align: left; }
+  .watchlist th.center { text-align: center; }
+
+  .watchlist tbody tr {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .watchlist tbody tr:hover { background: var(--bg3); }
+  .watchlist tbody tr.selected { background: #0d1f2a; border-left: 2px solid var(--cyan); }
+
+  .watchlist td {
+    padding: 8px 10px;
+    text-align: right;
+    font-size: 12px;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  .watchlist td:first-child { text-align: left; }
+  .watchlist td.center { text-align: center; }
+
+  .prog-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .prog-code {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .prog-id {
+    font-size: 10px;
+    color: var(--grey);
+  }
+  .prog-desc {
+    font-size: 10px;
+    color: var(--label);
+  }
+
+  .num-big { font-size: 14px; font-weight: 600; }
+  .clr-amber { color: var(--amber); }
+  .clr-green { color: var(--green); }
+  .clr-red   { color: var(--red); }
+  .clr-cyan  { color: var(--cyan); }
+  .clr-grey  { color: var(--grey); }
+  .clr-purple{ color: var(--purple); }
+  .clr-orange{ color: var(--orange); }
+  .clr-yellow{ color: var(--yellow); }
+  .clr-white { color: var(--white); }
+
+  .delta-pos { color: var(--red);   } /* positive delta = late */
+  .delta-neg { color: var(--green); } /* negative delta = early */
+  .delta-zero{ color: var(--grey);  }
+
+  .tag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 5px;
+    border: 1px solid;
+    letter-spacing: 0.08em;
+  }
+  .tag-dpas   { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+  .tag-nortg  { border-color: var(--grey);  color: var(--grey);  }
+  .tag-live   { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  .tag-warn   { border-color: var(--red);   color: var(--red);   background: var(--red-dim); }
+
+  /* PROGRESS BAR */
+  .pbar-wrap {
+    width: 80px;
+    height: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .pbar-fill {
+    height: 100%;
+  }
+
+  /* CONSTRAINT BOX */
+  .constraint-block {
+    margin: 0 12px 8px;
+    border: 1px solid var(--red);
+    background: var(--red-dim);
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .constraint-icon { color: var(--red); font-size: 14px; }
+  .constraint-label { color: var(--label); font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .constraint-val   { color: var(--red);   font-size: 13px; font-weight: 700; }
+  .constraint-note  { color: var(--grey);  font-size: 10px; }
+
+  /* BOTTOM STATUS LINE */
+  .statusline {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #05070a;
+    border-top: 1px solid var(--border2);
+    padding: 3px 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 10px;
+    color: var(--grey);
+  }
+  .sl-ok  { color: var(--green); }
+  .sl-warn{ color: var(--amber); }
+  .sl-err { color: var(--red); }
+  .sl-sep { color: var(--border2); }
+  .sl-right { margin-left: auto; }
+
+  /* SPARKLINE */
+  .spark { display: inline-block; vertical-align: middle; }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    margin: 0 12px 80px;
+    border: 1px solid var(--border2);
+    background: var(--bg2);
+  }
+  .detail-hdr {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border2);
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+    color: var(--label);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+  }
+  .detail-cell {
+    padding: 8px 10px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-cell:last-child { border-right: none; }
+  .detail-cell-label { font-size: 9px; color: var(--label); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+  .detail-cell-val   { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .detail-cell-sub   { font-size: 9px; color: var(--grey); margin-top: 2px; }
+
+  /* NAV TABS */
+  .page-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border2);
+    margin-bottom: 0;
+    padding: 0 12px;
+    background: var(--bg2);
+  }
+  .tab {
+    padding: 6px 14px;
+    font-size: 10px;
+    color: var(--grey);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+  .tab:hover  { color: var(--white); }
+
+  main { padding-bottom: 80px; }
+</style>
+</head>
+<body>
+
+<!-- TOP COMMAND BAR -->
+<div class="cmd-bar">
+  <div class="cmd-logo">RTG//FORECAST</div>
+  <input class="cmd-input" type="text" placeholder="PROGRAM&gt; type code or command..." value="">
+  <div class="fn-keys">
+    <div class="fk active">F1 DASH</div>
+    <div class="fk"><a href="C_terminal_matrix.html" style="color:inherit;text-decoration:none">F2 MATRIX</a></div>
+    <div class="fk">F3 LEVERS</div>
+    <div class="fk">F4 WC-LOAD</div>
+    <div class="fk">F5 MRB</div>
+    <div class="fk">F8 ALERTS</div>
+    <div class="fk">F9 EXPORT</div>
+    <div class="fk">F12 HELP</div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <!-- Block 1 -->
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH232 </span><span class="tick-dn">+7d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH233 </span><span class="tick-dn">+4d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH229 </span><span class="tick-up">-2d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH234 </span><span class="tick-flat">0d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH235 </span><span class="tick-up">-3d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH236 </span><span class="tick-up">-9d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·RH227 </span><span class="tick-dn">+1d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·RH231 </span><span class="tick-up">-1d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·RH232 </span><span class="tick-flat">0d</span></span>
+    <span class="tick-sep">///</span>
+    <span class="tick-item"><span class="tick-label">WC221·PAINT </span><span class="tick-warn">118% UTIL — BINDING</span></span>
+    <span class="tick-item"><span class="tick-label">OTD </span><span class="tick-up">TRENDING UP</span></span>
+    <span class="tick-item"><span class="tick-label">MAE </span><span class="tick-warn">7.1d (n=8)</span></span>
+    <span class="tick-item"><span class="tick-label">C48178·RAD·WIP </span><span class="tick-warn">7 STALLED</span></span>
+    <span class="tick-item"><span class="tick-label">530349·AEGIS·DPAS </span><span class="tick-dn">2 STALLED</span></span>
+    <span class="tick-sep">///</span>
+    <!-- Block 2 (repeat for seamless loop) -->
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH232 </span><span class="tick-dn">+7d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH233 </span><span class="tick-dn">+4d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH229 </span><span class="tick-up">-2d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH234 </span><span class="tick-flat">0d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH235 </span><span class="tick-up">-3d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·LH236 </span><span class="tick-up">-9d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·RH227 </span><span class="tick-dn">+1d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·RH231 </span><span class="tick-up">-1d</span></span>
+    <span class="tick-item"><span class="tick-label">531335·ELV·RH232 </span><span class="tick-flat">0d</span></span>
+    <span class="tick-sep">///</span>
+    <span class="tick-item"><span class="tick-label">WC221·PAINT </span><span class="tick-warn">118% UTIL — BINDING</span></span>
+    <span class="tick-item"><span class="tick-label">OTD </span><span class="tick-up">TRENDING UP</span></span>
+    <span class="tick-item"><span class="tick-label">MAE </span><span class="tick-warn">7.1d (n=8)</span></span>
+    <span class="tick-item"><span class="tick-label">C48178·RAD·WIP </span><span class="tick-warn">7 STALLED</span></span>
+    <span class="tick-item"><span class="tick-label">530349·AEGIS·DPAS </span><span class="tick-dn">2 STALLED</span></span>
+    <span class="tick-sep">///</span>
+  </div>
+</div>
+
+<!-- GLOBAL STATUS BAR -->
+<div class="status-bar">
+  <div class="kpi-cell">
+    <div class="kpi-label">FORECAST MAE</div>
+    <div class="kpi-val clr-amber">7.1d</div>
+    <div class="kpi-sub">~7d OPTIMISTIC</div>
+  </div>
+  <div class="kpi-divider"></div>
+  <div class="kpi-cell">
+    <div class="kpi-label">OTD TREND</div>
+    <div class="kpi-val clr-green">&#9650; UP</div>
+    <div class="kpi-sub">IMPROVING</div>
+  </div>
+  <div class="kpi-divider"></div>
+  <div class="kpi-cell">
+    <div class="kpi-label">BINDING CONSTRAINT</div>
+    <div class="kpi-val clr-red">WC221 PAINT</div>
+    <div class="kpi-sub">118% UTILIZATION</div>
+  </div>
+  <div class="kpi-divider"></div>
+  <div class="kpi-cell">
+    <div class="kpi-label">TOTAL WIP</div>
+    <div class="kpi-val clr-white">33</div>
+    <div class="kpi-sub">3 PROGRAMS</div>
+  </div>
+  <div class="kpi-divider"></div>
+  <div class="kpi-cell">
+    <div class="kpi-label">BEHIND RTG</div>
+    <div class="kpi-val clr-red">7</div>
+    <div class="kpi-sub">6 ELV + 1 RAD + 0 AEGIS</div>
+  </div>
+  <div class="kpi-divider"></div>
+  <div class="kpi-cell">
+    <div class="kpi-label">STALLED / PARKED</div>
+    <div class="kpi-val clr-amber">9</div>
+    <div class="kpi-sub">7 RAD + 2 AEGIS</div>
+  </div>
+  <div class="honesty-badge">
+    <div class="badge-pill">EMPIRICAL &middot; n=8 &middot; PRELIMINARY</div>
+    <div class="badge-caveat">forecast = best-case floor + measured slip; not guaranteed delivery</div>
+  </div>
+</div>
+
+<!-- CONSTRAINT ALERT -->
+<div class="constraint-block">
+  <div class="constraint-icon">&#9888;</div>
+  <div>
+    <div class="constraint-label">BINDING CONSTRAINT — SCHEDULE DRIVER</div>
+    <div class="constraint-val">WC221 PAINT BOOTH &nbsp;&nbsp; 118% UTILIZATION</div>
+    <div class="constraint-note">All 3 programs share WC221. Any slip in paint will delay ship. Expand paint capacity or pull units forward.</div>
+  </div>
+</div>
+
+<main>
+
+<!-- NAV TABS -->
+<div class="page-tabs">
+  <div class="tab active">WATCHLIST</div>
+  <div class="tab">ALERTS</div>
+  <div class="tab">LEVERS</div>
+  <div class="tab">MODEL STATUS</div>
+</div>
+
+<!-- WATCHLIST SECTION -->
+<div class="section-hdr" style="margin-top:0; border-top:none;">
+  <div class="section-title">PROGRAM WATCHLIST</div>
+  <div class="section-line"></div>
+  <div class="section-hint">AS OF 2026-08-22 06:00 &nbsp;|&nbsp; CLICK ROW FOR DETAIL &nbsp;|&nbsp; F2 MATRIX FOR UNIT-LEVEL VIEW</div>
+</div>
+
+<div class="watchlist-wrap">
+<table class="watchlist">
+  <thead>
+    <tr>
+      <th style="text-align:left; width:180px;">PROGRAM</th>
+      <th>WIP</th>
+      <th>BEHIND</th>
+      <th>STALLED</th>
+      <th>SHIP RATE</th>
+      <th>TARGET</th>
+      <th class="center">RATE &Delta;</th>
+      <th>OPT BIAS</th>
+      <th class="center">MODEL</th>
+      <th style="text-align:left;">FLAGS</th>
+      <th style="text-align:left; min-width:120px;">WIP HEALTH</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="selected" onclick="selectRow(this,'531335')">
+      <td>
+        <div class="prog-name">
+          <div class="prog-code">G500 ELEVATOR</div>
+          <div class="prog-id">531335 &nbsp;|&nbsp; D5237</div>
+          <div class="prog-desc">LH + RH WING ELEV</div>
+        </div>
+      </td>
+      <td class="num-big clr-white">17</td>
+      <td class="num-big clr-red">6</td>
+      <td class="num-big clr-amber">0</td>
+      <td class="num-big clr-green">1.5<span style="font-size:9px;color:var(--grey)">/wk</span></td>
+      <td style="color:var(--label)">1.4<span style="font-size:9px;color:var(--grey)">/wk</span></td>
+      <td class="center clr-green">&#9650; +0.1</td>
+      <td class="clr-amber">~7.0d</td>
+      <td class="center"><span class="tag tag-live">EMPIRICAL</span></td>
+      <td><span class="tag tag-live">ACTIVE RTG</span></td>
+      <td>
+        <div class="pbar-wrap">
+          <div class="pbar-fill" style="width:70%;background:var(--amber);"></div>
+        </div>
+        <span style="color:var(--grey);font-size:10px;margin-left:4px;">70% BEHIND</span>
+      </td>
+    </tr>
+
+    <tr onclick="selectRow(this,'C48178')">
+      <td>
+        <div class="prog-name">
+          <div class="prog-code">AERONOSE RADOME</div>
+          <div class="prog-id">C48178 &nbsp;|&nbsp; D5240</div>
+          <div class="prog-desc">COMPOSITE RADOME</div>
+        </div>
+      </td>
+      <td class="num-big clr-white">11</td>
+      <td class="num-big clr-amber">1</td>
+      <td class="num-big clr-red">7</td>
+      <td class="num-big clr-amber">0.5<span style="font-size:9px;color:var(--grey)">/wk</span></td>
+      <td style="color:var(--label)">—</td>
+      <td class="center clr-grey">—</td>
+      <td class="clr-red">~7.8d</td>
+      <td class="center"><span class="tag tag-live">EMPIRICAL</span></td>
+      <td><span class="tag tag-warn">7 STALLED</span></td>
+      <td>
+        <div class="pbar-wrap">
+          <div class="pbar-fill" style="width:63%;background:var(--red);"></div>
+        </div>
+        <span style="color:var(--grey);font-size:10px;margin-left:4px;">63% STALLED</span>
+      </td>
+    </tr>
+
+    <tr onclick="selectRow(this,'530349')">
+      <td>
+        <div class="prog-name">
+          <div class="prog-code">AEGIS REFLECTOR</div>
+          <div class="prog-id">530349 &nbsp;|&nbsp; DPAS</div>
+          <div class="prog-desc">00999000563 ANTENNA</div>
+        </div>
+      </td>
+      <td class="num-big clr-white">5</td>
+      <td class="num-big clr-grey">0</td>
+      <td class="num-big clr-amber">2</td>
+      <td class="clr-grey" style="font-size:11px;">—</td>
+      <td style="color:var(--label)">—</td>
+      <td class="center clr-grey">—</td>
+      <td class="clr-amber">~7.1d</td>
+      <td class="center"><span class="tag tag-live">EMPIRICAL</span></td>
+      <td>
+        <span class="tag tag-dpas">DPAS</span>&nbsp;
+        <span class="tag tag-nortg">NO RTG</span>
+      </td>
+      <td>
+        <div class="pbar-wrap">
+          <div class="pbar-fill" style="width:40%;background:var(--amber);"></div>
+        </div>
+        <span style="color:var(--grey);font-size:10px;margin-left:4px;">40% STALLED</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- DETAIL PANEL (531335 selected by default) -->
+<div class="section-hdr">
+  <div class="section-title">G500 ELEVATOR / 531335 — PROGRAM DETAIL</div>
+  <div class="section-line"></div>
+  <div class="section-hint"><a href="C_terminal_matrix.html" style="color:var(--cyan);text-decoration:none">F2 OPEN FORECAST MATRIX &rsaquo;</a></div>
+</div>
+
+<div class="detail-panel">
+  <div class="detail-hdr">
+    531335 &nbsp;&nbsp; G500 G600 ELEVATOR &nbsp;&nbsp; LH+RH SHIPSET &nbsp;&nbsp;
+    <span style="margin-left:auto; color:var(--amber)">ACTIVE RTG PLAN &nbsp; | &nbsp; EMPIRICAL MODEL &nbsp; | &nbsp; n=8</span>
+  </div>
+  <div class="detail-grid">
+    <div class="detail-cell">
+      <div class="detail-cell-label">ACTIVE WIP</div>
+      <div class="detail-cell-val clr-white">17</div>
+      <div class="detail-cell-sub">LH: 6 &nbsp; RH: 11</div>
+    </div>
+    <div class="detail-cell">
+      <div class="detail-cell-label">BEHIND RTG TGT</div>
+      <div class="detail-cell-val clr-red">6</div>
+      <div class="detail-cell-sub">LATEST: LH232 +7d</div>
+    </div>
+    <div class="detail-cell">
+      <div class="detail-cell-label">NEXT SHIP</div>
+      <div class="detail-cell-val clr-amber">08/22</div>
+      <div class="detail-cell-sub">RH227 (P50: 08/22)</div>
+    </div>
+    <div class="detail-cell">
+      <div class="detail-cell-label">SHIP RATE</div>
+      <div class="detail-cell-val clr-green">1.5/wk</div>
+      <div class="detail-cell-sub">TARGET: 1.4/wk</div>
+    </div>
+    <div class="detail-cell">
+      <div class="detail-cell-label">OPT BIAS</div>
+      <div class="detail-cell-val clr-amber">~7.0d</div>
+      <div class="detail-cell-sub">MODEL RUNS EARLY</div>
+    </div>
+    <div class="detail-cell">
+      <div class="detail-cell-label">CONSTRAINT</div>
+      <div class="detail-cell-val clr-red">WC221</div>
+      <div class="detail-cell-sub">PAINT 118% UTIL</div>
+    </div>
+  </div>
+
+  <!-- Upcoming slot table -->
+  <div style="border-top:1px solid var(--border2); padding:6px 10px;">
+    <div style="font-size:9px;color:var(--label);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">NEXT 3 DELIVERY SLOTS — DELTA VS RTG TARGET</div>
+    <table style="width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:11px;">
+      <thead>
+        <tr style="color:var(--label);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;">
+          <th style="padding:3px 8px;text-align:left;">SERIAL</th>
+          <th style="padding:3px 8px;">SO</th>
+          <th style="padding:3px 8px;">RTG TGT</th>
+          <th style="padding:3px 8px;">P50 FCST</th>
+          <th style="padding:3px 8px;">&Delta; d</th>
+          <th style="padding:3px 8px;text-align:left;">STATUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:4px 8px;color:var(--white);font-weight:600;">LH 232</td>
+          <td style="padding:4px 8px;color:var(--grey);">1455596</td>
+          <td style="padding:4px 8px;color:var(--label);">08/21</td>
+          <td style="padding:4px 8px;color:var(--amber);">08/28</td>
+          <td style="padding:4px 8px;" class="delta-pos">+7</td>
+          <td style="padding:4px 8px;"><span style="color:var(--amber);">IN FS / WIP 3850</span></td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:4px 8px;color:var(--white);font-weight:600;">RH 227</td>
+          <td style="padding:4px 8px;color:var(--grey);">1452749</td>
+          <td style="padding:4px 8px;color:var(--label);">08/21</td>
+          <td style="padding:4px 8px;color:var(--green);">08/22</td>
+          <td style="padding:4px 8px;" class="delta-pos" style="color:var(--amber)">+1</td>
+          <td style="padding:4px 8px;"><span style="color:var(--green);">FINAL INSP</span></td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:4px 8px;color:var(--white);font-weight:600;">LH 233</td>
+          <td style="padding:4px 8px;color:var(--grey);">1456550</td>
+          <td style="padding:4px 8px;color:var(--label);">08/28</td>
+          <td style="padding:4px 8px;color:var(--amber);">09/01</td>
+          <td style="padding:4px 8px;" class="delta-pos">+4</td>
+          <td style="padding:4px 8px;"><span style="color:var(--grey);">UPCOMING</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<!-- BOTTOM STATUS LINE -->
+<div class="statusline">
+  <span class="sl-ok">&#11044; LIVE</span>
+  <span class="sl-sep">|</span>
+  <span>IFS LAST SYNC: 2026-08-22 05:47</span>
+  <span class="sl-sep">|</span>
+  <span class="sl-warn">MODEL: EMPIRICAL &middot; n=8 &middot; PRELIMINARY</span>
+  <span class="sl-sep">|</span>
+  <span>WC221 PAINT: <span class="sl-err">118% UTIL</span></span>
+  <span class="sl-sep">|</span>
+  <span>FORECAST = BEST-CASE FLOOR + MEASURED SLIP — NOT GUARANTEED DELIVERY</span>
+  <span class="sl-right">RTG-TRACKER v0.9.0-beta</span>
+</div>
+
+<script>
+function selectRow(el, prog) {
+  document.querySelectorAll('.watchlist tbody tr').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

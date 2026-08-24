@@ -1,0 +1,727 @@
+REQUIRES CUSTOMER APPROVAL	 YES 	 NO
+Redline incorporation frequency (insert X as appropriate):
+Select month(s) for redline incorporation (insert X as appropriate – n/for startups):
+REVISION SHEET
+Note: All changes pertaining to revision(s) will be in highlighted in “Blue” text.
+When document revision occurs - change text back to black font and enter
+“new” revision changes in “blue”.
+Table of Figures
+Figure 1: Correct Wet Install of NASM21140 series blind bolt. Visible evidence of sealant all the way around the fastener.	13
+Figure 2: Correct Wet Install of a NASM21140 series blind bolt. Visible evidence of sealant all the way around the fastener.	13
+Figure 3: Single Action Blind Bolt with Optional Drive Washer and Bolt Configuration	14
+Figure 4: Long Grip Length, Evidence of Loose Fit, Dry Installation	14
+Figure 5	15
+Figure 6	15
+Figure 7: Dimensioning for Installation Criteria	17
+Figure 8	18
+Figure 9	20
+Figure 10	23
+Figure 11	24
+Figure 12	28
+Figure 13	30
+Figure 14: Countersink Wall Thickness and Wall Thickness	31
+Figure 15	35
+PROCESS 1 - PREP AND SEAL - GAMPS 7115
+PC SMAH - FAY SURFACE SEAL - GRP F, PR I (MIL-PRF-81733 TY IV)
+PREPARATION FOR SEAL - GAMPS 4122
+MATERIALS REQUIRED:
+ACETONE 		(GD# 00095020000)
+WIPING CLOTHS 	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Deburr all mating holes and ensure edge break common to any fasteners
+Clean both interface surfaces as follows: GAMPS 4122 - 3.5.3.5
+Using wiping cloths wet with acetone solvent, wash the surface with a downward pressure in one direction and immediately wipe dry with clean cloth in the same direction. Extend clean area approximately 1 inch beyond area to be sealed in all directions.
+Repeat until cloth shows no evidence of contamination.
+Do not touch the cleaned surface with bare hands or contaminated gloves.
+FAY SURFACE SEAL
+MATERIALS REQUIRED:
+SEALANT		(GD# PS 870 C-12)
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Record material data in router as instructed. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Mix per MAF 447 – Elevators Assy
+Sealing must begin within one hour of cleaning.
+The sealant shall be applied to one of the faying surfaces with an appropriate sealant application tool.
+The thickness of the sealant applied shall be the minimum amount required to fill the assembled faying surface and to give a continuous and visible sealant squeeze-out.
+Sealant shall not be rolled or worked on a separate work surface (i.e., palette, “sealant boards”, etc.) During application as, this may reduce the squeeze-out out life significantly.
+The mating surfaces shall be attached using temporary or permanent fasteners no more than 4 inches apart within the application time of the sealant. For easy removal of a temporary fastener, a release agent may be applied to the threaded portion of the fastener.
+Sealant squeeze-out shall be visible and continuous around the edges of the faying parts if sealant squeeze-out is not continuous, apply a fillet seal in the area where squeeze-out out is not visible such that the sealant is continuous along the edge of the faying parts.
+When Cyanoacrylate glue is used to hold aluminum shims in place, ensure an adequate fillet seal is present around the periphery of shim.
+Clean up excess sealant during process using GAS115A1PT and clean wiping cloths.
+“After cleanup cover seal edges with flash breaker 1 tape if desired to protect the sealant during Cure to Tack Free Stage.” Do not remove tape for 24 hours if tape is used.
+Cure is 14 days at room temperature. Cure may be accelerated by allowing the part to flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 48 hours minimum. GAMPS 7115 Rev T Table VI: P/S 870 C-12 requires a 24 hour flash off period followed by an elevated temperature cure of 48 hours at 125°F)
+PC SMR – FAY SEAL/FILLET SEAL
+FAY SEAL (MIL-PRF-81733 GRP F, PR I)
+FILLET SEAL (MIL-PRF-81733 GRP F, PR II)
+PREPARATION FOR SEAL - GAMPS 4122
+MATERIALS REQUIRED:
+ACETONE 		(GD# 00095020000)
+WIPING CLOTHS 	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Deburr all mating holes and ensure edge break common to any fasteners
+Clean both interface surfaces as follows: GAMPS 7115 - 3.5.6.1
+Using wiping cloths wet with acetone solvent, wash the surface with a downward pressure in one direction and immediately wipe dry with clean cloth in the same direction. Extend clean area approximately 1 inch beyond area to be sealed in all directions.
+Repeat until cloth shows no evidence of contamination.
+Do not touch the cleaned surface with bare hands or contaminated gloves.
+FAY SURFACE SEAL USING INSTRUCTIONS IN PC SMAH ABOVE
+MATERIALS REQUIRED:
+SEALANT (FAY)	(GD# PS 870 C-12)
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Sealant squeeze-out shall be visible and continuous around the edges of the faying parts if sealant squeeze-out is not continuous, apply a fillet seal in the area where squeeze-out out is not visible such that the sealant is continuous along the edge of the faying parts.
+Clean up excess sealant during process with GAS115A1PT, and clean wiping cloths.
+Smoothing the Fillet may be accomplished using a 50/50 Mix of Isopropyl Alcohol and Water.
+“After cleanup cover seal edges with flash breaker 1 tape if desired to protect the sealant during Cure to Tack Free Stage.” Do not remove tape for 24 hours if tape is used.
+Cure is 14 days at room temperature.
+Cure may be accelerated by allowing the part to flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 48 hours minimum. (GAMPS 7115 Rev T Table VI: P/S 870 C-12 requires a 24 hour flash off period followed by an elevated temperature cure of 48 hours at 125°F)
+FILLET SURFACE SEAL
+MATERIALS REQUIRED:
+SEALANT (FILLET)	(GD# PS 870 B-2)
+ACETONE 		(GD# 00095020000)
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Sealant squeeze-out shall be visible and continuous around the edges of the faying parts if sealant squeeze-out is not continuous, apply a fillet seal in the area where squeeze-out out is not visible such that the sealant is continuous along the edge of the faying parts.
+Clean up excess sealant during process with GAS115A1PT, and clean wiping cloths.
+Smoothing the Fillet may be accomplished using a 50/50 Mix of Isopropyl Alcohol and Water.
+“After cleanup cover seal edges with flash breaker 1 tape if desired to protect the sealant during Cure to Tack Free Stage.” Do not remove tape for 24 hours if tape is used.
+Cure is 14 days at room temperature.
+Cure may be accelerated by allowing the part to flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 48 hours minimum. (GAMPS 7115 Rev T Table VI: P/S 870 B-2 requires a 24 hour flash off period followed by an elevated temperature cure of 8 hours at 125°F)
+PC SMAC - FILLET SEAL
+(MIL-PRF-81733 GRP F, PR IzI)
+PREPARATION FOR SEAL - GAMPS 4122
+MATERIALS REQUIRED:
+ACETONE 		(GD# 00095020000)
+WIPING CLOTHS 	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Deburr all mating holes and ensure edge break common to any fasteners
+Clean both interface surfaces as follows: GAMPS 7115 - 3.5.6.1
+Using wiping cloths wet with acetone solvent, wash the surface with a downward pressure in one direction and immediately wipe dry with clean cloth in the same direction. Extend clean area approximately 1 inch beyond area to be sealed in all directions.
+Repeat until cloth shows no evidence of contamination.
+Do not touch the cleaned surface with bare hands or contaminated gloves.
+MATERIALS REQUIRED:
+SEALANT 		GD# PS 870 B-2
+SOLVENT		(GD# GAS115A1PT)
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Record material data in router as instructed
+Mix per MAF 447 - Elevators Assembly
+Sealing must begin within one hour of cleaning.
+Apply a continuous bead of sealant at the juncture of two adjoining parts or surfaces with a sealant nozzle.
+The fillet shall extend up the face of the top member forming one side of the fillet and along the face of the bottom member.
+The height and width of the fillet should be approximately the same so that the fillet should be slightly concave.
+When the stack up is 3/16" or less, the size and shape of the fillet should be typically as viewed in figure (A) below. When the stack up is greater than 3/16", the fillet need not extend up to the face of the stack up, but the fillet will have the same as appearance as Figure (B) below.
+Clean up excess sealant during process using GAS115A1PT and clean wiping cloths.
+“After cleanup cover seal edges with flash breaker 1 tape if desired to protect the sealant during Cure to Tack Free Stage.” Do not remove tape for 24 hours if tape is used.
+Cure is 14 days at room temperature.
+Cure may be accelerated by allowing the part to flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 8 hours minimum. GAMPS 7115 Rev T Table VI: P/S 870 B-2 requires a 24 hour flash off period followed by an elevated temperature cure of 8 hours at 125°F)
+PROCESS 2 - SHIMMING - GAMPS 2114
+PC SM
+If no hard shims are needed, you may N/A the lines in the router.
+SHIMMING GAP LIMITATIONS
+If gap is less than 0.005 inch, no shimming is required
+If the gap is not greater than 0.030 inch for machined parts, 0.060 inch for sheet metal parts, this process applies.
+If a gap exceeds maximum gap, hand pressure may be applied. The maximum load that can be applied to close the gap is 20 lbs. This can be applied using a calibrated push/pull force gauge. Any other method of applying force that has been demonstrated not to exceed this limit may be used.
+If after applying hand pressure, per above instructions, the gap exceeds the above criteria, MRB action will be required.
+This shimming process may be used in conjunction with a maximum liquid shim thickness of 0.010" (see Process 5)
+PROCESS FOR FABRICATION OF GLASS SHIMS – CLCCD
+Glass stock will be used for the fabrication of fiberglass shims from the following manufactured sheets:
+GMS4018SHEET-2 (2 PLY "~0.010”: [45/45])
+GMS4018SHEET-3 (3 PLY "~0.015”: [45/0/45])
+GMS4018SHEET-4 (4 PLY "~0.020”: [45/0/0/45])
+GMS4018SHEET-5 (5 PLY "~0.025”: [45/45/0/45/45])
+Determine the thickness of the shim required with the use of feeler gauge and micrometer.
+The width of the shim is to correspond to the narrower of the two mating parts or to fit the required area with edges extending beyond the centerline of the fasteners to provide 1.5 diameter edge distance unless otherwise indicated.
+Shims to be +/-.030" to edge of adjacent part.
+The length of the shim is to correspond with each individual circumstance. Shims to be +/-.030" to edge of adjacent part.
+Select the required thickness of shim sheet. Allow for thickness buildup due to primer, adhesive, and/or sealant.
+Cut the shim to size, starting in the opposite corner of the shim from the identification.
+If the identification is inadvertently cut off the sheet, re-identify with the correct part number and serial number.
+If a tapered shim is required, use the maximum thickness shim and sand to fit the minimum thickness.
+Insert the shim into the gap and clamp it securely to obtain a good fit. Drill as instructed. Deburr after disassembly (if applicable).
+Identify the shim by sharpie the appropriate number that corresponds to the (Rx) location in MAF 641.
+Blind shims shall be fastened with a minimum of two fasteners.
+PREPARATION OF GLASS SHIMS
+MATERIALS REQUIRED:
+ACETONE 		(GD# 00095020000)
+WIPING CLOTHS 	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Deburr all mating holes and ensure edge break common to any fasteners
+Clean both interface surfaces as follows: GAMPS 4122 - 3.5.3.5
+Sand glass shim surfaces with 180 grit or finer aluminum oxide abrasive paper.
+Sand any composite surface that shim is to be bonded to with 180 grit or finer silicon oxide abrasive paper
+Using wiping cloths wet with acetone solvent, wash the surface with a downward pressure in one direction and immediately wipe dry with clean cloth in the same direction. Extend clean area approximately 1 inch beyond area to be sealed in all directions.
+Repeat until cloth shows no evidence of contamination.
+Do not touch the cleaned surface with bare hands or contaminated gloves.
+PROCESS FOR FABRICATION OF ALUMINUM SHIMS
+Use Peelable Aluminum Shim Part Numbers 4401ED0011-1, 4401ED0011-3, 4401ED0011-5, 4401ED0011-7, & 4401ED0011-9 where required to fill the gap between the hinge and Fwd Spar. If none of the part numbers listed will work for your hinge application follow the directions to create a “Custom shim” from GAS12D-B-A laminated aluminum shim material.
+Determine the thickness of the shim required with the use of feeler gauge and micrometer.
+The width of the shim is to correspond to the narrower of the two mating parts or to fit the required area with edges extending beyond the centerline of the fasteners to provide 1.5 diameter edge distance unless otherwise indicated.
+Shims to be +/-.030" to edge of adjacent part.
+The length of the shim is to correspond with each individual circumstance. Shims to be +/-.030" to edge of adjacent part.
+Peel off the laminated shim until the required thickness is reached. Allow for thickness buildup due to primer, adhesive, and/or sealant.
+The thickness of the flat or tapered shim shall completely fill the gap without strain or clamp-up.
+Insert the shim into the gap and clamp it securely to obtain a good fit. Drill as instructed. Deburr after disassembly (if applicable).
+Identify the shim by vibro-etching the appropriate number that corresponds to the (Rx) location in the appropriate MAF.
+PREPARATION OF ALUMINUM SHIMS - GAMPS 4107
+MATERIALS REQUIRED:
+ACETONE		(GD# 00095020000)
+WIPING CLOTHS 	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+ALODINE PEN		(GD# A13011)
+PRIMER		(GD# GMS5005TY1)
+REAGENT WATER	(GD# ASTMD1193TYIV)
+Solvent Clean:
+Using a clean lint-free cloth dampened with acetone, solvent wipe all surfaces of the shim.
+Aluminum material to be treated must be cleaned by abrading with one of the following materials, dampened with Reagent Water (GD# ASTMD1193TYIV)
+a) Aluminum oxide paper - #320 A
+b) Aluminum oxide abrasive pads, 280-400 grit per A-A-58054, Type I Grade A
+c) Abrasive pads – fine or ultrafine – Scotch Brite/3M or standard abrasive
+After abrading, using a clean lint-free cloth dampened with acetone and solvent wipe all surfaces of the shim.
+Wipe dry with a clean dry lint-free cloth before the solvent evaporates.
+Ensure the shim surfaces are free of oil, grease, fingerprints, and contaminants.
+Allow the shim to air dry completely.
+Apply Chromate Conversion Coating:
+Remove cap. Hold Applicator device with applicator tip downwards.
+Activate the device by pressing tip against a firm surface. New applicator device will charge in 30 to 45 seconds. When the conversion coating solution wets the top, release the pressure. Do not allow tip to cause puddling on the firm surface. Applicators previously in use may need only minimal tip-charging.
+Apply the conversion coating to the aluminum surface in smooth, even strokes. Do not allow the material to puddle on surface.
+A fifty (50) percent overlap of the strokes will give the required coating quality.
+On trimmed edges apply the film with overlap stroke starting at the mid-point of the previous stroke.
+Allow the first film coating to dry completely prior to second coating application.
+NOTE: coating must not be rinsed with water or solvent after application.
+After first coat has dried, apply a second coat (including to trimmed edges). On flat surfaces, apply at a 90 degrees cross-coat to the first coat application. Second coating must be applied within 5 minutes of the first coating application.
+Allow the second coating to dry completely prior to painting/coating.
+Painting/coating must be performed within the time limits stated in GAMPS 3116.
+Apply Epoxy Primer:
+Prep and prime shims per WI 4401-PAINT Section 1, with the following exceptions:
+Surface sanding and application of glazing putty is not required
+Masking not required.
+Water break free surfaces required
+Prep and prime the entire shim per WI 4401-PAINT.
+Perform tape test per WI 4401-PAINT.
+Perform thickness verification per WI 4401-PAINT.
+INSTALLATION OF SHIMS - GAMPS 2114
+Hold shims in place for fay seal operations during drilling with Flashbreaker Tape.
+Bond shims in place for liquid shim operations with GD# A-A-3097-TY2CL2 adhesive. Completely cover one of the mating surfaces where the shim will be bonded, locate the shim in the correct position and apply pressure to the shim surface for a minimum of 20 seconds for the adhesive to bond.
+Complete fay surface seal per process 1 or liquid shim operation per Process 5.
+Fillet seal where possible per process 1 after fastener installation of shim.
+PROCESS 3 - PREP AND APPLY RELEASE AGENT - GAMPS 2410/2114
+PC SLM
+PREPARATION FOR SEAL PER GAMPS 2410 (7115)
+MATERIALS REQUIRED:
+ACETONE 		(GD# 00095020000)
+WIPING CLOTHS 	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Clean both interface surfaces as follows:
+Using wiping cloths wet with acetone solvent, wash the surface with a downward pressure in one direction and immediately wipe dry with clean cloth in the same direction. Extend clean area approximately one inch beyond area to be sealed in all directions.
+Repeat until cloth shows no evidence of contamination.
+Do not touch the cleaned surface with bare hands or contaminated gloves, handle with clean gloves
+APPLICATION OF RELEASE AGENT PER GAMPS 2410 (GAMPS 2114)
+GAMPS 2114 and GAS12D 3.6.3.4
+MATERIALS REQUIRED:
+RELEASE AGENT	(GD# GAR111D3)
+MASKING TAPE	(GD# 00804009000) or equivalent
+Record material data in router as instructed
+Prep for liquid shim by spraying the le Rib and hinge surfaces common to the spar with release agent GAR111D3 and allow to air dry.
+Prepare the trailing edge skins for fay seal by spraying the 2-inch periphery with release agent GAR111D3 and allow to air dry.
+Do not touch the prepared surface, handle with gloves
+Mask the spar if desired to minimize cleanup.
+PROCESS 4 - WET INSTALLATION OF FASTENERS - GAMPS 7115
+PC SMAK MIL-PRF-81733 GRP F, PR IV & SBON for Electrical Hardware & Dimpled Washer attaching hardware
+MATERIALS REQUIRED:
+SEALANT		(GD# PS 870 C-12)
+SOLVENT		(GD# GAS115A1PT)
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+For visible acceptance criteria see GAMPS2204
+Record material data in router as instructed. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Sealing must begin within one hour of cleaning.
+Clean up excess sealant during process using GAS115A1PT.
+Record material data in router as instructed
+Deburr all mating holes (non-composite) and ensure edge break common to any fasteners
+Any contamination such as metal filings shall be removed from the fastener hole.
+The sealant shall be applied to all the faying surfaces of the fastener such as the shaft or shank, to the underside of the fastener, the washer, and nut. The application of sealant may be to the hole and countersink.
+When installing “lock bolt” type fasteners, care should be taken not to apply the sealant to the threaded portion of the shaft.
+When the fastener is installed thru structure in which a faying seal exists that is still within the assembly time, the squeeze-out of the faying seal can be used to affect a wet installed condition. If the faying surface sealant exceeds assembly time, additional sealant shall be added to meet the requirements of this document.
+There shall be evidence of sealant squeeze-out around the entire periphery of the fastener head and tail. Over coating the fastener periphery is acceptable on fasteners where there is no evidence of sealant squeeze-out. Excess sealant shall be removed with a clean, lint free cloth. To facilitate removal of excess sealant, solvent cleaning may be instituted.
+NOTE: Wet installed fasteners shall meet the sealing requirements of the applicable sealant specification.
+Figures 1 & 2 show an example of an appropriate wet installation for NASM21140.
+Figure : Correct Wet Install of NASM21140 series blind bolt. Visible evidence of sealant all the way around the fastener.
+Figure : Correct Wet Install of a NASM21140 series blind bolt. Visible evidence of sealant all the way around the fastener.
+NOTE: This figure is only applicable to NASM21140 and other fasteners with a similar blindside bulb
+Figure 2: Correct Bolt Installation (Wet Installation)
+Assemblies with Faying Surface Sealant
+(a) When a faying surface sealant is specified on the Engineering drawing, the fasteners should be
+installed starting from the center of the part and working away from the center in all directions whenever possible.
+NOTE: Installation from center to edge aids in extruding excess sealant to the part edges where it
+can be removed.
+(b) Faying surface sealed assemblies shall be fastened within the sealant application time limit per
+the applicable sealant specification to ensure squeeze out of the excess sealant.
+(c) Faying surface sealed assemblies that cannot be fastened within the sealant application time limit
+shall be bolted together with temporary fasteners to squeeze out excess sealant. The maximum
+distance between the temporary fasteners shall be five (5) inches.
+NOTE: Spring type Clecos, by themselves, are not considered adequate to accomplish the
+clamp-up required to squeeze out excess sealant.
+Installation Tooling
+The pulling gun should be held perpendicular to the material surface while pulling the fastener. Blind
+bolt installation tooling should be operated per the manufacturer’s recommendations. Manual hand
+operated blind bolt guns shall not be used for double action bolt installation (i.e., manual Huck gun).
+NOTE: Double action blind bolts must not be installed with single action guns. Doing this will
+result in improper seating of the locking ring and a structurally unacceptable installation.
+Single Action Installation Tooling
+Single Action blind bolts shall be installed with single action non-shifting installation tools. Single action
+blind bolts with an optional drive washer (Figure 3) may be installed with an approved manual hand
+operated blind bolt gun.
+NOTE: The optional drive washer functions as integral anvil for driving during installation.
+Figure : Single Action Blind Bolt with Optional Drive Washer and Bolt Configuration
+Figure : Long Grip Length, Evidence of Loose Fit, Dry Installation
+NOTE: This figure is only applicable to MS 21140 and other fasteners with a similar blindside bulb
+FASTENER INSTALLATION (GAMPS 2206) “Installation of Hi-Shear Type Fasteners in Clearance Fit Holes” (Flush or protruding head fasteners with collars)
+RESTRICTIONS
+The head or collar cannot ride on any fillet or radius, see (a.) in the figure below.
+Countersunk holes cannot overlap any fillet or radius, see b and c in figure 5 below.
+Figure
+The fastener grip length will be based on the actual measurement or grip at each individual fastener location. See figure 6 below for proper interpretation of the grip length. When grip length is past a line gradient – go up to the next grip length.  The arrow at bubble #2 indicates approximately 41/2 (450), so you should go up the next whole number 5 (500).
+Figure
+Washers of the same nominal fastener diameter may be used to adjust grip length if required per the table below.
+NOTE: NASM 21140 is replacing MS 21140, and NASM 21141 is replacing MS 21141
+Pin protrusion limits are as follows:
+Installed collar Gap Allowable:
+Screw break-off requirements (GAMPS 2201)
+Figure 1 (from GAMPS 2201)
+NOTES:
+1See Figure 1 for dimension (DIM) "A" and "B".
+2When necessary to use washers in accordance with 3.5.5, these dimensions shall be increased by the total thickness of the washers.
+3Class 1 per NAS 1675.
+4Class 2 per NAS 1675.
+Dimension "A" measured from sheet to top of screw.
+Dimension "B" measured from top of fastener to top of screw.
+Figure : Dimensioning for Installation Criteria
+Figure
+FASTENER INSTALLATION
+(GAMPS 2222: “Installation of Mechanical Fasteners in Non-Metallic Materials”)
+No lubrication allowed for drilling
+Hole perpendicularity 		+/- 2 degrees
+Hole Countersink CL to hole CL	+/- 1 degree
+Included angle (CSK)		+/- 30 minutes
+Hand reaming is permissible providing the finished hole size meets the engineering requirements
+Use backup material when drilling
+Do not use deburring tools to deburr the exit hole. It is permissible to lightly abrade the surface with 180 grit of finer Emory cloth or equivalent. Abrasion shall not penetrate the top ply.
+Heads of fasteners shall be seated before the installation tool is applied.
+FASTENER INSTALLATION
+(GAMPS 8316: “Match Drilling Aircraft Structure”)
+Cutting Coolants and Lubricants: Cetyl alcohol and Boelube (misting application) may be used as a drilling lubricant. If other lubricants are needed, submit request to M&P engineering on a case by case basis. If Boelube is used as a drilling lubricant, clean surface with solvents to remove residue.
+Hole perpendicularity tolerance			+/- 2 degrees
+Hole Countersink CL to hole CL tolerance		+/- 2 degrees
+Countersink concentric to Hole CL tolerance 	.003"
+Break sharp edges and solvent clean surface prior to fastener installation. No debris is permitted on hole surface.
+Deburr all metals per GAMPS 2109, section 3.5.1.13.4. “The depth of deburring shall not exceed 20% of the thickness of the of the material thickness at the hole location or 0.030 inch, whichever is smaller.”
+Chamfering of composite structure to obtain fillet relief is not allowed except as specified by the fastener installation requirements.
+Do not deburr composite materials except when specified in GAH11AL.
+A borescope may be used to verify that the deburr interface meet the requirements of this specification.
+If part stack-up will not be separated after drilling for cleaning and deburring of faying surface, residual burr height is per GAMPS 2109, section 3.5.1.13.4.
+Heads of fasteners shall be seated before the installation tool is applied.
+Fastener Head Flushness Inspection Criteria:
+Figure
+GENERAL FASTENER INSPECTION TABLE (see above for specific aero-surface tolerance)
+Note: Fasteners that do not meet the fastener installation inspection criteria maybe removed using the Fastener Removal Instructions in Appendix A
+PROCESS 5 - PREP AND LIQUID SHIM - PC SLM - GAMPS 2114
+PREPARATION FOR SEAL PER GAMPS 2410
+MATERIALS REQUIRED:
+ACETONE		(GD# 00095020000)
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Deburr all mating holes and ensure edge break common to any fastener
+Using wiping cloths wet with acetone, wash the surface with a downward pressure in one direction and immediately wipe dry with clean cloth in the same direction. Extend clean area approximately 1 inch beyond area to be sealed in all directions.
+Repeat until cloth shows no evidence of contamination. Do not touch the cleaned surface with bare hands or contaminated gloves.
+LIQUID SHIM PER PC SLM - GAMPS 2114, 2410
+MATERIALS REQUIRED:
+SHIM MATERIAL	(GD# GMS4003TYIICLB)
+ACETONE		(GD# 00095020000)
+TEFLON TAPE		(GD# #3MCO02120048103)
+CYANOACRYLATE	(GD#A-A-3097-TY2CL2)
+Mix per MAF 447 - Elevators Assembly. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Sealing must begin within one hour of cleaning.
+Clean up excess sealant during process using acetone
+A plastic shim sample having a minimum thickness of 1/4-inch and a surface area of approximately (1) on inch square or greater, shall be fabricated under the same conditions as the production part. Material from the same mix used to make the production shim shall be used to make the test specimen. The test specimen shall be forwarded to quality control for testing. Sample shall be identified with part number and serial number for identification.
+Pot life is 35 minutes. Do not mix more than can be applied and located in this time frame.
+The thickness of the adhesive applied shall be the minimum amount required to fill the assembled gap and to give a continuous and visible adhesive squeeze-out.
+Shims may be held in place with GD# A-A-3097-TY2CL2 in lieu of relying on the liquid shim to hold them in place per GAMPS 2114 SCN 2. Completely cover shim surface.
+Adhesive shall not be rolled or worked on a separate work surface (i.e., palette, “sealant boards”, etc.) During application as this may reduce the squeeze-out out life significantly.
+Adhesive squeeze-out shall be visible and continuous around the edges of the mating parts. If adhesive squeeze-out is not continuous, apply a fillet seal in the area where squeeze-out out is not visible such that the adhesive is continuous along the edge of the mating parts.
+PROCESS 6 - PREP AND FORM IN PLACE GASKET - GAMPS 7115
+PC SMAF
+PREPARATION FOR SEAL PER GAMPS 7115
+MATERIALS REQUIRED:
+ACETONE		(GD# 00095020000)
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+MASKING TAPE	(GD# 00804009000) or equivalent
+Deburr all mating holes and ensure edge break common to any fasteners
+Using wiping cloths wet with acetone, wash the surface with a downward pressure in one direction and immediately wipe dry with clean cloth in the same direction. Extend clean area approximately 1 inch beyond area to be sealed in all directions.
+Repeat until cloth shows no evidence of contamination
+Do not touch the cleaned surface, handle with gloves
+Mask OML surface of skins and panels to protect from sealant
+FIP GASKET - GAMPS 7115
+MATERIALS REQUIRED:
+FAY SEALANT		(GD# PS 870 B-2)
+SOLVENT		(GD# GAS115A1PT)
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+RELEASE AGENT	(GD# GAR111D3)
+STEEL WIRE .012"	(GD# 998209) or equivalent
+Mix per MAF 447 - Elevators Assembly Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Sealing must begin within one hour of cleaning.
+Clean up excess sealant during process using GD# GAS115A1PT
+Record material data in router as instructed
+Apply release agent to fasteners and allow to dry
+The removable mating surface shall have release agent applied per process 3 of this document.
+Apply the sealant to the faying surfaces with an appropriate sealant application tool.
+Use GD# 998209 wires sprayed with GAR111D3 to control thickness, use a 2" piece of wire at each temporary fastener location to set the panel in place. Place wires on both sides of the fastener holes (see sketch below)
+The thickness of the sealant applied shall be the minimum amount required to fill the assembled faying surface and to give a continuous and visible sealant squeeze-out.
+Sealant shall not be rolled or worked on a separate work surface (i.e., palette, “sealant boards”, etc.) During application as this may reduce the squeeze-out out life significantly.
+Apply sealant (PS 870 B-2) to the interface between the parts using spatula to a uniform thickness of approximately .025-.050” to provide enough sealant for sufficient squeeze out.
+Locate the mating parts and install fasteners sprayed with GAR111D3 release spray. Torque fasteners to 15-25 in/lbs. To create squeeze out.
+When sealant has reached the tack free stage, remove masking tape and excess squeeze out using wiping cloths wet with GD# GAS115A1PT.
+Following complete cure, disassemble and check for voids in the faying area. If voids are present, clean formed-in-place gasket to remove any residual release agent. It is acceptable to locally fill voids, using the same sealant, provided additional sealant can be faired to existing sealant surface. This may be accomplished by applying release agent to the mating surface, allowing 15 minutes’ dry time, and installing the mating surface onto the void-filled gasket. When sealant thickness is used to control surface location of mating part, it is acceptable to have a thin gasket (<0.005”) provided sealant is present on surface.
+After sealant is completely cured, disassemble, remove wires, and check for voids in the faying surface. After a void free faying surface has been achieved, remove the spacers or shim, remove any residual release agent, and upon final installation of the part, install the fastener as per engineering drawings requirements and fill the void left by the spacers and shims, with sealant. Remove any excess sealant as required.
+The final installation of the LE panels must be accomplished with the blueprint hardware as shown in the part WI operations.
+Torque fasteners to 15-25 in/lbs.
+Figure
+Cure is 14 days at room temperature.
+Cure may be accelerated by allowing the part to flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 8 hours minimum. GAMPS 7115 Rev T Table VI: P/S 870 B-2 requires a 24 hour flash off period followed by an elevated temperature cure of 8 hours at 125°F)
+Apply primer 3012 per GAF14A after the minimum flash-off time of six hours has transpired.
+PROCESS 7 - PREP AND AERO SEAL GAPS - GAMPS 7102
+PC ASH
+SOLVENT WIPE CLEANING PER GAMPS 4122
+MATERIALS REQUIRED:									WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+ACETONE		(GD# 00095020000)
+Using wiping cloths wet with acetone, rub the surface to be cleaned with the solvent soaked cloth and immediately wipe dry with a clean cloth. Do not allow the solvent to evaporate to dryness.
+Repeat until cloth shows no evidence of contamination.
+AERO SEAL PER GAMPS 7102
+MATERIALS REQUIRED:
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+ACETONE		(GD# 00095020000)
+PROMOTER		(GD# GAP111W4)
+SEALANT		(GD# GMS4114CLBTYII)
+Record material data in router as instructed.
+After surface prep, pour a small amount of GAP111W4 (PR-188) into a small clean disposable container. Apply a thin coat to the surface with a single wipe and wipe off with a clean dry cloth. Allow to dry for 15 minutes. After drying is complete, wipe off excess promoter with a clean cloth.
+Sealing must begin within 4 hours of promoter application.
+Mix sealant per manufacturer's instructions. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Fill gaps between parts to protect the faying surface from moisture entrapment.
+Smooth sealant flush with adjacent panels (within .010” as shown below).
+Material will be tack free in 2 hours
+Figure
+No accelerated cure is allowed.
+A supplemental coating of GMS 5005 Epoxy Primer shall be applied within 7 days of application to prevent UV degradation of the exposed surfaces of Type VB (GMS 4114, Class B, Type II) sealant.
+PROCESS 8 – PREP AND BOND RADIUS BLOCKS
+ELEVATOR NOTE C7
+MATERIALS REQUIRED: 										WIPING CLOTHS 		(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+ACETONE 			(GD# 00095020000)
+Click Bond CB-200-40		(GD# 00503290000F)
+For all hinges and radius blocks for adhesive bonding as follows (note, this is only applicable to radius blocks that are attached with a single fastener, adhesive bonding is not required for radius blocks with 2 fasteners):
+Lightly abrade topcoat of faying surfaces of both hinge and radius block with 180 grit (or finer) aluminum oxide abrasive paper, or medium Scotch-Brite pad per GAMPS 4104, sanding through the gloss only and not removing the topcoat layer.
+Immediately prior to radius block installation, wipe clean both faying surfaces of the hinge and radius block with Acetone per GAMPS 4122.
+Utilizing a "Click Bond" self-aligning rubber positioning fixture, install fixture through radius block fastener hole.
+Mix enough CB-200 adhesive or equivalent per manufacturer’s instructions, to ensure sufficient bonding and minimal squeeze-out. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Apply to the faying surface of the radius block, then locate radius block (with fixture) through hinge hole in correct position, ensuring adequate pressure and squeeze out of adhesive. Note: adhesive application, positioning and pressure of the radius block must occur before 5 minutes of adhesive working time has expired.
+At room temperature, wait 2 hours minimum for adhesive to cure, do not disturb assembly during this cure time.
+When cured, remove the rubber fixture, and install attachment fasteners.
+PROCESS 9 - PREP AND APPLY RTV - GAMPS 8210
+NOTE F1 PER MODEL
+PREPARATION FOR RTV
+MATERIALS REQUIRED: 										WIPING CLOTHS 		(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+ACETONE 			(GD# 00095020000)
+220 GRIT SILICONE CARBIDE PAPER	(GD# 24005500000 or equivalent)
+220 GRIT ALUMINUM OXIDE PAPER	(GD# 240019 or equivalent)
+NOTE:	FOR COMPOSITE AND RUBBER PARTS USE 220 GRIT SILICONE CARBIDE PAPER.
+FOR ALUMINUM PARTS USE 220 GRIT ALUMINUM OXIDE PAPER.
+Scuff sand bonding surface with 220 grit sandpaper.
+Using wiping cloths wet with acetone solvent, rub the surface to be bonded with the solvent soaked cloth and immediately wipe dry with a clean cloth. Do not allow the solvent to evaporate to dryness.
+Repeat until cloth shows no evidence of contamination.
+APPLICATION OF RTV
+MATERIALS REQUIRED:
+RTV 108			(GD# GAA100D1)
+WIPING CLOTHS 		(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+ACETONE 			(GD# 00095020000)
+Record material data in router as instructed. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Apply GAA100D1 as directed where process 9 is called for.
+Cure at 130 +/- 10 Deg F for 30 minutes minimum.
+Record cure data in router.
+PROCESS 10 - PREP AND SEAL ELECTRICALLY BONDED JOINT - GAB17GA/GAMPS 2605
+PC EBM, Alodine per GAMPS 6113
+REMOVE ANY FINISH IN BOND AREAS PER GAMPS 2605
+MATERIALS REQUIRED:
+WIPING CLOTHS 	(GD# EMAP P25.6000)
+AMS-S-8802 		(GD# AMS-S-8802TYIICLB-1/2)
+ALCOHOL		(GD# 00501093000)
+220 GRIT SILICONE CARBIDE PAPER	(GD# 24005500000 or equivalent)
+220 GRIT ALUMINUM OXIDE PAPER	(GD# 240019 or equivalent)
+ALODINE PEN		(GD# A13011)
+IF PART IS PRIMED OR PAINTED
+Mating surfaces shall be cleaned of anodic film, oxides, greases, paints, lacquers, or other highly electrically resistant films. Remove all finish in all bonding areas with 220 grit or finer aluminum oxide paper to expose bare aluminum.
+Wipe with clean cloth after finish removal is complete.
+Using wiping cloths wet with alcohol, rub the surfaces to be mated with the alcohol-soaked cloth and immediately wipe dry with a clean cloth. Do not allow the solvent to evaporate to dryness. Repeat until cloth shows no evidence of contamination.
+IF THE PART DOESN’T HAVE ANY ALODINE – PERFORM CHEMICAL CONVERSION COATING, LOW ELECTRICAL RESISTANCE:
+FINISH CODE 213 PER GAMPS 6113 Reference PROCESS 14
+Clean the bare aluminum with acetone per GAMPS 4122 and allow surface to fully dry before applying Alodine. Apply chromate conversion coating (GD# A13011) using pen and a 50% overlap stroke to ensure coverage.
+Allow the first coat to dry completely.
+Apply a second 90° cross coat within 5 minutes of first coating application.
+Install hardware per instructions
+IF PART HAS ALODINE
+Using wiping cloths wet with alcohol, rub the surfaces to be mated with the alcohol-soaked cloth and immediately wipe dry with a clean cloth. Do not allow the solvent to evaporate to dryness. Repeat until cloth shows no evidence of contamination.
+Install hardware per instructions
+If Alodine is not required, it is acceptable to apply N/A in the router in the material record.
+Prep and Assembly of the “Grounding Bracket” (typical)
+Figure
+ASSEMBLY OF THE GROUNDING BRACKET
+Prep burnished area per above requirements.
+NOTE: Install the Electrical Connections Dry - No sealant Required.
+Install hardware as shown
+Torque Jam-Nut to 20-25 in-Lbs.
+Torque Self-locking Nut to 20-25 in-Lbs.
+Cable installation and Electrical Overcoat to be performed later.
+ELECTRICAL BOND CHECK
+Perform an electrical bond check for all grounding joints per QCF 4401-001
+FILLET SEAL BRACKET TO HINGE
+MATERIALS REQUIRED:
+SEALANT (FILLET)	(GD# AMS-S-8802TYIICLB-1/2)
+ACETONE 		(GD# 00095020000)
+WIPING CLOTHS	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Apply a continuous bead of sealant at the juncture of two adjoining parts or surfaces with a sealant nozzle.
+After applying the initial sealant, smooth to a fillet using a sealant application tool such as a non-metallic spatula. Aluminum tools may also be used to form the fillet, provided damage to the adjacent structure does not occur.
+On back-to-back angles and skin-to-angle joints where fillets are required, the fillet must be sufficient to insure no water is held in the joint after installation on the aircraft. See the sketch below.
+Clean up excess sealant during process with GAS115A1PT, and clean wiping cloths.
+Smoothing the Fillet may be accomplished using a 50/50 Mix of Isopropyl Alcohol and Water.
+After cleanup cover seal edges with flash breaker 1 tape if desired to protect the sealant during Cure to Tack Free Stage.” Do not remove tape for 24 hours if tape is used.
+Cure is 1 day at room temperature.
+Cure may be accelerated by allowing the part to flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 6 hours minimum. GAMPS 7115 Rev T Table VI: AMS-S-8802TYIICLB-1/2 requires a 24 hour flash off period followed by an elevated temperature cure of 6 hours at 125°F)
+Electrical overcoat PER EBM WITH GAB17G SEALANT DESIGNATOR A
+GAMPS 2605/7115
+MATERIALS REQUIRED:
+SEALANT (GD# AMS-S-8802TYIICLB-1/2)
+Record material data in router as instructed.
+Mix sealant per manufacturer's instructions. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+The sealant shall be applied to the washer(s), fastener head, locking devices (i.e., lock ring) and tail extending the sealant approximately 1/4-inch beyond the periphery of the components.
+NOTE: Application beyond the 1/4-inch head and tail periphery does not improve sealants protection
+of the fastener installation and adds unnecessary weight.
+The fastener tail shall consist of the driven head, collar, pin, and protruding threads, as applicable.
+Figure
+Cure is 1 day at room temperature.
+Cure may be accelerated by allowing the part to flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 6 hours minimum. GAMPS 7115 Rev T Table VI: AMS-S-8802TYIICLB-1/2 requires a 24 hour flash off period followed by an elevated temperature cure of 6 hours at 125°F)
+Fillet seal the RED highlighted area of Ground Stud (GAT11F) area only leaving the fastener head and tail exposed.
+SEALANT REWORK
+If the sealant is damaged or undersized and is within the sealant assembly time, remove
+damaged area using a plastic sealant removal tool, or a cleaning cloth. Solvents must not be used on the
+sealant prior to tack free time, if that happens just wait to perform the rework, then reapply in accordance with the applicable process, or add material and reshape. It is acceptable to only remove and reapply sealant in the damaged area.
+PROCESS 11 - MATCH DRILL COMPOSITE/METAL STACK UP - GAMPS 8316
+PC AVD
+1.0 SCOPE
+1.1 This specification establishes the requirements for match drilling into aircraft structure when the
+stack-up includes metals and/or composites. When the stack-up will not be separated after drilling
+for cleaning and deburring of faying surface, qualification of processes, facilities, and equipment is
+required.
+3.5.1 Hole Preparation
+3.5.1.1 General Requirements
+a. Parts shall be firmly clamped together prior to and during drilling, reaming, and fastening
+processes. The clamping method shall control faying surface contamination and control
+misalignment. The process will also control burrs and shall not mark or damage the finish or
+structure.
+b. The remaining wall thickness of the countersink holes shall be 0.030 inch minimum unless
+specified by engineering. Hole diameter can be verified before countersink operation when
+the remaining wall thickness of the hole diameter cannot be verified with standard
+measurement devices. See Figure 14.
+Figure : Countersink Wall Thickness and Wall Thickness
+Process (B) is to be used for each operation that uses hand drills through a structure.
+This must be done at each initial setup and after each bit change.
+PROCESS B
+USING PRODUCTION VERIFICATION PANEL, PERFORM THE FOLLOWING:
+Hold panel and drill (2) holes equal to the production hole size to be drilled.
+Present the verification panel to QA for approval to proceed
+Drilling operations in liquid shimmed area cannot begin until QA has inspected and granted authorization to proceed in the router
+These processes may also be used as an operator verification step for Drill setups that do not require the use of liquid shim, not required by GAC.
+PROCESS 12 - PREP AND SEAL BOND STATIC DISCHARGE BASE
+72P5522505N001, NOTE F1 (SMAK)
+PREPARATION AND BONDING
+MATERIALS REQUIRED: 									WIPING CLOTHS 	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+ACETONE 		(gd# 00095020000)
+320 GRIT SILICONE CARBIDE PAPER	(gd# 998889 or equivalent) in vending machine
+CHO-BOND primer		(GD# CHO-BOND 1086)
+CHO-BOND 1038		(GD# CHO-BOND 1038)
+SEALANT			(GD# PS 870 C-12)
+EPON 828			(GD# gac115aa2)
+CATALYST (DTA)		(GD# gac117g1)
+Prepare and bond grounding angle (static discharge base) with CHO Bond 1038 per the following instructions.
+Ensure holes have been drilled in Upper skin and substructure.
+Abrade an excess of 0.25 inch (minimum) around static discharge base. Keep abraded area to a minimum.
+Abrade the area being bonded with 240 grit or finer silicon carbide sandpaper and a sanding block (do not use any automation tools) until the copper mesh is exposed. Any FM300 that remains in the composite material is acceptable. Use 320 grit silicon carbide #998889.
+Verify maximum resistance exists between abraded surface and adjacent structure per QCF 4401-001.
+Using wiping cloths wet with acetone solvent, rub the surface to be bonded with the solvent soaked cloth and immediately wipe dry with a clean cloth. Do not allow the solvent to evaporate to dryness. Repeat until cloth shows no evidence of contamination.
+Ensure that the silicone adhesive is mixed per MAF 447 - Elevators Assembly Record material data in router as instructed. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Apply CHO bond 1086 primer (Part #2 of CHO Bond 1038) to both surfaces and allow to dry 30 minutes prior to application of 1038 adhesive. Do not touch area after cleaning.
+Ensure that the silicone adhesive is applied per MAF 447 - Elevators Assembly Apply a thin layer of 1038 silicone adhesive over the mating surfaces of the abraded area and static discharge base including exposed excess.
+Attach static discharger bases to Upper skin by wet installing (8) NAS1921C04S03 fasteners, using PS 870 C-12 sealant as the wet install material.
+NOTE: CHO-BOND 1038 has a maximum work life of 30 mINUtes.
+Cho bond 1038 adhesive squeeze out can be used as fillet material along the static discharge base edge.
+Allow adhesive to cure a minimum of 24 hours before verifying resistance. Verify resistance per GAMPS 2605, Section 3.5.3.2, maximum not to exceed between static discharger base and Upper skin per QCF 4401-001.
+After bonding is completed, brush coat an area on the Upper skin two (2) inches around the static discharge base with EPON 828 and DTA.
+Mix Epon 828 and DTA. Curing agent (ratio 100 to 11 parts by wt.) Record material data in router as instructed. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Cure at 130 Deg F for two hours minimum or room temperature until tack free. It is acceptable to loosely cover with tape to protect resin during room temperature cure.
+PROCESS 13 – PREP-BOND-SEAL DIMPLE WASHERS - GAMPS 7601
+PC SBON PER pl 72P5523501N001, note f4
+PREPARation and bonding
+MATERIALS REQUIRED: 									WIPING CLOTHS
+(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+ACETONE 			(GD# 00095020000)
+240 GRIT SILICONE CARBIDE	PAPER	(GD# 998137 or equivalent)
+CHO-BOND primer		(GD# CHO-BOND 1086)
+CHO-BOND 1038		(GD# CHO-BOND 1038)
+EPON 828			(GD# gac115aa2)
+CATALYST (DTA)		(GD# gac117g1)
+Ensure holes have been drilled in the Upper skin and substructure.
+Abrade the composite area being bonded with 240 grit or finer silicon carbide sandpaper and a sanding block (do not use any automation tools) until the copper mesh is exposed. Any FM300 that remains in the composite material is acceptable. Note: Abrade an excess of 0.25 inch around dimple washer. Verify the maximum resistance in QCF 4401-001 exists between abraded surface and the adjacent untouched skin.
+Clean abraded area and dimple washer per GAMPS 8210 (§ Process 9).
+Ensure that the silicone adhesive is mixed per MAF 447 - Elevators Assembly Record material data in router as instructed. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+Within 8 hours of surface cleaning (step 3), perform the following. Using a cotton swab, wipe a thin coating of the Cho Bond 1086 primer (Part #2 of CHO Bond 1038) to a maximum thickness of 0.2 mils, (0.0002”)  (§ Process 12) to both surfaces and allow to dry 15 to 30 minutes depending on environmental conditions (low humidity will require a longer drying time).
+Do not touch this area after cleaning.
+NOTE: CHO-BOND 1038 has a maximum work life of 30 mINUtes.
+Within 2 hours of CHO BOND 1086 primer application (step 5), perform the following. Apply the Cho Bond 1038 silicone sealant onto one faying surface using the minimum amount required to ensure total squeeze-out along the entire joint (§ Process 12)
+Wet install attaching hardware per process code SBON (§ Process 13) within 30 minutes of Cho Bond 1038 application.
+Allow the adhesive to cure a minimum of 24 hours before verifying resistance per QCF 4401-001.
+Verify resistance per GAMPS 2605, section 3.5.5. The measured value shall not exceed the value listed in QCF 4401-001  between Upper skin and the hinge fitting.
+Extruding the sealant directly from the tube, lay a bead in the joint area to form a fillet seal. Cho Bond 1038 adhesive squeeze out can be used as fillet material around all the above part edges per (§ Process 12). Clean excess fillet sealant from around the joint prior to full cure,168 hours.
+After bonding is completed, brush coat an area on the Upper skin two (2) inches around the dimple washer with EPON 828 and DTA. mix and cure per SR 1056 (130 Deg F for two hours minimum or room temperature until tack free. It is acceptable to loosely cover with tape to protect resin during room temperature cure).
+Touch up finish at exposed areas to match surrounding surface as required,
+PROCESS 14 – CHEMICAL CONVERSION COATING - GAMPS 6113
+MIL-DTL-81706, qpl 81706
+MATERIALS REQUIRED:
+ALODINE 1200s	(GD# A13011)
+WIPING CLOTHS 	(EMAP P25.6000)
+ACETONE 		(gd# 00095020000)
+Solvent clean shim surfaces using clean wiping cloths wet with Acetone. Use clean wiping cloths to dry surface before the solvent can dry.
+Apply chromate conversion coating (GD# A13011) using pen and a 50% overlap stroke to ensure coverage.
+Allow the first coat to dry completely.
+Apply a second 90° cross coat within 5 minutes of first coating application.
+Record material used and lot number as instructed in the router.
+PROCESS 15 – OVERCOAT FASTENER TAILS PER GAMPS 7115
+SEALANT DESIGNATOR MIL-PRF-81733 GRP F, PR III - GAMPS 7115
+MATERIALS REQUIRED:
+SEALANT		(GD# PS 870 B-2)
+ACETONE 		(GD# 00095020000)
+WIPING CLOTHS 	(GD# 997834 or equivalent to AMS 3819 Class 2, Grade A Form 1)
+Record material data in router as instructed.
+Remove aluminum chips and loose dirt before solvent wiping.
+Clean the fastener tail, washer(s), locking device, and surrounding structure per GAMPS 4122.
+Using wiping cloths wet with acetone, rub the surface to be cleaned with the solvent-soaked cloth and immediately wipe dry with a clean cloth. do not allow the solvent to evaporate to dryness.
+Apply sealant within 4 hours of cleaning. If 4 hours is exceeded, SHALL be re-cleaned per GAMPS 4122 before proceeding.
+Do NOT touch cleaned surfaces after solvent wiping.
+Mix sealant per MAF447 Elevators Assy. Record applicable information on MAF101 & EHS STICKER and stick it to the container.
+The sealant shall be applied to the washer(s), fastener head, locking devices (i.e., lock ring) and tail extending the sealant approximately 1/4-inch beyond the periphery of the components.
+NOTE: Application beyond the 1/4-inch head and tail periphery does not improve sealants protection
+of the fastener installation and adds unnecessary weight.
+The fastener tail shall consist of the driven head, collar, pin, and protruding threads, as applicable.
+Figure
+After cleanup cover seal edges with flash breaker 1 tape if desired to protect the sealant during Cure to Tack Free Stage. Do not remove tape for 24 hours if tape is used.
+Cure is 3 days at room temperature.
+Cure may be accelerated by allowing the part to flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 8 hours minimum. GAMPS 7115 Rev T Table VI: P/S 870 B-2 requires a 24 hour flash off period followed by an elevated temperature cure of 8 hours at 125°F)
+SEALANT REWORK
+If the sealant is damaged or undersized and is within the sealant assembly time, remove damaged area using a plastic sealant removal tool, or a cleaning cloth. Solvents must not be used on the sealant prior to tack free time, if that happens just wait to perform the rework, then reapply in accordance with the applicable process, or add material and reshape. It is acceptable to only remove and reapply sealant in the damaged area.
+APPENDIX A:  Elevator Fastener Removal (Method “B”)
+Note: Fastener Removal requires PRE-QUALIFICATION. Do not attempt to remove fasteners unless you have been qualified.
+Fastener Removal is to be accomplished using the “e-drill if available and accessible, if not use Method “B”.
+Required Tools:
+Drill Block
+#40 Drill Bit & Bushing
+#24 Drill Bit & Bushing
+#30 Pin Punch
+Hammer
+Glass Tape
+Hair Dryer
+Not Pictured:
+Bombsite
+Hot Glue Gun
+Method:
+Place Glass Tape around fastener.
+Using Bombsite, locate the drill block centered on the stem.
+Clean Up
+Pull tape to remove from part.
+If necessary, use hairdryer to heat glue on drill block, then peel off the drill block.
+Check and Complete the Following:
+Recheck the hole and make sure not oversized.
+Fill out appropriate paperwork. (MAF 663).
+De-FOD the Unit.
+-- Table 1 --
+ | After completion of each part (startup / pre FAI completion)
+ | Every 6 months (after full FAI completion)
+X | Annual (mature program – units shipped for ≥ 24 consecutive months)
+-- Table 2 --
+ | January |  | February |  | March |  | April |  | May | X | June
+ | July |  | August |  | September |  | October |  | November |  | December
+-- Table 3 --
+WI 4401-ASSEMBLY PROCESS
+Work Instructions  
+Process Specification for:
+Aerostructures Rudder & Elevator ASSEMBLY PROCESSES
+-- Table 4 --
+EXPORT CONTROLLED
+Warning – This document contains technical data and / or technology whose export or disclosure to non-U.S. Persons, wherever located, is restricted by the International Traffic in Arms Regulations (ITAR) (22 C.F.R. Section 120-130) or the Export Administration Regulations (EAR) (15 C.F.R. Section 730-774). This document CANNOT be exported (e.g., provided to a supplier outside of the United States) or disclosed to a non-U.S. Person, wherever located, until a final jurisdiction and classification determination has been completed, and any required U.S. Government approvals have been obtained. Violations are subject to severe criminal penalties.
+-- Table 5 --
+The following shall be filled out upon issue of hard copy to floor: | The following shall be filled out upon issue of hard copy to floor: | The following shall be filled out upon issue of hard copy to floor: | Initials | Date
+Book location (plant/area): |  |  |  | 
+Total number of locations for this document: | Total number of locations for this document: |  |  | 
+Verify all locations recorded at
+P:\Production control charts\WI TUI LOG\##MASTER Revision Listing: | Verify all locations recorded at
+P:\Production control charts\WI TUI LOG\##MASTER Revision Listing: | Verify all locations recorded at
+P:\Production control charts\WI TUI LOG\##MASTER Revision Listing: |  | 
+Verify Effective Documents table updated for all routers that reference this document | Verify Effective Documents table updated for all routers that reference this document | Verify Effective Documents table updated for all routers that reference this document |  | 
+-- Table 6 --
+ | SIGNATURE
+Program Engineer: | Al Thiel
+Quality Engineer: | Brian Mabe
+Program Manager: | Ryan Miller
+Program Engineering Manager (approval required for initial rev): | Ric Hudgins
+Quality Engineering Manager (approval required for initial rev): | Tanner Pote
+-- Table 7 --
+Date | Revision Letter | Description of Changes | Revised By | Approval
+12/11/2023 | - | Initial Release. Was WI BPS4401-ASSEMBLY PROCESS | J Maggart | MasterControl
+01/30/2025 | - | Reviewed for redlines, no changes needed. | A Smith | SharePoint
+03/09/2026 | A | IS: “Mix per MAF 447 – Elevators Assy WAS: ”Mix sealant per manufacturer’s  instructions”. Throughout
+PROCESS 2: Updated to add Aluminum Shim Part Numbers 4401ED0011-1, 4401ED0011-3, 4401ED0011-5, 4401ED0011-7, & 4401ED0011-9. Removed  “GAS540EE115T480 shim will be used for the fabrication of titanium shims” added “If no hard shims are required you may N/A the lines in the router”.
+Process 6: Added ‘or equivalent’ in reference to masking tape and steel wire 
+Process 9, 10, & 12: Added ‘or equivalent’ in reference to sandpaper
+Process 10: Added Do not use Cho-Bond on Ground Stud stack up fasteners. Removed CHO-BOND 1038 & CHO-BOND 1086. Added “If no Alodine (Chromate Conversion)”. Added “Clean bare aluminum with acetone before applying Alodine”. Added “Fillet seal the RED highlighted area of Ground Stud (GAT11F) only leaving the fastener head and tail exposed”. Torque Jam-nut to 20-25 in-lbs.
+Process 13: Added ‘or equivalent’ to reference to sandpaper. IS: PS 870 B-2, WAS: MIL-PRF-81733-B-1/2. IS: per MAF 447 Elevators Assy WAS: per manufacturer’s instructions 
+Appendix “A” added “Fastener Removal is to be accomplished using the “e-drill if available and accessible, if not use Method “B”. | Al Thiel | SharePoint
+05/08/2026 | B | Process 15 added
+P/S 815 M corrected to reflect newest part number. | SharePoint | L. Puryear
+06/21/2026 | C | Cover Page: Removed - and approved by Raytheon.  Quality Manager IS -Tanner Pote. WAS Mike Reid: 
+Process 1: Removed P/S 815M from list of materials. IS: “After cleanup cover seal edges with flash breaker 1 tape if desired to protect the sealant during Cure to Tack Free Stage.” Was: Apply Tac-Free accelerator P/S 815M after cleanup or cover seal edges with Flash Breaker 1 tape. 3 places.
+Process 10: Removed P/S 815M from list of materials. IS: “After cleanup cover seal edges with flash breaker 1 tape if desired to protect the sealant during Cure to Tack Free Stage.” Was: Apply Tac-Free accelerator P/S 815M after cleanup or cover seal edges with Flash Breaker 1 tape.   Added Fillet Seal Electrical Bracket to Hinge.
+IS: QCF 4401-001 WAS: IP 4401-001, or 4401-002 
+Process 6: Added GAMPS 7115 Rev T Table VI: P/S 870 B-2 requires a 24 hour flash off period followed by an elevated temperature cure of 8 hours at 125°F)
+Process 10: Added GAMPS 7115 Rev T Table VI: AMS-S-8802TYIICLB-1/2 requires a 24 hour flash off period followed by an elevated temperature cure of 6 hours at 125°F)
+Process 11: Removed Process A. Quackenbush set up verification panel. IS: Verification Panel was 4401 GB 0030 Panel.
+Process 12: IS QCF 4401-001 WAS QCF 4401 2 PLCS
+Process 13: IS QCF 4401-001 WAS QCF 4401 3 PLCS.
+Process 15: IS: “After cleanup cover seal edges with flash breaker 1 tape if desired to protect the sealant during Cure to Tack Free Stage.” Do not remove tape for 24 hours if tape is used. Was: Optional to use P/S 815M tack free accel
+Added GAMPS 7115 Rev T Table VI: P/S 870 B-2 requires a 24 hour flash off period followed by an elevated temperature cure of 8 hours at 125°F) | Al Thiel | MMDCC
+-- Table 8 --
+FASTENER | WASHER
+GAB510GT6B | NAS620C10L
+GAB510GT8B | NAS620C416L
+GAF510Y08 | NAS620A8L
+GAF510Y3 | NAS620A10L
+GAB511AB6B | NAS1149D0316K
+GAB511AD5B | NAS620C8L
+GAB511AD6B | NAS620C10L
+MS21140S04 | NAS1149CN416R
+MS21141S04 | NAS1149CN516R
+NAS1919C04S | NAS1149DN416K
+MS20605 | NAS620C3L
+-- Table 9 --
+NOMINAL DIAMETER | HI-LITE | HI-LITE
+NOMINAL DIAMETER | MIN | MAX
+3/16" | 0.280 | 0.362
+1/4" | 0.310 | 0.392
+-- Table 10 --
+NOMINAL DIAMETER | MAX 
+GAP
+NOMINAL DIAMETER | MAX 
+GAP
+3/16" | 0.004
+1/4" | 0.005
+-- Table 11 --
+NOTES:
+1/ Collar gap allowable for oversize fastener usage must be the gap specified for the standard fastener diameter (i.e., for an 11/32 pin use 5/16 criteria of 0.006).
+-- Table 12 --
+PROTRUDING HEAD | FLUSH HEAD
+NAS 1669 | NAS 1670
+NAS 1671 | NAS 1672
+GAF510Y | GAF511AB
+ | GAF511AC
+ | GAF511BC

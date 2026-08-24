@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RTG FORECASTER — FORECAST MATRIX</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg:       #0a0c0e;
+    --bg2:      #111418;
+    --bg3:      #1a1f26;
+    --border:   #1e2730;
+    --border2:  #2a3440;
+    --amber:    #f5a623;
+    --amber-dim:#7a5210;
+    --green:    #39ff6e;
+    --green-dim:#1a4a2a;
+    --red:      #ff4455;
+    --red-dim:  #4a1020;
+    --cyan:     #00d4ff;
+    --white:    #e8edf2;
+    --grey:     #5a6a78;
+    --grey2:    #3a4858;
+    --purple:   #b87fff;
+    --orange:   #ff8c2a;
+    --label:    #8ab4c8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  /* ── CMD BAR ─────────────────────────────── */
+  .cmd-bar {
+    background: var(--bg2);
+    border-bottom: 2px solid var(--amber);
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .cmd-logo { color: var(--amber); font-weight: 700; font-size: 13px; letter-spacing: 0.12em; white-space: nowrap; }
+  .cmd-crumb a { color: var(--cyan); text-decoration: none; }
+  .cmd-crumb { color: var(--grey); font-size: 11px; }
+  .cmd-input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 3px 8px;
+    outline: none;
+  }
+  .cmd-input::placeholder { color: var(--grey); }
+  .fn-keys { display: flex; gap: 3px; }
+  .fk {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--label);
+    font-size: 9px;
+    padding: 2px 5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .fk.active { border-color: var(--amber); color: var(--amber); }
+  .fk:hover  { background: var(--border); color: var(--white); }
+
+  /* ── CONTROLS BAR ────────────────────────── */
+  .ctrl-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border2);
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 10px;
+    position: sticky;
+    top: 37px;
+    z-index: 190;
+  }
+  .ctrl-label { color: var(--label); text-transform: uppercase; letter-spacing: 0.1em; font-size: 9px; }
+  .ctrl-val   { color: var(--white); font-weight: 600; }
+  .ctrl-sep   { color: var(--border2); }
+  .ctrl-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--label);
+    font-family: inherit;
+    font-size: 9px;
+    padding: 2px 7px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .ctrl-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+  .ctrl-btn.danger { border-color: var(--red); color: var(--red); }
+  .ctrl-right { margin-left: auto; display: flex; gap: 6px; }
+
+  /* ── LEGEND BAR ─────────────────────────── */
+  .legend-bar {
+    background: #080a0c;
+    border-bottom: 1px solid var(--border);
+    padding: 3px 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 9px;
+    color: var(--grey);
+    position: sticky;
+    top: 66px;
+    z-index: 180;
+  }
+  .leg { display: flex; align-items: center; gap: 4px; }
+  /* Critic fix #4: only actionable states get bg fill; passive use text-only */
+  .leg-chip {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 0 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .lc-done  { color: var(--green); }
+  .lc-wip   { background: var(--amber); color: #000; }
+  .lc-date  { color: var(--grey); }
+  .lc-cure  { color: var(--purple); }
+  .lc-gate  { background: var(--orange); color: #000; }
+  .lc-stall { background: var(--red); color: #000; }
+
+  /* ── SCROLL CONTAINER ───────────────────── */
+  .matrix-scroll {
+    overflow: auto;
+    height: calc(100vh - 130px);
+    padding-bottom: 36px;
+  }
+
+  /* ── THE TABLE ──────────────────────────── */
+  .matrix-table {
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+    font-size: 10px;
+    min-width: max-content;
+  }
+
+  /* Sticky left column — critic fix #5: strict ch widths */
+  .col-op {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: var(--bg2);
+    border-right: 2px solid var(--border2);
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* ── COMPRESSED 3-ROW HEADER (Critic fix #2) ── */
+  /* Row 1: [GROUP] SERIAL (SO#) */
+  /* Row 2: CTR: date  RTG: date */
+  /* Row 3: P50: date [+N / -N / 0] */
+  thead tr { border-bottom: 1px solid var(--border); }
+
+  .hdr-grp-label {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border2);
+    position: sticky;
+    top: 130px;
+    z-index: 15;
+  }
+
+  /* Group spanning cells */
+  .grp-lh   { background: #0a1420; border-bottom: 2px solid var(--cyan);   color: var(--cyan);   font-size: 9px; font-weight: 700; letter-spacing: 0.15em; padding: 3px 0; text-align: center; }
+  .grp-rh   { background: #0a1a10; border-bottom: 2px solid var(--green);  color: var(--green);  font-size: 9px; font-weight: 700; letter-spacing: 0.15em; padding: 3px 0; text-align: center; }
+  .grp-bump { background: #160808; border-bottom: 2px solid var(--red);    color: var(--red);    font-size: 9px; font-weight: 700; letter-spacing: 0.15em; padding: 3px 0; text-align: center; }
+  .grp-op   { background: var(--bg2); text-align: left; padding-left: 6px; font-size: 9px; color: var(--label); letter-spacing: 0.1em; }
+
+  /* Row 1: serial + SO */
+  .hdr1 { background: var(--bg3); }
+  .hdr1 .col-hdr { padding: 4px 4px 2px; text-align: center; border-left: 1px solid var(--border); vertical-align: bottom; }
+  .hdr1 .hdr-serial { color: var(--white); font-weight: 700; font-size: 11px; display: block; }
+  .hdr1 .hdr-so     { color: var(--grey);  font-size: 9px;  display: block; }
+
+  /* Row 2: CTR + RTG */
+  .hdr2 { background: var(--bg3); }
+  .hdr2 .col-hdr { padding: 2px 4px; text-align: center; border-left: 1px solid var(--border); font-size: 9px; }
+  .hdr2-ctr { color: var(--grey);  }
+  .hdr2-rtg { color: var(--amber); font-weight: 600; }
+
+  /* Row 3: P50 + inline delta — most important row */
+  .hdr3 { background: #0a0d0a; border-bottom: 2px solid var(--border2); }
+  .hdr3 .col-hdr { padding: 3px 4px; text-align: center; border-left: 1px solid var(--border); font-size: 10px; font-weight: 700; }
+  .p50-late  { color: var(--amber);  }
+  .p50-early { color: var(--green);  }
+  .p50-zero  { color: var(--label);  }
+  .delta-pos { color: var(--red);    font-size: 9px; }
+  .delta-neg { color: var(--green);  font-size: 9px; }
+  .delta-zer { color: var(--grey);   font-size: 9px; }
+
+  /* Group border overrides */
+  .lh-border  { border-left: 2px solid var(--cyan)  !important; }
+  .rh-border  { border-left: 2px solid var(--green) !important; }
+  .bmp-border { border-left: 2px solid var(--red)   !important; }
+
+  /* ── MILESTONE BANDS (Critic fix #1: no bg fill, typographic/structural only) ── */
+  .milestone-band td {
+    background: #0b0f13;
+    color: var(--grey2);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 3px 6px;
+    border-top: 1px solid var(--border2);
+    border-bottom: 1px solid var(--border2);
+  }
+  /* Typographic accent via left border + text accent per phase */
+  .mb-aj  td { border-left: 3px solid var(--cyan);   }
+  .mb-a1  td { border-left: 3px solid #3a5a3a;       }
+  .mb-a2  td { border-left: 3px solid #5a3a6a;       }
+  .mb-fs  td { border-left: 3px solid var(--amber-dim); }
+  /* Phase code accent */
+  .mb-aj  td .ph { color: var(--cyan);   }
+  .mb-a1  td .ph { color: #4a8a4a;       }
+  .mb-a2  td .ph { color: #8a4aaa;       }
+  .mb-fs  td .ph { color: var(--amber);  }
+
+  /* ── OP ROWS ────────────────────────────── */
+  .op-row { border-bottom: 1px solid var(--border); }
+  .op-row:hover td { background: #0e1318 !important; }
+
+  /* Critic fix #5: strict ch-width columns within sticky cell */
+  .op-cell {
+    background: var(--bg2);
+    padding: 4px 6px;
+    vertical-align: top;
+  }
+  .op-line1 { display: flex; gap: 0; align-items: baseline; }
+  .op-num   {
+    color: var(--grey);
+    font-size: 9px;
+    display: inline-block;
+    width: 4ch;
+    flex-shrink: 0;
+  }
+  .op-sep   { color: var(--border2); margin: 0 2px; }
+  .op-desc  {
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 500;
+    display: inline-block;
+    width: 15ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .op-line2 {
+    font-size: 9px;
+    margin-top: 1px;
+    display: flex;
+    gap: 4px;
+    color: var(--grey2);
+  }
+  .op-branch { color: var(--border2); }
+  .op-wc    {
+    color: var(--cyan);
+    display: inline-block;
+    width: 7ch;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .op-wc-warn { color: var(--red) !important; }
+  .op-hrs   { color: var(--grey); display: inline-block; width: 5ch; }
+
+  /* ── DATA CELLS ─────────────────────────── */
+  .data-cell {
+    min-width: 68px;
+    max-width: 80px;
+    border-left: 1px solid var(--border);
+    text-align: center;
+    padding: 4px 3px;
+    vertical-align: middle;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  /* Critic fix #4: passive states = dark bg + text color only */
+  .cell-done {
+    background: var(--bg);
+    color: var(--green);
+    font-weight: 700;
+  }
+  .cell-upcoming {
+    background: var(--bg);
+    color: var(--grey);
+  }
+  .cell-cure {
+    /* Purple text only, no bg fill — keeps it passive but distinct */
+    background: var(--bg);
+    color: var(--purple);
+    font-size: 9px;
+  }
+
+  /* Critic fix #3: WIP = solid amber bg, black text, NO smooth animation */
+  /* If blinking desired, use steps(1) on an asterisk, not background */
+  .cell-wip {
+    background: var(--amber);
+    color: #000;
+    font-weight: 700;
+    font-size: 10px;
+  }
+  .cell-wip::after {
+    content: '*';
+    color: #000;
+    font-weight: 700;
+    animation: blink-hard 1s steps(1) infinite;
+    margin-left: 1px;
+  }
+  @keyframes blink-hard {
+    0%, 49% { opacity: 1; }
+    50%,100% { opacity: 0; }
+  }
+
+  /* Critic fix #4: actionable states = solid bg + high-contrast text */
+  .cell-gate {
+    background: var(--orange);
+    color: #000;
+    font-weight: 700;
+    font-size: 10px;
+  }
+  .cell-stall {
+    background: var(--red);
+    color: #000;
+    font-weight: 700;
+    font-size: 10px;
+  }
+  .cell-na {
+    background: var(--bg);
+    color: var(--border2);
+  }
+
+  /* Cure row: purple-tinted left column only */
+  .cure-row .op-cell { background: #100c1a; }
+  .cure-row .op-desc { color: var(--purple); }
+  .cure-row .op-line2 { color: #5a4a7a; }
+
+  /* Gate row: orange-tinted left column only */
+  .gate-row .op-cell { background: #130a04; }
+  .gate-row .op-desc { color: var(--orange); }
+  .gate-row .op-line2 { color: #6a4020; }
+
+  /* ── BUMPED SECTION ─────────────────────── */
+  .bump-hdr td {
+    background: #0e0608;
+    border-top: 2px solid var(--red);
+    border-bottom: 1px solid var(--red);
+    color: var(--red);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    padding: 4px 8px;
+    font-weight: 700;
+  }
+  .bump-unit-cell {
+    background: #0e0608;
+    padding: 6px 8px;
+    vertical-align: middle;
+  }
+  .reassign-btn {
+    background: none;
+    border: 1px dashed var(--grey2);
+    color: var(--grey);
+    font-family: inherit;
+    font-size: 9px;
+    padding: 1px 6px;
+    cursor: pointer;
+    margin-top: 3px;
+    display: inline-block;
+  }
+  .reassign-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* ── STATUS LINE ────────────────────────── */
+  .statusline {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #05070a;
+    border-top: 1px solid var(--border2);
+    padding: 3px 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 9px;
+    color: var(--grey);
+    z-index: 300;
+  }
+  .sl-ok   { color: var(--green); }
+  .sl-warn { color: var(--amber); }
+  .sl-err  { color: var(--red);   }
+  .sl-sep  { color: var(--border2); }
+  .sl-right { margin-left: auto; }
+
+  /* ── TOOLTIP ────────────────────────────── */
+  [data-tip] { position: relative; cursor: help; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--white);
+    font-size: 9px;
+    padding: 4px 8px;
+    white-space: nowrap;
+    z-index: 999;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- CMD BAR -->
+<div class="cmd-bar">
+  <div class="cmd-logo">RTG//MATRIX</div>
+  <div class="cmd-crumb"><a href="C_terminal_landing.html">F1 DASH</a> &rsaquo; <span style="color:var(--amber)">F2 MATRIX</span></div>
+  <input class="cmd-input" type="text" value="531335" placeholder="531335&gt; filter serial / op...">
+  <div class="fn-keys">
+    <div class="fk"><a href="C_terminal_landing.html" style="color:inherit;text-decoration:none">F1 DASH</a></div>
+    <div class="fk active">F2 MATRIX</div>
+    <div class="fk">F3 LEVERS</div>
+    <div class="fk">F4 WC-LOAD</div>
+    <div class="fk">F5 MRB</div>
+    <div class="fk">F9 EXPORT</div>
+  </div>
+</div>
+
+<!-- CONTROLS BAR -->
+<div class="ctrl-bar">
+  <span class="ctrl-label">PROG</span><span class="ctrl-val">531335 G500 ELEVATOR</span>
+  <span class="ctrl-sep">|</span>
+  <span class="ctrl-label">MODEL</span><span class="ctrl-val" style="color:var(--amber)">EMPIRICAL &middot; n=8</span>
+  <span class="ctrl-sep">|</span>
+  <span class="ctrl-label">BIAS ADJ</span><span class="ctrl-val" style="color:var(--amber)">+7.0d APPLIED</span>
+  <span class="ctrl-sep">|</span>
+  <span class="ctrl-label">VIEW</span>
+  <button class="ctrl-btn">ALL OPS</button>
+  <button class="ctrl-btn">MILESTONES</button>
+  <button class="ctrl-btn">CURES</button>
+  <div class="ctrl-right">
+    <button class="ctrl-btn">REASSIGN SLOT</button>
+    <button class="ctrl-btn danger">BUMP UNIT</button>
+    <button class="ctrl-btn">REFRESH IFS</button>
+  </div>
+</div>
+
+<!-- LEGEND BAR -->
+<div class="legend-bar">
+  <span style="color:var(--label);text-transform:uppercase;letter-spacing:0.1em;">KEY:</span>
+  <div class="leg"><span class="leg-chip lc-done">C</span><span>DONE</span></div>
+  <div class="leg"><span class="leg-chip lc-wip">WIP</span><span>IN-WORK</span></div>
+  <div class="leg"><span class="leg-chip lc-date">09/04</span><span>UPCOMING</span></div>
+  <div class="leg"><span class="leg-chip lc-cure">&#8987; 09/04</span><span>CURE DWELL</span></div>
+  <div class="leg"><span class="leg-chip lc-gate">GATE</span><span>QUALITY GATE</span></div>
+  <div class="leg"><span class="leg-chip lc-stall">MRB</span><span>STALLED</span></div>
+  <span style="color:var(--border2)">|</span>
+  <span>&Delta; inline with P50: <span style="color:var(--red)">+7</span>=LATE &nbsp; <span style="color:var(--green)">-2</span>=EARLY &nbsp; <span style="color:var(--grey)">0</span>=ON TGT</span>
+  <span style="margin-left:auto;color:var(--grey)">HOVER CELL FOR DETAIL &nbsp;|&nbsp; SCROLL &rarr;</span>
+</div>
+
+<!-- MATRIX -->
+<div class="matrix-scroll">
+<table class="matrix-table">
+  <thead>
+    <!-- ROW 0: GROUP SPANS -->
+    <tr class="hdr-grp-label">
+      <td class="col-op grp-op">OPS &darr; &nbsp; UNITS &rarr;</td>
+      <!-- LH GROUP: 6 units -->
+      <td class="grp-lh lh-border" colspan="6">&#9632;&#9632; LH — LEFT-HAND ELEVATOR</td>
+      <!-- RH GROUP: 5 units -->
+      <td class="grp-rh rh-border" colspan="5">&#9632;&#9632; RH — RIGHT-HAND ELEVATOR</td>
+      <!-- BUMP: 1 -->
+      <td class="grp-bump bmp-border" colspan="1">BUMP</td>
+    </tr>
+
+    <!-- ROW 1: SERIAL + SO (compressed from 2 rows → 1, critic fix #2) -->
+    <tr class="hdr1">
+      <td class="col-op col-hdr" style="text-align:left;padding:4px 6px;font-size:9px;color:var(--label);">SERIAL &nbsp; (SHOP ORDER)</td>
+      <!-- LH -->
+      <td class="col-hdr lh-border"><span class="hdr-serial">LH 232</span><span class="hdr-so">1455596</span></td>
+      <td class="col-hdr"><span class="hdr-serial">LH 233</span><span class="hdr-so">1456550</span></td>
+      <td class="col-hdr"><span class="hdr-serial">LH 229</span><span class="hdr-so">1452748</span></td>
+      <td class="col-hdr"><span class="hdr-serial">LH 234</span><span class="hdr-so">1457061</span></td>
+      <td class="col-hdr"><span class="hdr-serial">LH 235</span><span class="hdr-so">1458317</span></td>
+      <td class="col-hdr"><span class="hdr-serial">LH 236</span><span class="hdr-so">1459236</span></td>
+      <!-- RH -->
+      <td class="col-hdr rh-border"><span class="hdr-serial">RH 227</span><span class="hdr-so">1452749</span></td>
+      <td class="col-hdr"><span class="hdr-serial">RH 231</span><span class="hdr-so">1456551</span></td>
+      <td class="col-hdr"><span class="hdr-serial">RH 232</span><span class="hdr-so">1457063</span></td>
+      <td class="col-hdr"><span class="hdr-serial">RH 233</span><span class="hdr-so">1458318</span></td>
+      <td class="col-hdr"><span class="hdr-serial">RH 235</span><span class="hdr-so">1460168</span></td>
+      <!-- BUMP -->
+      <td class="col-hdr bmp-border" style="color:var(--red);"><span class="hdr-serial" style="color:var(--red);">LH 238</span><span class="hdr-so" style="color:var(--red-dim);">MRB HOLD</span></td>
+    </tr>
+
+    <!-- ROW 2: CTR + RTG (compressed from 2 rows → 1, critic fix #2) -->
+    <tr class="hdr2">
+      <td class="col-op col-hdr" style="text-align:left;padding:3px 6px;font-size:9px;color:var(--label);">
+        <span class="hdr2-ctr">CTR</span> / <span class="hdr2-rtg">RTG TGT</span>
+      </td>
+      <!-- LH -->
+      <td class="col-hdr lh-border"><span class="hdr2-ctr">08/15</span> <span class="hdr2-rtg">08/21</span></td>
+      <td class="col-hdr"><span class="hdr2-ctr">08/22</span> <span class="hdr2-rtg">08/28</span></td>
+      <td class="col-hdr"><span class="hdr2-ctr">09/01</span> <span class="hdr2-rtg">09/04</span></td>
+      <td class="col-hdr"><span class="hdr2-ctr">09/08</span> <span class="hdr2-rtg">09/11</span></td>
+      <td class="col-hdr"><span class="hdr2-ctr">09/15</span> <span class="hdr2-rtg">09/18</span></td>
+      <td class="col-hdr"><span class="hdr2-ctr">09/22</span> <span class="hdr2-rtg">09/25</span></td>
+      <!-- RH -->
+      <td class="col-hdr rh-border"><span class="hdr2-ctr">08/15</span> <span class="hdr2-rtg">08/21</span></td>
+      <td class="col-hdr"><span class="hdr2-ctr">08/22</span> <span class="hdr2-rtg">08/28</span></td>
+      <td class="col-hdr"><span class="hdr2-ctr">09/01</span> <span class="hdr2-rtg">09/04</span></td>
+      <td class="col-hdr"><span class="hdr2-ctr">09/08</span> <span class="hdr2-rtg">09/11</span></td>
+      <td class="col-hdr"><span class="hdr2-ctr">09/15</span> <span class="hdr2-rtg">09/18</span></td>
+      <!-- BUMP -->
+      <td class="col-hdr bmp-border" style="color:var(--grey);">— / —</td>
+    </tr>
+
+    <!-- ROW 3: P50 FORECAST + INLINE DELTA (the most critical row, critic fix #2) -->
+    <tr class="hdr3">
+      <td class="col-op col-hdr" style="text-align:left;padding:3px 6px;font-size:9px;color:var(--green);letter-spacing:0.08em;background:var(--bg2);">
+        &#9654; FORECAST P50 [&Delta;d]
+      </td>
+      <!-- LH — late=amber, early=green, zero=grey; delta inline in brackets -->
+      <td class="col-hdr p50-late   lh-border"  data-tip="LH232: P50=08/28, RTG=08/21, LATE 7d">08/28 <span class="delta-pos">[+7]</span></td>
+      <td class="col-hdr p50-late"              data-tip="LH233: P50=09/01, RTG=08/28, LATE 4d">09/01 <span class="delta-pos">[+4]</span></td>
+      <td class="col-hdr p50-early"             data-tip="LH229: P50=09/02, RTG=09/04, EARLY 2d">09/02 <span class="delta-neg">[-2]</span></td>
+      <td class="col-hdr p50-zero"              data-tip="LH234: P50=09/11, RTG=09/11, ON TARGET">09/11 <span class="delta-zer">[0]</span></td>
+      <td class="col-hdr p50-early"             data-tip="LH235: P50=09/15, RTG=09/18, EARLY 3d">09/15 <span class="delta-neg">[-3]</span></td>
+      <td class="col-hdr p50-early"             data-tip="LH236: P50=09/16, RTG=09/25, EARLY 9d">09/16 <span class="delta-neg">[-9]</span></td>
+      <!-- RH -->
+      <td class="col-hdr p50-late   rh-border"  data-tip="RH227: P50=08/22, RTG=08/21, LATE 1d">08/22 <span class="delta-pos">[+1]</span></td>
+      <td class="col-hdr p50-early"             data-tip="RH231: P50=08/27, RTG=08/28, EARLY 1d">08/27 <span class="delta-neg">[-1]</span></td>
+      <td class="col-hdr p50-zero"              data-tip="RH232: P50=09/04, RTG=09/04, ON TARGET">09/04 <span class="delta-zer">[0]</span></td>
+      <td class="col-hdr p50-early"             data-tip="RH233: P50=09/08, RTG=09/11, EARLY 3d">09/08 <span class="delta-neg">[-3]</span></td>
+      <td class="col-hdr p50-early"             data-tip="RH235: P50=09/15, RTG=09/18, EARLY 3d">09/15 <span class="delta-neg">[-3]</span></td>
+      <!-- BUMP -->
+      <td class="col-hdr bmp-border" style="color:var(--red);background:#100408;font-size:9px;">BUMPED<br><span style="font-size:8px;color:var(--grey);">IDLE 9d</span></td>
+    </tr>
+  </thead>
+
+  <tbody>
+    <!-- ═══ MILESTONE BAND: ASSY JIG [AJ] ═══ (critic fix #1: typographic only, no fill) -->
+    <tr class="milestone-band mb-aj">
+      <td class="col-op" colspan="13" style="border-right:none;">
+        <span class="ph">AJ</span> &nbsp; &#9472;&#9472;&#9472; ASSY JIG — DETAIL / LAYUP PHASE &#9472;&#9472;&#9472;
+      </td>
+    </tr>
+
+    <!-- OP 100 -->
+    <tr class="op-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num">100 </span><span class="op-sep">|</span>
+          <span class="op-desc">Mark Data Plate</span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc">WC 248 </span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">0.8h</span>
+        </div>
+      </td>
+      <td class="data-cell cell-done   lh-border" data-tip="COMPLETE 08/01">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/08">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 07/22">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/14">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/02">09/02</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/03">09/03</td>
+      <td class="data-cell cell-done   rh-border" data-tip="COMPLETE 07/20">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/05">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/12">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/18">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/02">09/02</td>
+      <td class="data-cell cell-stall bmp-border" data-tip="MRB HOLD — IDLE 9d">MRB</td>
+    </tr>
+
+    <!-- OP 600 -->
+    <tr class="op-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num">600 </span><span class="op-sep">|</span>
+          <span class="op-desc">Locate &amp; Shim</span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc">WC 32684</span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">17.0h</span>
+        </div>
+      </td>
+      <td class="data-cell cell-done   lh-border" data-tip="COMPLETE 08/03">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/10">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 07/24">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/16">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/04">09/04</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/05">09/05</td>
+      <td class="data-cell cell-done   rh-border" data-tip="COMPLETE 07/22">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/07">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/14">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/20">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/04">09/04</td>
+      <td class="data-cell cell-stall bmp-border" data-tip="MRB HOLD">MRB</td>
+    </tr>
+
+    <!-- OP 800 -->
+    <tr class="op-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num">800 </span><span class="op-sep">|</span>
+          <span class="op-desc">Liquid Shim Spar</span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc">WC 32684</span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">6.5h</span>
+        </div>
+      </td>
+      <td class="data-cell cell-done   lh-border" data-tip="COMPLETE 08/05">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/12">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 07/26">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/18">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/05">09/05</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/06">09/06</td>
+      <td class="data-cell cell-done   rh-border" data-tip="COMPLETE 07/24">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/09">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/16">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 08/21">08/21</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/05">09/05</td>
+      <td class="data-cell cell-stall bmp-border" data-tip="MRB HOLD">MRB</td>
+    </tr>
+
+    <!-- CURE ROW -->
+    <tr class="op-row cure-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num" style="color:var(--purple);">&#8987;   </span><span class="op-sep" style="color:var(--purple);">|</span>
+          <span class="op-desc" style="color:var(--purple);">Liq Shim Cure</span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc" style="color:var(--purple);">NO-TOUCH</span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">8h dwell</span>
+        </div>
+      </td>
+      <td class="data-cell cell-cure   lh-border" data-tip="CURE COMPLETE 08/06">&#8987; C</td>
+      <td class="data-cell cell-cure"             data-tip="CURE COMPLETE 08/13">&#8987; C</td>
+      <td class="data-cell cell-cure"             data-tip="CURE COMPLETE 07/27">&#8987; C</td>
+      <td class="data-cell cell-cure"             data-tip="CURE COMPLETE 08/19">&#8987; C</td>
+      <td class="data-cell cell-cure"             data-tip="EST CURE 09/06">&#8987; 09/06</td>
+      <td class="data-cell cell-cure"             data-tip="EST CURE 09/07">&#8987; 09/07</td>
+      <td class="data-cell cell-cure   rh-border" data-tip="CURE COMPLETE 07/25">&#8987; C</td>
+      <td class="data-cell cell-cure"             data-tip="CURE COMPLETE 08/10">&#8987; C</td>
+      <td class="data-cell cell-cure"             data-tip="CURE COMPLETE 08/17">&#8987; C</td>
+      <td class="data-cell cell-cure"             data-tip="EST CURE 08/22">&#8987; 08/22</td>
+      <td class="data-cell cell-cure"             data-tip="EST CURE 09/06">&#8987; 09/06</td>
+      <td class="data-cell cell-na    bmp-border">—</td>
+    </tr>
+
+    <!-- ═══ MILESTONE BAND: ASSEMBLY 1 [A1] ═══ -->
+    <tr class="milestone-band mb-a1">
+      <td class="col-op" colspan="13" style="border-right:none;">
+        <span class="ph">A1</span> &nbsp; &#9472;&#9472;&#9472; ASSEMBLY 1 — STRUCTURAL JOINING &#9472;&#9472;&#9472;
+      </td>
+    </tr>
+
+    <!-- OP 2300 -->
+    <tr class="op-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num">2300</span><span class="op-sep">|</span>
+          <span class="op-desc">Instl &amp; Fillet Sl</span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc">WC 32684</span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">18.0h</span>
+        </div>
+      </td>
+      <td class="data-cell cell-done   lh-border" data-tip="COMPLETE 08/09">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/16">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 07/30">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/22">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/09">09/09</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/10">09/10</td>
+      <td class="data-cell cell-done   rh-border" data-tip="COMPLETE 07/28">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/13">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/20">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 08/25">08/25</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/09">09/09</td>
+      <td class="data-cell cell-stall bmp-border" data-tip="MRB HOLD">MRB</td>
+    </tr>
+
+    <!-- ═══ MILESTONE BAND: ASSEMBLY 2 [A2] ═══ -->
+    <tr class="milestone-band mb-a2">
+      <td class="col-op" colspan="13" style="border-right:none;">
+        <span class="ph">A2</span> &nbsp; &#9472;&#9472;&#9472; ASSEMBLY 2 — SEALING + CLOSE-OUT &#9472;&#9472;&#9472;
+      </td>
+    </tr>
+
+    <!-- OP 3030 -->
+    <tr class="op-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num">3030</span><span class="op-sep">|</span>
+          <span class="op-desc">Fay Seal        </span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc">WC 32684</span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">12.0h</span>
+        </div>
+      </td>
+      <td class="data-cell cell-done   lh-border" data-tip="COMPLETE 08/14">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/20">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/04">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 08/28">08/28</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/14">09/14</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/15">09/15</td>
+      <td class="data-cell cell-done   rh-border" data-tip="COMPLETE 08/02">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/18">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 08/25">08/25</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 08/30">08/30</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/14">09/14</td>
+      <td class="data-cell cell-stall bmp-border" data-tip="MRB HOLD">MRB</td>
+    </tr>
+
+    <!-- ═══ MILESTONE BAND: FINISH-SHIP [FS] ═══ -->
+    <tr class="milestone-band mb-fs">
+      <td class="col-op" colspan="13" style="border-right:none;">
+        <span class="ph">FS</span> &nbsp; &#9472;&#9472;&#9472; FINISH-SHIP — PAINT / INSPECT / PACK &#9472;&#9472;&#9472;
+      </td>
+    </tr>
+
+    <!-- OP 3800 -->
+    <tr class="op-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num">3800</span><span class="op-sep">|</span>
+          <span class="op-desc">Prep &amp; Prime    </span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc op-wc-warn">WC 221&#9888; </span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">30.5h</span>
+        </div>
+      </td>
+      <td class="data-cell cell-wip    lh-border" data-tip="IN WORK — WC221 PAINT 118% UTIL">WIP</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 08/24">08/24</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/15">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/04">09/04</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/10">09/10</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/11">09/11</td>
+      <td class="data-cell cell-done   rh-border" data-tip="COMPLETE 08/14">C</td>
+      <td class="data-cell cell-done"             data-tip="COMPLETE 08/21">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 08/28">08/28</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/04">09/04</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST 09/10">09/10</td>
+      <td class="data-cell cell-stall bmp-border" data-tip="MRB HOLD">MRB</td>
+    </tr>
+
+    <!-- GATE ROW -->
+    <tr class="op-row gate-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num" style="color:var(--orange);">&#9655;   </span><span class="op-sep" style="color:var(--orange);">|</span>
+          <span class="op-desc" style="color:var(--orange);">Topcoat Tape-Tst</span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc" style="color:var(--orange);">WC221 HLD</span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">24h gate</span>
+        </div>
+      </td>
+      <td class="data-cell cell-gate   lh-border" data-tip="GATE — awaiting tape test">GATE</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST GATE 08/25">08/25</td>
+      <td class="data-cell cell-done"             data-tip="GATE PASS 08/16">C</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST GATE 09/05">09/05</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST GATE 09/11">09/11</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST GATE 09/12">09/12</td>
+      <td class="data-cell cell-done   rh-border" data-tip="GATE PASS 08/15">C</td>
+      <td class="data-cell cell-gate"             data-tip="IN GATE — RH231">GATE</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST GATE 08/29">08/29</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST GATE 09/05">09/05</td>
+      <td class="data-cell cell-upcoming"         data-tip="EST GATE 09/11">09/11</td>
+      <td class="data-cell cell-na    bmp-border">—</td>
+    </tr>
+
+    <!-- OP 4100 -->
+    <tr class="op-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num">4100</span><span class="op-sep">|</span>
+          <span class="op-desc">Final Inspection </span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc">WC 32687</span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">4.0h</span>
+        </div>
+      </td>
+      <td class="data-cell cell-upcoming lh-border" data-tip="EST 08/26">08/26</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST 08/30">08/30</td>
+      <td class="data-cell cell-done"               data-tip="COMPLETE 08/17">C</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST 09/09">09/09</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST 09/13">09/13</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST 09/14">09/14</td>
+      <td class="data-cell cell-done   rh-border"   data-tip="COMPLETE 08/20">C</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST 08/25">08/25</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST 09/02">09/02</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST 09/06">09/06</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST 09/13">09/13</td>
+      <td class="data-cell cell-stall bmp-border"   data-tip="MRB HOLD">MRB</td>
+    </tr>
+
+    <!-- OP 4200 -->
+    <tr class="op-row">
+      <td class="col-op op-cell">
+        <div class="op-line1">
+          <span class="op-num">4200</span><span class="op-sep">|</span>
+          <span class="op-desc">Pack &amp; Ship     </span>
+        </div>
+        <div class="op-line2">
+          <span class="op-branch">&#9492;&#9472;</span>
+          <span class="op-wc">WC P2PCK </span>
+          <span class="op-sep">|</span>
+          <span class="op-hrs">3.0h</span>
+        </div>
+      </td>
+      <td class="data-cell cell-upcoming lh-border" data-tip="EST SHIP 08/28" style="color:var(--amber);">08/28</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST SHIP 09/01">09/01</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST SHIP 09/02">09/02</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST SHIP 09/11">09/11</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST SHIP 09/15">09/15</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST SHIP 09/16">09/16</td>
+      <td class="data-cell cell-upcoming rh-border" data-tip="EST SHIP 08/22" style="color:var(--green);">08/22</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST SHIP 08/27">08/27</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST SHIP 09/04">09/04</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST SHIP 09/08">09/08</td>
+      <td class="data-cell cell-upcoming"           data-tip="EST SHIP 09/15">09/15</td>
+      <td class="data-cell cell-na    bmp-border">—</td>
+    </tr>
+
+    <!-- ═══ BUMPED / UNASSIGNED ═══ -->
+    <tr class="bump-hdr">
+      <td colspan="13">
+        &#9632; UNASSIGNED / BUMPED — PENDING SLOT REASSIGNMENT
+      </td>
+    </tr>
+
+    <tr class="op-row">
+      <td class="col-op bump-unit-cell">
+        <div style="color:var(--red);font-weight:700;font-size:11px;">LH 238 &nbsp; MRB HOLD</div>
+        <div style="color:var(--grey);font-size:9px;margin-top:2px;">IDLE 9d &nbsp;|&nbsp; NO SLOT</div>
+        <button class="reassign-btn">&#9654; REASSIGN SLOT</button>
+      </td>
+      <td class="data-cell cell-stall lh-border" colspan="6" data-tip="LH238 — MRB hold, idle 9d, no slot assigned">
+        MRB HOLD &nbsp;&mdash;&nbsp; IDLE 9d
+      </td>
+      <td class="data-cell cell-na rh-border" colspan="5" style="background:var(--bg);color:var(--border2);">
+        &mdash; &mdash; &mdash; &mdash; &mdash;
+      </td>
+      <td class="data-cell cell-na bmp-border">—</td>
+    </tr>
+
+  </tbody>
+</table>
+</div>
+
+<!-- STATUS LINE -->
+<div class="statusline">
+  <span class="sl-ok">&#11044; LIVE</span>
+  <span class="sl-sep">|</span>
+  <span>531335 G500 ELEVATOR &nbsp; LH+RH</span>
+  <span class="sl-sep">|</span>
+  <span class="sl-warn">EMPIRICAL &middot; n=8 &middot; PRELIMINARY</span>
+  <span class="sl-sep">|</span>
+  <span>WC221: <span class="sl-err">118% UTIL — BINDING CONSTRAINT</span></span>
+  <span class="sl-sep">|</span>
+  <span>FORECAST = BEST-CASE FLOOR + MEASURED SLIP &mdash; NOT GUARANTEED DELIVERY</span>
+  <span class="sl-right">IFS SYNC 05:47 &nbsp;|&nbsp; RTG-TRACKER v0.9.0-beta</span>
+</div>
+
+</body>
+</html>

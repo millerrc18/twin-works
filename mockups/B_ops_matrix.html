@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RTG Matrix — 531335 G500 Elevator — Ops Command Center</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  /* ─── Design tokens ───────────────────────────────────────────── */
+  :root {
+    --bg-base:    #0a0e1a;
+    --bg-panel:   #0f1629;
+    --bg-card:    #131c34;
+    --border-dim: #1e2d4a;
+    --border-hi:  #2a3f6a;
+    --txt-pri:    #e8edf8;
+    --txt-sec:    #8a9bbf;
+    --txt-mute:   #4a5a7a;
+
+    /* Cell states */
+    --done-bg:     rgba(34,197,94,0.14);
+    --done-txt:    #4ade80;
+    --done-bdr:    rgba(34,197,94,0.3);
+
+    --wip-bg:      rgba(255,191,0,0.13);   /* FIX 1: amber, no blink */
+    --wip-txt:     #ffd54f;
+    --wip-lbdr:    #ffbf00;                /* FIX 1: hard left-border accent */
+
+    --up-bg:       rgba(22,37,68,0.7);
+    --up-txt:      #5a6e96;
+    --up-bdr:      rgba(34,52,90,0.5);
+
+    --cure-bg:     rgba(178,102,255,0.10);  /* FIX 5: more distinct purple */
+    --cure-txt:    #b266ff;
+    --cure-bdr:    rgba(178,102,255,0.3);
+
+    --gate-txt:    #94a3b8;                /* FIX 5: neutral, not orange (avoids WIP clash) */
+    --gate-bg:     rgba(255,255,255,0.03);
+    --gate-top:    1px dashed rgba(148,163,184,0.35); /* FIX 5: dashed border = hard stop */
+    --gate-bot:    1px dashed rgba(148,163,184,0.35);
+
+    /* Delta badges — FIX 3: solid pill, no text-shadow */
+    --delta-late-bg:  #3f1515;
+    --delta-late-txt: #ff5555;
+    --delta-late-bdr: #ff5555;
+    --delta-ahead-bg: #0d2e1b;
+    --delta-ahead-txt:#4ade80;
+    --delta-ahead-bdr:#4ade80;
+    --delta-ok-bg:    rgba(59,130,246,0.12);
+    --delta-ok-txt:   #60a5fa;
+    --delta-ok-bdr:   rgba(59,130,246,0.4);
+  }
+
+  html.light {
+    --bg-base:    #f1f5f9;
+    --bg-panel:   #e8edf5;
+    --bg-card:    #ffffff;
+    --border-dim: #cbd5e1;
+    --border-hi:  #94a3b8;
+    --txt-pri:    #0f172a;
+    --txt-sec:    #475569;
+    --txt-mute:   #94a3b8;
+    --done-bg:    rgba(34,197,94,0.1);
+    --done-txt:   #166534;
+    --done-bdr:   rgba(34,197,94,0.25);
+    --wip-bg:     rgba(255,191,0,0.09);
+    --wip-txt:    #78350f;
+    --wip-lbdr:   #d97706;
+    --up-bg:      rgba(241,245,249,0.85);
+    --up-txt:     #94a3b8;
+    --up-bdr:     #e2e8f0;
+    --cure-bg:    rgba(178,102,255,0.07);
+    --cure-txt:   #5b3a82;
+    --cure-bdr:   rgba(178,102,255,0.2);
+    --gate-txt:   #64748b;
+    --gate-bg:    rgba(0,0,0,0.02);
+    --delta-late-bg:  #fef2f2;
+    --delta-late-txt: #dc2626;
+    --delta-late-bdr: #fca5a5;
+    --delta-ahead-bg: #f0fdf4;
+    --delta-ahead-txt:#166534;
+    --delta-ahead-bdr:#86efac;
+    --delta-ok-bg:    #eff6ff;
+    --delta-ok-txt:   #1d4ed8;
+    --delta-ok-bdr:   #bfdbfe;
+  }
+
+  /* ─── Base ────────────────────────────────────────────────────── */
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-base);
+    color: var(--txt-pri);
+    min-height: 100vh;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ─── Top bar ─────────────────────────────────────────────────── */
+  .scanbar {
+    background: linear-gradient(135deg, #0d1829, #111d35 50%, #0a1422);
+    border-bottom: 1px solid var(--border-hi);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  }
+  html.light .scanbar { background: #1e3a5f; border-color: #2d5a9e; }
+  html.light .scanbar * { color: #e8edf8 !important; }
+
+  /* ─── Chips ───────────────────────────────────────────────────── */
+  .chip-green  { background:rgba(34,197,94,0.12); color:#4ade80; border:1px solid rgba(34,197,94,0.35); }
+  .chip-amber  { background:rgba(245,158,11,0.12); color:#fbbf24; border:1px solid rgba(245,158,11,0.35); }
+  .chip-red    { background:rgba(239,68,68,0.12);  color:#f87171; border:1px solid rgba(239,68,68,0.35); }
+  .chip-blue   { background:rgba(59,130,246,0.12); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); }
+  .chip-purple { background:rgba(168,85,247,0.12); color:#c084fc; border:1px solid rgba(168,85,247,0.35); }
+  html.light .chip-green,html.light .chip-amber,html.light .chip-red { box-shadow:none; }
+
+  /* ─── Alarm ───────────────────────────────────────────────────── */
+  @keyframes alarm-pulse {
+    0%,100% { box-shadow: 0 0 12px rgba(239,68,68,0.3); }
+    50%      { box-shadow: 0 0 22px rgba(239,68,68,0.55); }
+  }
+  .alarm-pulse {
+    animation: alarm-pulse 2.5s ease-in-out infinite;
+    background: rgba(239,68,68,0.07);
+    border: 1px solid rgba(239,68,68,0.38);
+    border-radius: 5px;
+  }
+  html.light .alarm-pulse { animation:none; background:rgba(239,68,68,0.04); border-color:#fca5a5; }
+
+  /* ─── Section label ──────────────────────────────────────────── */
+  .slabel {
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--txt-mute);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── Matrix container ───────────────────────────────────────── */
+  .matrix-wrap {
+    overflow: auto;
+    max-height: calc(100vh - 152px);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+  }
+  html.light .matrix-wrap { border-color: #cbd5e1; }
+
+  .matrix-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1380px;
+    font-size: 0.7rem;
+  }
+
+  /* ─── Sticky column ──────────────────────────────────────────── */
+  .col-sticky {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: #0c1422;
+    border-right: 2px solid var(--border-hi);
+  }
+  html.light .col-sticky { background: #1e3a5f; }
+
+  /* ─── Sticky header rows
+         FIX 2: Collapsed from 6 rows → 3 logical rows
+         Row A: Group band (LH / RH / BUMPED)
+         Row B: Serial (large) + SO (small) stacked in cell
+         Row C: RTG ★ target (medium) + P50 (small) + Δ pill (large/bold)
+  ──────────────────────────────────────────────────────────────── */
+  .row-sticky { position: sticky; z-index: 20; }
+  .row-A { top: 0px;  }
+  .row-B { top: 26px; }
+  .row-C { top: 66px; }     /* row-B is ~40px tall due to 2-line cells */
+
+  .row-sticky .col-sticky { z-index: 30; }
+
+  /* Base header cell */
+  td, th { white-space: nowrap; padding: 0; }
+
+  .hdr {
+    border-bottom: 1px solid var(--border-dim);
+    border-right:  1px solid var(--border-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding: 3px 7px;
+  }
+
+  /* Row A – group banners */
+  .grp-lh   { background: rgba(34,197,94,0.09);  border-bottom: 2px solid rgba(34,197,94,0.35); }
+  .grp-rh   { background: rgba(59,130,246,0.09); border-bottom: 2px solid rgba(59,130,246,0.35); }
+  .grp-bump { background: rgba(239,68,68,0.07);  border-bottom: 2px solid rgba(239,68,68,0.3); }
+
+  /* Row B – serial + SO stacked */
+  .serial-cell {
+    background: #0d1525;
+    border-bottom: 1px solid var(--border-hi);
+    border-right:  1px solid var(--border-dim);
+    padding: 5px 8px;
+    text-align: center;
+    min-width: 80px;
+    vertical-align: top;
+  }
+  html.light .serial-cell { background: #1e3a5f; }
+  .serial-num { color: #e8edf8; font-weight: 700; font-size: 0.74rem; font-family:'JetBrains Mono',monospace; }
+  .so-num     { color: #4a5a7a; font-size: 0.58rem; font-family:'JetBrains Mono',monospace; letter-spacing:0.03em; margin-top: 2px; }
+
+  /* Row C – RTG / P50 / Δ stacked */
+  .dates-cell {
+    background: #0d1829;
+    border-bottom: 2px solid var(--border-hi);
+    border-right:  1px solid var(--border-dim);
+    padding: 4px 7px;
+    text-align: center;
+    vertical-align: top;
+    min-width: 80px;
+  }
+  html.light .dates-cell { background: #1a2d4a; }
+  .rtg-val  { color: #60a5fa; font-size: 0.68rem; font-weight: 600; font-family:'JetBrains Mono',monospace; }
+  .p50-val  { color: #5a6e96; font-size: 0.58rem; font-family:'JetBrains Mono',monospace; margin-top: 1px; }
+
+  /* FIX 3: Delta as solid badge pill — no text-shadow */
+  .delta-pill {
+    display: inline-block;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+  .d-late  { background: var(--delta-late-bg);  color: var(--delta-late-txt);  border: 1px solid var(--delta-late-bdr); }
+  .d-ahead { background: var(--delta-ahead-bg); color: var(--delta-ahead-txt); border: 1px solid var(--delta-ahead-bdr); }
+  .d-ok    { background: var(--delta-ok-bg);    color: var(--delta-ok-txt);    border: 1px solid var(--delta-ok-bdr); }
+
+  /* The header corner cell (op column top) */
+  .corner-cell {
+    background: #0c1422;
+    border-bottom: 1px solid var(--border-hi);
+    border-right:  2px solid var(--border-hi);
+    padding: 4px 10px;
+    color: var(--txt-mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    vertical-align: bottom;
+  }
+  html.light .corner-cell { background: #1e3a5f; color: #8a9bbf; }
+
+  /* ─── Data cells ─────────────────────────────────────────────── */
+  .dc {
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border-dim);
+    border-right:  1px solid var(--border-dim);
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    transition: background 0.12s;
+  }
+
+  /* DONE */
+  .s-done { background: var(--done-bg); color: var(--done-txt); border-right-color: var(--done-bdr); font-weight:600; }
+  .s-done::after { content: " ✓"; font-size: 0.7em; }
+
+  /* FIX 1: WIP — hard left-border, NO blink */
+  .s-wip {
+    background: var(--wip-bg);
+    color: var(--wip-txt);
+    border-left: 2px solid var(--wip-lbdr);
+    font-weight: 700;
+  }
+
+  /* UPCOMING */
+  .s-up { background: var(--up-bg); color: var(--up-txt); border-right-color: var(--up-bdr); }
+
+  /* CURE — FIX 5: icon prefix, no italic */
+  .s-cure {
+    background: var(--cure-bg);
+    color: var(--cure-txt);
+    border-right-color: var(--cure-bdr);
+    font-size: 0.63rem;
+  }
+
+  /* GATE — FIX 5: dashed top+bottom border, neutral color */
+  .s-gate {
+    background: var(--gate-bg);
+    color: var(--gate-txt);
+    border-top: var(--gate-top);
+    border-bottom: var(--gate-bot);
+    font-size: 0.63rem;
+  }
+
+  .s-empty { background: rgba(10,14,26,0.3); color: var(--txt-mute); }
+  html.light .s-empty { background: rgba(241,245,249,0.5); }
+
+  /* ─── Row label cell ─────────────────────────────────────────── */
+  .rlc {
+    padding: 5px 10px 5px 12px;
+    border-bottom: 1px solid var(--border-dim);
+    min-width: 230px;
+    max-width: 230px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.67rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ─── Milestone band rows ────────────────────────────────────── */
+  .band-hdr { background: rgba(59,130,246,0.1); border-top: 1px solid rgba(59,130,246,0.2); border-bottom: 1px solid rgba(59,130,246,0.2); }
+  .band-hdr td, .band-hdr .rlc {
+    color: #60a5fa; font-weight: 800; letter-spacing: 0.1em;
+    font-size: 0.63rem; text-transform: uppercase; padding: 4px 10px;
+    background: rgba(59,130,246,0.09);
+  }
+  html.light .band-hdr td, html.light .band-hdr .rlc { background: rgba(59,130,246,0.05); }
+
+  /* Cure row background */
+  .cure-row .dc, .cure-row .rlc { background: rgba(178,102,255,0.06); }
+
+  /* FIX 5: Gate row — dashed separator rows */
+  .gate-row .dc, .gate-row .rlc {
+    background: var(--gate-bg);
+    border-top: var(--gate-top);
+    border-bottom: var(--gate-bot);
+  }
+
+  /* ─── WC221 constraint row accent ───────────────────────────── */
+  /* Thin red left-edge on the label cell only; keep cells clean */
+  .wc221-row .rlc { border-left: 3px solid rgba(239,68,68,0.55); }
+  .wc221-row .dc  { border-left: 1px solid rgba(239,68,68,0.12); }
+
+  /* FIX 6: MRB HOLD — hatched background = "blocked / do not enter" */
+  .mrb-hold-row .dc {
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(239,68,68,0.06),
+      rgba(239,68,68,0.06) 8px,
+      transparent 8px,
+      transparent 16px
+    );
+    border: 1px solid rgba(239,68,68,0.18);
+  }
+  .mrb-hold-row .rlc { border-left: 3px solid rgba(239,68,68,0.55); }
+
+  /* ─── Group divider lines (single hard line each group) ─────── */
+  /* FIX 4: column z-striping via CSS class on each <td>/<th> */
+  .col-lh { background: rgba(255,255,255,0.014); }   /* slight warm tint for LH */
+  .col-rh { /* stays raw navy */ }
+  .col-lh-last { border-right: 2px solid rgba(34,197,94,0.45) !important; }
+  .col-rh-last { border-right: 2px solid rgba(59,130,246,0.45) !important; }
+  .col-bump     { border-right: 1px solid rgba(239,68,68,0.25) !important; }
+
+  /* ─── MRB tag ────────────────────────────────────────────────── */
+  .mrb-tag {
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 1px 5px; border-radius: 3px;
+    background: rgba(239,68,68,0.15); color: #f87171;
+    border: 1px solid rgba(239,68,68,0.3);
+    font-size: 0.58rem; font-weight: 700;
+  }
+
+  /* ─── Reassign select ────────────────────────────────────────── */
+  .reassign-select {
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: 3px; color: #60a5fa;
+    font-size: 0.6rem; font-family: 'JetBrains Mono', monospace;
+    padding: 1px 4px; cursor: pointer; outline: none;
+  }
+  .reassign-select:hover { border-color: rgba(59,130,246,0.5); }
+
+  /* ─── Legend swatch ──────────────────────────────────────────── */
+  .swatch { width: 13px; height: 13px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+
+  /* ─── Glow line ──────────────────────────────────────────────── */
+  .glow-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(59,130,246,0.35), transparent); }
+  html.light .glow-line { background: #e2e8f0; }
+</style>
+</head>
+<body>
+
+<!-- TOP STATUS BAR -->
+<header class="scanbar sticky top-0 z-50 px-4 py-2">
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-4">
+      <div>
+        <div class="text-xs text-blue-400 mono tracking-widest uppercase mb-0.5">RTG TRACKER</div>
+        <div class="text-white font-bold text-sm tracking-tight">531335 · G500 Elevator Matrix</div>
+      </div>
+      <div class="w-px h-8 bg-blue-900/60"></div>
+      <nav class="flex items-center gap-1">
+        <a href="B_ops_landing.html" class="px-3 py-1.5 rounded text-xs text-blue-300/60 hover:text-blue-200 transition mono">← ALL PROGRAMS</a>
+        <span class="px-3 py-1.5 rounded text-xs font-semibold bg-blue-600/30 text-blue-200 border border-blue-500/40 mono">531335 ELEVATOR</span>
+        <span class="px-3 py-1.5 rounded text-xs text-blue-300/40 mono">C48178 RADOME</span>
+        <span class="px-3 py-1.5 rounded text-xs text-blue-300/40 mono">530349 AEGIS</span>
+      </nav>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 px-2.5 py-1 rounded" style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2)">
+        <span class="w-2 h-2 rounded-full bg-green-400" style="box-shadow:0 0 5px #22c55e"></span>
+        <span class="text-xs text-green-300 mono">17 WIP · 6 Behind · 0 Stalled</span>
+      </div>
+      <div class="flex items-center gap-2 px-2.5 py-1 alarm-pulse">
+        <svg class="w-3 h-3 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <span class="text-xs font-bold text-red-300 mono">WC221 118% — BINDING CONSTRAINT</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span class="chip-purple text-xs px-2 py-0.5 rounded mono font-semibold">EMPIRICAL · n=8</span>
+      <span class="text-xs text-blue-300/50 mono" id="asof-clock">2026-08-22 08:00</span>
+      <button onclick="toggleTheme()" class="px-2.5 py-1 rounded border border-blue-700/40 text-xs text-blue-300 hover:border-blue-500/60 transition mono" id="theme-btn">☀ LIGHT</button>
+    </div>
+  </div>
+</header>
+
+<!-- LEGEND + ACTIONS BAR -->
+<div class="px-4 py-2 flex items-center justify-between gap-4 flex-wrap" style="background:var(--bg-panel);border-bottom:1px solid var(--border-dim)">
+  <div class="flex items-center gap-4 flex-wrap">
+    <span class="slabel">CELL STATES:</span>
+    <div class="flex items-center gap-1.5">
+      <span class="swatch" style="background:var(--done-bg);border:1px solid var(--done-bdr)"></span>
+      <span class="text-xs mono" style="color:var(--done-txt)">DONE ✓</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="swatch" style="background:var(--wip-bg);border-left:3px solid var(--wip-lbdr)"></span>
+      <span class="text-xs mono" style="color:var(--wip-txt)">WIP (active)</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="swatch" style="background:var(--up-bg);border:1px solid var(--up-bdr)"></span>
+      <span class="text-xs mono" style="color:var(--up-txt)">UPCOMING</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="swatch" style="background:var(--cure-bg);border:1px solid var(--cure-bdr)"></span>
+      <span class="text-xs mono" style="color:var(--cure-txt)">⏱ CURE DWELL</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="swatch" style="background:var(--gate-bg);border-top:var(--gate-top);border-bottom:var(--gate-bot)"></span>
+      <span class="text-xs mono" style="color:var(--gate-txt)">🔒 GATE (hold)</span>
+    </div>
+    <div class="w-px h-4" style="background:var(--border-hi)"></div>
+    <span class="slabel">Δ VS RTG:</span>
+    <span class="delta-pill d-late text-xs">+N BEHIND</span>
+    <span class="delta-pill d-ahead text-xs">-N AHEAD</span>
+    <span class="delta-pill d-ok text-xs">0 ON TIME</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <button class="px-3 py-1.5 rounded text-xs mono font-semibold" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#60a5fa">⟳ REFRESH</button>
+    <button class="px-3 py-1.5 rounded text-xs mono" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:#4ade80">↓ EXPORT</button>
+  </div>
+</div>
+
+<!-- MATRIX -->
+<div class="px-4 pb-4 pt-3">
+  <div class="matrix-wrap">
+    <table class="matrix-table">
+      <thead>
+
+        <!-- ROW A: Group banners ─────────────────────────────── -->
+        <tr class="row-sticky row-A">
+          <th class="col-sticky corner-cell row-A" rowspan="1" style="vertical-align:middle">OPERATION</th>
+          <!-- LH: 6 units -->
+          <th colspan="6" class="hdr grp-lh text-center col-lh col-lh-last" style="color:#4ade80;font-weight:800;font-size:0.68rem;letter-spacing:0.08em">
+            ◀ LH GROUP — 6 UNITS
+          </th>
+          <!-- RH: 5 units -->
+          <th colspan="5" class="hdr grp-rh text-center col-rh col-rh-last" style="color:#60a5fa;font-weight:800;font-size:0.68rem;letter-spacing:0.08em">
+            RH GROUP — 5 UNITS ▶
+          </th>
+          <!-- Bumped -->
+          <th colspan="1" class="hdr grp-bump text-center col-bump" style="color:#f87171;font-weight:700">UNASSIGNED</th>
+        </tr>
+
+        <!-- ROW B: Serial + SO number stacked ───────────────── -->
+        <tr class="row-sticky row-B">
+          <th class="col-sticky corner-cell row-B" style="border-bottom:1px solid var(--border-hi)">SERIAL / SO</th>
+
+          <!-- LH serials -->
+          <th class="serial-cell col-lh"><div class="serial-num">LH 232</div><div class="so-num">SO 1455596</div></th>
+          <th class="serial-cell col-lh"><div class="serial-num">LH 233</div><div class="so-num">SO 1456550</div></th>
+          <th class="serial-cell col-lh"><div class="serial-num">LH 229</div><div class="so-num">SO 1452748</div></th>
+          <th class="serial-cell col-lh"><div class="serial-num">LH 234</div><div class="so-num">SO 1457061</div></th>
+          <th class="serial-cell col-lh"><div class="serial-num">LH 235</div><div class="so-num">SO 1458317</div></th>
+          <th class="serial-cell col-lh col-lh-last"><div class="serial-num">LH 236</div><div class="so-num">SO 1459236</div></th>
+
+          <!-- RH serials -->
+          <th class="serial-cell col-rh"><div class="serial-num">RH 227</div><div class="so-num">SO 1452749</div></th>
+          <th class="serial-cell col-rh"><div class="serial-num">RH 231</div><div class="so-num">SO 1456551</div></th>
+          <th class="serial-cell col-rh"><div class="serial-num">RH 232</div><div class="so-num">SO 1457063</div></th>
+          <th class="serial-cell col-rh"><div class="serial-num">RH 233</div><div class="so-num">SO 1458318</div></th>
+          <th class="serial-cell col-rh col-rh-last"><div class="serial-num">RH 235</div><div class="so-num">SO 1460168</div></th>
+
+          <!-- Bumped -->
+          <th class="serial-cell col-bump" style="border-right-color:rgba(239,68,68,0.25)"><div class="serial-num" style="color:#f87171">LH 238</div><div class="so-num" style="color:rgba(239,68,68,0.5)">MRB HOLD</div></th>
+        </tr>
+
+        <!-- ROW C: RTG ★ / P50 / Δ pill stacked ────────────── -->
+        <tr class="row-sticky row-C">
+          <th class="col-sticky corner-cell row-C" style="border-bottom:2px solid var(--border-hi)">
+            <div style="color:#60a5fa;font-size:0.62rem">RTG TARGET ★</div>
+            <div style="color:#4a5a7a;font-size:0.58rem;margin-top:1px">Forecast P50</div>
+            <div style="color:#3a4a6a;font-size:0.58rem;margin-top:1px">Δ vs RTG</div>
+          </th>
+
+          <!-- LH dates+delta -->
+          <td class="dates-cell col-lh">
+            <div class="rtg-val">08/21</div><div class="p50-val">08/28</div>
+            <div><span class="delta-pill d-late">+7d</span></div>
+          </td>
+          <td class="dates-cell col-lh">
+            <div class="rtg-val">08/28</div><div class="p50-val">09/01</div>
+            <div><span class="delta-pill d-late">+4d</span></div>
+          </td>
+          <td class="dates-cell col-lh">
+            <div class="rtg-val">09/04</div><div class="p50-val">09/02</div>
+            <div><span class="delta-pill d-ahead">-2d</span></div>
+          </td>
+          <td class="dates-cell col-lh">
+            <div class="rtg-val">09/11</div><div class="p50-val">09/11</div>
+            <div><span class="delta-pill d-ok">0</span></div>
+          </td>
+          <td class="dates-cell col-lh">
+            <div class="rtg-val">09/18</div><div class="p50-val">09/15</div>
+            <div><span class="delta-pill d-ahead">-3d</span></div>
+          </td>
+          <td class="dates-cell col-lh col-lh-last">
+            <div class="rtg-val">09/25</div><div class="p50-val">09/16</div>
+            <div><span class="delta-pill d-ahead" style="font-size:0.72rem;font-weight:800">-9d</span></div>
+          </td>
+
+          <!-- RH dates+delta -->
+          <td class="dates-cell col-rh">
+            <div class="rtg-val">08/21</div><div class="p50-val">08/22</div>
+            <div><span class="delta-pill d-late">+1d</span></div>
+          </td>
+          <td class="dates-cell col-rh">
+            <div class="rtg-val">08/28</div><div class="p50-val">08/27</div>
+            <div><span class="delta-pill d-ahead">-1d</span></div>
+          </td>
+          <td class="dates-cell col-rh">
+            <div class="rtg-val">09/04</div><div class="p50-val">09/04</div>
+            <div><span class="delta-pill d-ok">0</span></div>
+          </td>
+          <td class="dates-cell col-rh">
+            <div class="rtg-val">09/11</div><div class="p50-val">09/08</div>
+            <div><span class="delta-pill d-ahead">-3d</span></div>
+          </td>
+          <td class="dates-cell col-rh col-rh-last">
+            <div class="rtg-val">09/18</div><div class="p50-val">09/15</div>
+            <div><span class="delta-pill d-ahead">-3d</span></div>
+          </td>
+
+          <!-- Bumped -->
+          <td class="dates-cell col-bump" style="border-right-color:rgba(239,68,68,0.25)">
+            <div class="rtg-val" style="color:#f87171">—</div>
+            <div class="p50-val" style="color:rgba(239,68,68,0.5)">BLOCKED</div>
+            <div><span class="mrb-tag">MRB</span></div>
+          </td>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <!-- ═══ ASSY JIG (AJ) ═══ -->
+        <tr class="band-hdr">
+          <td class="rlc col-sticky" style="color:#60a5fa;font-weight:800;letter-spacing:0.1em">▸ ASSY JIG (AJ)</td>
+          <td class="dc" style="background:rgba(59,130,246,0.06)" colspan="12"></td>
+        </tr>
+
+        <!-- Op 100 -->
+        <tr>
+          <td class="rlc col-sticky" style="color:var(--txt-sec)">
+            <div class="flex justify-between items-center gap-2">
+              <span>100 · Mark Data Plate</span>
+              <span class="slabel">WC248 · 0.8h</span>
+            </div>
+          </td>
+          <td class="dc s-done col-lh">08/05</td>
+          <td class="dc s-done col-lh">08/08</td>
+          <td class="dc s-done col-lh">07/28</td>
+          <td class="dc s-done col-lh">08/12</td>
+          <td class="dc s-done col-lh">08/19</td>
+          <td class="dc s-done col-lh col-lh-last">08/26</td>
+          <td class="dc s-done col-rh">08/03</td>
+          <td class="dc s-done col-rh">08/07</td>
+          <td class="dc s-done col-rh">08/10</td>
+          <td class="dc s-done col-rh">08/14</td>
+          <td class="dc s-done col-rh col-rh-last">08/18</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- Op 600 -->
+        <tr>
+          <td class="rlc col-sticky" style="color:var(--txt-sec)">
+            <div class="flex justify-between items-center gap-2">
+              <span>600 · Locate &amp; Shim Parts</span>
+              <span class="slabel">WC32684 · 17h</span>
+            </div>
+          </td>
+          <td class="dc s-done col-lh">08/10</td>
+          <td class="dc s-done col-lh">08/13</td>
+          <td class="dc s-done col-lh">08/02</td>
+          <td class="dc s-done col-lh">08/16</td>
+          <td class="dc s-done col-lh">08/21</td>
+          <td class="dc s-done col-lh col-lh-last">08/28</td>
+          <td class="dc s-done col-rh">08/07</td>
+          <td class="dc s-done col-rh">08/11</td>
+          <td class="dc s-done col-rh">08/15</td>
+          <td class="dc s-done col-rh">08/18</td>
+          <td class="dc s-done col-rh col-rh-last">08/22</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- Op 800 -->
+        <tr>
+          <td class="rlc col-sticky" style="color:var(--txt-sec)">
+            <div class="flex justify-between items-center gap-2">
+              <span>800 · Liquid Shim Spar</span>
+              <span class="slabel">WC32684 · 6.5h</span>
+            </div>
+          </td>
+          <td class="dc s-done col-lh">08/13</td>
+          <td class="dc s-done col-lh">08/15</td>
+          <td class="dc s-done col-lh">08/04</td>
+          <td class="dc s-done col-lh">08/19</td>
+          <td class="dc s-wip col-lh">WIP</td>
+          <td class="dc s-up col-lh col-lh-last">09/01</td>
+          <td class="dc s-done col-rh">08/09</td>
+          <td class="dc s-done col-rh">08/13</td>
+          <td class="dc s-done col-rh">08/17</td>
+          <td class="dc s-done col-rh">08/20</td>
+          <td class="dc s-done col-rh col-rh-last">08/22</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- Cure row: Liquid Shim RT Cure -->
+        <tr class="cure-row">
+          <td class="rlc col-sticky" style="color:var(--cure-txt)">
+            <div class="flex items-center gap-2">
+              <span>⏱ Liquid Shim RT Cure</span>
+              <span class="slabel" style="color:var(--cure-txt);opacity:0.7">8h dwell</span>
+            </div>
+          </td>
+          <td class="dc s-done col-lh" style="font-size:0.6rem">done</td>
+          <td class="dc s-done col-lh" style="font-size:0.6rem">done</td>
+          <td class="dc s-done col-lh" style="font-size:0.6rem">done</td>
+          <td class="dc s-done col-lh" style="font-size:0.6rem">done</td>
+          <td class="dc s-cure col-lh">~08/22</td>
+          <td class="dc s-cure col-lh col-lh-last">~09/02</td>
+          <td class="dc s-done col-rh" style="font-size:0.6rem">done</td>
+          <td class="dc s-done col-rh" style="font-size:0.6rem">done</td>
+          <td class="dc s-done col-rh" style="font-size:0.6rem">done</td>
+          <td class="dc s-done col-rh" style="font-size:0.6rem">done</td>
+          <td class="dc s-done col-rh col-rh-last" style="font-size:0.6rem">done</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- ═══ ASSEMBLY 1 (A1) ═══ -->
+        <tr class="band-hdr">
+          <td class="rlc col-sticky" style="color:#60a5fa;font-weight:800;letter-spacing:0.1em">▸ ASSEMBLY 1 (A1)</td>
+          <td class="dc" style="background:rgba(59,130,246,0.06)" colspan="12"></td>
+        </tr>
+
+        <!-- Op 2300 -->
+        <tr>
+          <td class="rlc col-sticky" style="color:var(--txt-sec)">
+            <div class="flex justify-between items-center gap-2">
+              <span>2300 · Install &amp; Fillet Seal</span>
+              <span class="slabel">WC32684 · 18h</span>
+            </div>
+          </td>
+          <td class="dc s-done col-lh">08/18</td>
+          <td class="dc s-done col-lh">08/20</td>
+          <td class="dc s-done col-lh">08/10</td>
+          <td class="dc s-done col-lh">08/23</td>
+          <td class="dc s-up col-lh">08/28</td>
+          <td class="dc s-up col-lh col-lh-last">09/05</td>
+          <td class="dc s-done col-rh">08/12</td>
+          <td class="dc s-done col-rh">08/16</td>
+          <td class="dc s-done col-rh">08/20</td>
+          <td class="dc s-done col-rh">08/23</td>
+          <td class="dc s-wip col-rh col-rh-last">WIP</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- ═══ ASSEMBLY 2 (A2) ═══ -->
+        <tr class="band-hdr">
+          <td class="rlc col-sticky" style="color:#60a5fa;font-weight:800;letter-spacing:0.1em">▸ ASSEMBLY 2 (A2)</td>
+          <td class="dc" style="background:rgba(59,130,246,0.06)" colspan="12"></td>
+        </tr>
+
+        <!-- Op 3030 -->
+        <tr>
+          <td class="rlc col-sticky" style="color:var(--txt-sec)">
+            <div class="flex justify-between items-center gap-2">
+              <span>3030 · Fay Seal</span>
+              <span class="slabel">WC32684 · 12h</span>
+            </div>
+          </td>
+          <td class="dc s-done col-lh">08/21</td>
+          <td class="dc s-wip col-lh">WIP</td>
+          <td class="dc s-done col-lh">08/14</td>
+          <td class="dc s-up col-lh">08/27</td>
+          <td class="dc s-up col-lh">09/02</td>
+          <td class="dc s-up col-lh col-lh-last">09/09</td>
+          <td class="dc s-done col-rh">08/15</td>
+          <td class="dc s-done col-rh">08/19</td>
+          <td class="dc s-up col-rh">08/24</td>
+          <td class="dc s-up col-rh">08/27</td>
+          <td class="dc s-up col-rh col-rh-last">09/01</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- ═══ FINISH-SHIP (FS) ═══ -->
+        <tr class="band-hdr">
+          <td class="rlc col-sticky" style="color:#60a5fa;font-weight:800;letter-spacing:0.1em">▸ FINISH-SHIP (FS)</td>
+          <td class="dc" style="background:rgba(59,130,246,0.06)" colspan="12"></td>
+        </tr>
+
+        <!-- Op 3800: WC221 BOTTLENECK -->
+        <tr class="wc221-row">
+          <td class="rlc col-sticky">
+            <div class="flex justify-between items-center gap-2">
+              <div class="flex items-center gap-1.5">
+                <span style="color:#f87171">3800 · Prep &amp; Prime</span>
+                <span class="mrb-tag" style="background:rgba(239,68,68,0.18);color:#f87171;border-color:rgba(239,68,68,0.4)">⚑ WC221</span>
+              </div>
+              <span class="slabel" style="color:rgba(239,68,68,0.5)">WC221 · 30.5h</span>
+            </div>
+          </td>
+          <td class="dc s-wip col-lh">WIP</td>
+          <td class="dc s-up col-lh">08/27</td>
+          <td class="dc s-up col-lh">08/26</td>
+          <td class="dc s-up col-lh">09/04</td>
+          <td class="dc s-up col-lh">09/10</td>
+          <td class="dc s-up col-lh col-lh-last">09/12</td>
+          <td class="dc s-done col-rh">08/19</td>
+          <td class="dc s-done col-rh">08/22</td>
+          <td class="dc s-up col-rh">08/28</td>
+          <td class="dc s-up col-rh">09/02</td>
+          <td class="dc s-up col-rh col-rh-last">09/09</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- Gate row: Topcoat tape-test ────────────────────── -->
+        <tr class="gate-row">
+          <td class="rlc col-sticky" style="color:var(--gate-txt);border-top:var(--gate-top);border-bottom:var(--gate-bot)">
+            <div class="flex items-center gap-2">
+              <span>🔒 Topcoat 24hr tape-test</span>
+              <span class="slabel" style="color:var(--gate-txt);opacity:0.7">24h GATE</span>
+            </div>
+          </td>
+          <td class="dc s-gate col-lh">~08/24</td>
+          <td class="dc s-gate col-lh">~08/29</td>
+          <td class="dc s-gate col-lh">~08/28</td>
+          <td class="dc s-gate col-lh">~09/06</td>
+          <td class="dc s-gate col-lh">~09/12</td>
+          <td class="dc s-gate col-lh col-lh-last">~09/14</td>
+          <td class="dc s-done col-rh" style="font-size:0.6rem">done</td>
+          <td class="dc s-gate col-rh">~08/24</td>
+          <td class="dc s-gate col-rh">~08/30</td>
+          <td class="dc s-gate col-rh">~09/04</td>
+          <td class="dc s-gate col-rh col-rh-last">~09/11</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- Op 4100 -->
+        <tr>
+          <td class="rlc col-sticky" style="color:var(--txt-sec)">
+            <div class="flex justify-between items-center gap-2">
+              <span>4100 · Final Inspection</span>
+              <span class="slabel">WC32687 · 4h</span>
+            </div>
+          </td>
+          <td class="dc s-up col-lh">08/25</td>
+          <td class="dc s-up col-lh">08/30</td>
+          <td class="dc s-up col-lh">08/29</td>
+          <td class="dc s-up col-lh">09/07</td>
+          <td class="dc s-up col-lh">09/13</td>
+          <td class="dc s-up col-lh col-lh-last">09/15</td>
+          <td class="dc s-done col-rh">08/20</td>
+          <td class="dc s-up col-rh">08/25</td>
+          <td class="dc s-up col-rh">09/01</td>
+          <td class="dc s-up col-rh">09/05</td>
+          <td class="dc s-up col-rh col-rh-last">09/12</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- Op 4200: Pack & Ship — forecast date highlighted -->
+        <tr>
+          <td class="rlc col-sticky" style="color:var(--txt-sec)">
+            <div class="flex justify-between items-center gap-2">
+              <span>4200 · Pack &amp; Ship</span>
+              <span class="slabel">P2PCK · 3h</span>
+            </div>
+          </td>
+          <!-- LH 232: forecast 08/28, Δ+7 → amber highlight (imminent, late) -->
+          <td class="dc col-lh" style="background:rgba(255,191,0,0.15);color:#ffd54f;font-weight:700;border:1px solid rgba(255,191,0,0.3)">08/28</td>
+          <td class="dc s-up col-lh">09/01</td>
+          <td class="dc s-up col-lh">09/02</td>
+          <td class="dc s-up col-lh">09/11</td>
+          <td class="dc s-up col-lh">09/15</td>
+          <td class="dc s-up col-lh col-lh-last">09/16</td>
+          <!-- RH 227: forecast 08/22, Δ+1 → green highlight (imminent, nearly on time) -->
+          <td class="dc col-rh" style="background:rgba(34,197,94,0.15);color:#4ade80;font-weight:700;border:1px solid rgba(34,197,94,0.3)">08/22</td>
+          <td class="dc s-up col-rh">08/27</td>
+          <td class="dc s-up col-rh">09/04</td>
+          <td class="dc s-up col-rh">09/08</td>
+          <td class="dc s-up col-rh col-rh-last">09/15</td>
+          <td class="dc s-empty col-bump">—</td>
+        </tr>
+
+        <!-- ═══ UNASSIGNED / BUMPED ═══ -->
+        <tr class="band-hdr" style="background:rgba(239,68,68,0.07);border-top:2px solid rgba(239,68,68,0.28);border-bottom:2px solid rgba(239,68,68,0.28)">
+          <td class="rlc col-sticky" style="color:#f87171;font-weight:800;letter-spacing:0.08em;background:rgba(239,68,68,0.09)">▸ UNASSIGNED / BUMPED</td>
+          <td class="dc" style="background:rgba(239,68,68,0.04)" colspan="12"></td>
+        </tr>
+
+        <!-- LH 238 — MRB hold with hatched cells + reassign -->
+        <tr class="mrb-hold-row">
+          <td class="rlc col-sticky">
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center gap-2">
+                <span style="color:#f87171;font-weight:700">LH 238</span>
+                <span class="mrb-tag">MRB HOLD</span>
+              </div>
+              <div class="slabel" style="color:rgba(239,68,68,0.55)">IDLE 9 DAYS · OP 800 BLOCKED</div>
+              <div class="flex items-center gap-1 mt-1">
+                <span class="slabel">REASSIGN SLOT:</span>
+                <select class="reassign-select">
+                  <option>— SELECT —</option>
+                  <option>09/11 slot</option>
+                  <option>09/18 slot</option>
+                  <option>09/25 slot</option>
+                  <option>Hold / Defer</option>
+                </select>
+              </div>
+            </div>
+          </td>
+          <!-- Early ops done (before MRB) -->
+          <td class="dc s-done col-lh">08/05</td>
+          <td class="dc s-done col-lh">08/09</td>
+          <td class="dc s-done col-lh">08/07</td>
+          <td class="dc s-done col-lh">08/12</td>
+          <td class="dc s-done col-lh">08/14</td>
+          <td class="dc s-done col-lh col-lh-last">08/16</td>
+          <!-- Hatched hold across remaining ops -->
+          <td class="dc col-rh" colspan="6" style="text-align:center;color:#f87171;font-size:0.62rem;font-weight:600">
+            MRB HOLD — AWAITING DISPOSITION
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div><!-- /matrix-wrap -->
+
+  <!-- HONESTY / FOOTNOTE STRIP -->
+  <div class="mt-3 flex items-center justify-between gap-4 flex-wrap">
+    <div class="flex items-center gap-6 flex-wrap">
+      <div class="flex items-center gap-2">
+        <span class="chip-purple text-xs px-2 py-0.5 rounded mono">EMPIRICAL · n=8</span>
+        <span class="text-xs mono" style="color:var(--txt-mute)">Model not yet trained — best-case floor + measured slip</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 flex-shrink-0" style="color:rgba(245,158,11,0.5)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <span class="text-xs mono" style="color:rgba(138,155,191,0.35)">PRELIMINARY — forecast = best-case floor + measured slip, not guaranteed delivery</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="B_ops_landing.html" class="text-xs mono transition" style="color:rgba(96,165,250,0.5)">← ALL PROGRAMS</a>
+      <span class="text-xs mono" style="color:rgba(138,155,191,0.2)">RTG TRACKER · CONCEPT B</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function updateClock() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    document.getElementById('asof-clock').textContent =
+      `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const btn  = document.getElementById('theme-btn');
+    if (html.classList.contains('dark')) {
+      html.classList.replace('dark','light');
+      btn.textContent = '☾ DARK';
+    } else {
+      html.classList.replace('light','dark');
+      btn.textContent = '☀ LIGHT';
+    }
+  }
+</script>
+</body>
+</html>

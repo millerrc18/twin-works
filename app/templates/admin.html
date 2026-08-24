@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% set active_page = 'admin' %}
+
+{% block cmdtitle %}<h1>Admin<span class="sub">model &amp; WI status</span></h1>{% endblock %}
+{% block cmdright %}<span class="asof">data: {{ data_source|default('snapshot') }}</span>{% endblock %}
+
+{% block head %}
+<style>
+.atable{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.atable thead th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600;padding:8px 10px;text-align:center;background:var(--panel2);border-bottom:1px solid var(--border);}
+.atable thead th:first-child{text-align:left;}
+.atable td{padding:7px 10px;text-align:center;border-bottom:1px solid var(--border2);color:var(--muted);}
+.atable td:first-child{text-align:left;color:var(--text);font-weight:600;}
+.atable.sm{font-size:12px;} .atable.sm td{padding:5px 8px;text-align:left;}
+.badge2{font-size:10.5px;padding:3px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-weight:500;}
+.badge2.trained{background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);border-color:transparent;}
+.btn{font-size:12px;padding:5px 12px;border:none;border-radius:7px;cursor:pointer;font-weight:500;}
+.btn.pri{background:var(--brand);color:#fff;} .btn.sec{background:var(--panel2);color:var(--text);border:1px solid var(--border);}
+.btn.mini{font-size:11px;padding:3px 9px;background:var(--brand);color:#fff;}
+.h2{font-size:13px;font-weight:600;margin:22px 0 10px;}
+.synccard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:18px;}
+.syncrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.msg{font-size:12px;padding:6px 10px;border-radius:7px;margin-top:10px;}
+.msg.ok{background:color-mix(in srgb,var(--done) 12%,transparent);color:var(--done);}
+.msg.err{background:var(--late-bg);color:var(--late-tx);}
+.msg.info{background:var(--panel2);color:var(--muted);border:1px solid var(--border);}
+.previewbox{margin-top:10px;font-size:12px;color:var(--muted);border-left:3px solid var(--brand);padding:6px 12px;background:var(--panel2);border-radius:0 8px 8px 0;}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.linkbtn{background:none;border:none;color:var(--brand);font-size:11px;cursor:pointer;padding:0;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ===== IFS refresh loop ===== -->
+<div class="synccard" x-data="syncPanel()">
+  <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Refresh from IFS</div>
+  <div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;">
+    {% if ifs_connected %}<b style="color:var(--done)">● Connected to IFS</b> — syncing enabled.{% else %}
+    <b style="color:var(--late-tx)">Not connected</b> — <a href="/connect" style="color:var(--brand)">Connect IFS</a> to enable syncing.{% endif %}
+  </div>
+  <div class="syncrow">
+    <button class="btn pri" @click="syncPositions()" :disabled="busy"
+      title="Pull each in-process unit's current operation, last-clock, and due date from IFS and update the tracker. Also stamps today's forecast (needed for week-over-week slip). Run daily.">
+      <template x-if="busy && kind==='positions'"><span class="spin"></span></template>Refresh positions</button>
+    <button class="btn sec" @click="previewShips()" :disabled="busy"
+      title="Detect units that shipped since the last sync (pack-op complete or SO closed), preview them, then record their actual ship + score the forecast. Run when units close.">Process new ships…</button>
+    <span style="font-size:11px;color:var(--faint)">positions = daily · ships = when a unit closes</span>
+    <span style="margin-left:auto;">
+      <button class="linkbtn" @click="seedPositions()"
+        title="One-time: copy the wip_tables baseline into the editable PositionState layer. Safe to run; no-op if already seeded.">seed baseline</button> ·
+      <button class="linkbtn" @click="resetPositions()"
+        title="Revert PositionState to the wip_tables baseline — undoes all syncs and re-applies the original snapshot. Use to recover from a bad sync.">reset to baseline</button>
+    </span>
+  </div>
+
+  <!-- ship preview -> confirm -->
+  <template x-if="preview">
+    <div class="previewbox">
+      <div x-text="preview.new_count + ' new close(s) detected' + (preview.would_train.length ? '; would train: ' + preview.would_train.join(', ') : '; none reach the train gate yet')"></div>
+      <template x-for="(rows,prog) in preview.new_by_program" :key="prog">
+        <div style="margin-top:3px;"><b x-text="prog"></b>: <span x-text="rows.map(r=>r.serial).join(', ')"></span></div>
+      </template>
+      <div style="margin-top:6px;font-size:10.5px;color:var(--faint);">
+        Units already recorded as shipped (baseline / previously processed) are intentionally skipped —
+        only closes new since the last sync appear here.
+      </div>
+      <div style="margin-top:8px;">
+        <button class="btn pri" @click="processShips()" :disabled="busy || preview.new_count===0"
+          title="Record these ships: mark them shipped, backfill their forecast-vs-actual accuracy, then rescore + retrain any eligible program in the background.">Confirm + process</button>
+        <button class="btn sec" @click="preview=null" title="Discard this preview without recording anything.">Cancel</button>
+      </div>
+    </div>
+  </template>
+
+  <div class="msg" :class="msgType" x-show="msg" x-text="msg" style="display:none"></div>
+  <div class="msg info" x-show="slowStage" style="display:none"><span class="spin"></span><span x-text="slowStage"></span></div>
+</div>
+
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+  <button class="btn sec" hx-post="/admin/rebuild-training" hx-swap="none" hx-on::after-request="location.reload()"
+    title="Rebuild the ML training rows (features + residual) from every shipped unit. Run after processing new ships; does not train.">Rebuild training rows</button>
+  <button class="btn pri" hx-post="/admin/retrain" hx-swap="none" hx-on::after-request="location.reload()"
+    title="Fit the quantile P50/P80 model for any program at/over its forward-ship threshold, then reload it. Programs below threshold stay EMPIRICAL.">Retrain models</button>
+  <span style="font-size:11.5px;color:var(--muted)">Models stay EMPIRICAL until a program reaches its scored-ship threshold (ELEV/RAD 25, AEGIS 12) — counted on <b>forward</b> ships only.</span>
+</div>
+
+<table class="atable">
+  <thead><tr><th>Program</th><th>Model</th><th>n scored</th><th>Bias (d)</th><th>WI constraints</th><th>WI files</th><th>Ingest</th></tr></thead>
+  <tbody>
+    {% for m in models %}
+    <tr>
+      <td>{{ m.program }}</td>
+      <td><span class="badge2 {{ 'trained' if m.mode=='TRAINED' else '' }}">{{ m.mode }}</span></td>
+      <td class="num">{{ m.n_scored }} / {{ m.threshold }}</td>
+      <td class="num">{{ m.bias }}</td>
+      <td class="num">{{ m.wi_constraints }}</td>
+      <td class="num">{{ m.wi_files }}</td>
+      <td><button class="btn mini" hx-post="/admin/ingest-wi/{{ m.program }}" hx-swap="none" hx-on::after-request="location.reload()"
+        title="Load this program's extracted Work-Instruction cures/gates, validate them against the router cures, and write the WI constraint rows shown below.">Ingest WI</button></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- ===== model history / bias trend ===== -->
+<div class="h2">Model history — how the engine changes each sync</div>
+<div class="card" style="padding:12px;margin-bottom:14px;">
+  <div style="font-size:11px;color:var(--faint);margin:0 2px 6px;">
+    Bias = measured optimism (days the sim runs early). Toward <b>0</b> = forecast converging on reality.
+  </div>
+  <div id="biastrend"></div>
+</div>
+{% if history %}
+<table class="atable sm" style="margin-bottom:8px;">
+  <thead><tr><th style="text-align:left">When</th><th style="text-align:left">Program</th><th>Mode</th><th>n / thresh</th><th>Bias (d)</th><th>MAE (d)</th><th>Source</th></tr></thead>
+  <tbody>
+    {% for h in history|reverse %}
+    <tr>
+      <td>{{ h.at[:10] }}</td>
+      <td style="text-transform:none">{{ h.program }}</td>
+      <td style="text-align:center"><span class="badge2 {{ 'trained' if h.mode=='TRAINED' else '' }}">{{ h.mode }}</span></td>
+      <td class="num" style="text-align:center">{{ h.n_scored }} / {{ h.threshold }}</td>
+      <td class="num" style="text-align:center">{{ h.bias if h.bias is not none else '—' }}</td>
+      <td class="num" style="text-align:center">{{ h.mae if h.mae is not none else '—' }}</td>
+      <td style="text-align:center;color:var(--faint)">{{ h.source }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div style="font-size:12px;color:var(--faint);margin-bottom:14px;">No sync history yet — run a Refresh to start the trend.</div>
+{% endif %}
+
+<!-- ===== units in the model ===== -->
+<div class="h2">Units in the model — what's feeding each track</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px;">
+  <div style="flex:1;min-width:320px;">
+    <div style="font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:6px;">
+      Backtest (retrospective) — <span class="num">{{ backtest_units|length }}</span> units · empirical bias seed
+    </div>
+    <table class="atable sm">
+      <thead><tr><th style="text-align:left">Program</th><th style="text-align:left">SN</th><th style="text-align:left">SO #</th><th>Err (d)</th></tr></thead>
+      <tbody>
+        {% for u in backtest_units %}
+        <tr>
+          <td style="text-transform:none">{{ u.program }}</td>
+          <td>{{ u.serial }}</td>
+          <td class="num">{{ u.so }}</td>
+          <td class="num" style="text-align:center;{{ 'color:var(--late-tx)' if u.error_days and u.error_days>0 else ('color:var(--early-tx)' if u.error_days and u.error_days<0 else '') }}">{{ u.error_days if u.error_days is not none else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="color:var(--faint)">No backtest units.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div style="flex:1;min-width:320px;">
+    <div style="font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:6px;">
+      Forward (real scored ships) — <span class="num">{{ forward_units|length }}</span> units · counts toward the train gate
+    </div>
+    <table class="atable sm">
+      <thead><tr><th style="text-align:left">Program</th><th style="text-align:left">SN</th><th style="text-align:left">SO #</th><th>Closed</th><th>Err (d)</th></tr></thead>
+      <tbody>
+        {% for u in forward_units %}
+        <tr>
+          <td style="text-transform:none">{{ u.program }}</td>
+          <td>{{ u.serial }}</td>
+          <td class="num">{{ u.so }}</td>
+          <td class="num" style="text-align:center">{{ u.close }}</td>
+          <td class="num" style="text-align:center;{{ 'color:var(--late-tx)' if u.error_days and u.error_days>0 else ('color:var(--early-tx)' if u.error_days and u.error_days<0 else '') }}">{{ u.error_days if u.error_days is not none else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="color:var(--faint)">No forward ships scored yet — process a ship to populate this.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if constraints %}
+<div class="h2">Extracted WI constraints (cures / gates)</div>
+{% for prog, rows in constraints.items() %}
+<div x-data="{ open: false }" style="margin-bottom:8px;">
+  <div @click="open = !open" style="cursor:pointer;display:flex;align-items:center;gap:8px;
+       padding:8px 12px;background:var(--panel);border:1px solid var(--border);border-radius:8px;
+       font-size:12.5px;font-weight:600;">
+    <span x-text="open ? '▾' : '▸'" style="width:12px;color:var(--faint)"></span>
+    <span style="text-transform:none">{{ prog }}</span>
+    <span style="color:var(--faint);font-weight:400">— {{ rows|length }} constraint{{ 's' if rows|length != 1 else '' }}</span>
+    <span style="margin-left:auto;color:var(--faint);font-weight:400;font-size:11px"
+          x-show="!open">click to expand</span>
+  </div>
+  <table class="atable sm" x-show="open" x-cloak style="margin-top:4px;">
+    <thead><tr><th style="text-align:left">Op</th><th style="text-align:left">Label</th><th>Dwell hr</th><th>Type</th><th>Validated</th></tr></thead>
+    <tbody>
+      {% for c in rows %}
+      <tr>
+        <td class="num">{{ c.after_op if c.after_op is not none else '—' }}</td>
+        <td style="color:var(--muted);font-weight:400">{{ c.label }}</td>
+        <td class="num" style="text-align:center">{{ '%.2f'|format(c.dwell_hr) if c.dwell_hr is not none else '—' }}</td>
+        <td style="text-align:center">{{ c.constraint_type }}</td>
+        <td style="text-align:center;{{ 'color:var(--done)' if c.validated else 'color:var(--faint)' }}">{{ '✓' if c.validated else '?' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/charts.js?v=bullet4"></script>
+<script>
+  renderBiasTrend('biastrend', {{ history_json|safe }});
+
+  function syncPanel(){
+    return {
+      busy:false, kind:null, msg:'', msgType:'msg ok', preview:null, slowStage:'',
+      async _post(url){ const r = await fetch(url,{method:'POST'}); return {ok:r.ok, body:await r.json()}; },
+      show(m,type){ this.msg=m; this.msgType='msg '+(type||'ok'); },
+      async syncPositions(){
+        this.busy=true; this.kind='positions'; this.msg=''; this.preview=null;
+        const {ok,body}=await this._post('/admin/sync-positions');
+        this.busy=false; this.kind=null;
+        if(!ok){ this.show(body.reason||'Sync failed','err'); return; }
+        let m='Positions refreshed — '+body.moved+' unit(s) moved';
+        if(body.newly_stalled.length) m+='; newly stalled: '+body.newly_stalled.join(', ');
+        if(body.unknown_serials.length) m+='; needs serial: '+body.unknown_serials.join(', ');
+        this.show(m,'ok'); setTimeout(()=>location.reload(),1400);
+      },
+      async previewShips(){
+        this.busy=true; this.msg='';
+        const r=await fetch('/admin/process-ships/preview'); const body=await r.json();
+        this.busy=false;
+        if(!r.ok){ this.show(body.reason||'Preview failed','err'); return; }
+        this.preview=body;
+      },
+      async processShips(){
+        this.busy=true; this.msg=''; const pv=this.preview; this.preview=null;
+        const {ok,body}=await this._post('/admin/process-ships');
+        this.busy=false;
+        if(!ok){ this.show(body.reason||'Failed','err'); return; }
+        this.show('Recorded '+body.recorded+' ship(s). '+body.status,'ok');
+        this.pollStatus();
+      },
+      async pollStatus(){
+        this.slowStage='rescoring + retraining…';
+        const tick=async()=>{
+          const r=await fetch('/admin/sync-status'); const s=await r.json();
+          if(s.active){ this.slowStage='sync stage: '+s.stage+'…'; setTimeout(tick,1500); }
+          else { this.slowStage=''; this.show(s.error?('Sync error: '+s.error):'Sync complete — model updated.', s.error?'err':'ok'); setTimeout(()=>location.reload(),1400); }
+        };
+        setTimeout(tick,1500);
+      },
+      async seedPositions(){ const {body}=await this._post('/admin/seed-positions'); this.show(body.seeded?('Seeded '+body.rows+' rows from baseline'):'Already seeded','info'); },
+      async resetPositions(){ const {body}=await this._post('/admin/reset-positions'); this.show('Reset to baseline ('+body.rows+' rows)','info'); setTimeout(()=>location.reload(),1200); }
+    };
+  }
+</script>
+{% endblock %}

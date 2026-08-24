@@ -1,0 +1,102 @@
+{
+  "program": "ELEV",
+  "source_file": "wis/WI 4401-ASSEMBLY PROCESS.docx; wis/WI 4401-PAINT.docx",
+  "provider": "claude-opus-4-7",
+  "cures": [
+    {
+      "op": 800,
+      "label": "Liquid shim (GMS4003) ambient set before assembly",
+      "dwell_value": 8,
+      "dwell_unit": "hr",
+      "gate": "set before assembly",
+      "source_quote": "mix and cure per SR 1056 (130 Deg F for two hours minimum or room temperature until tack free"
+    },
+    {
+      "op": 2300,
+      "label": "Fillet seal PS870 B-2: 24hr flash + 8hr @125F (accel)",
+      "dwell_value": 32,
+      "dwell_unit": "hr",
+      "gate": "cure before next",
+      "source_quote": "flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 8 hours minimum"
+    },
+    {
+      "op": 3000,
+      "label": "CHO-BOND 1038 seal elec hardware: 24hr resistance-check gate",
+      "dwell_value": 24,
+      "dwell_unit": "hr",
+      "gate": "24hr resistance check",
+      "source_quote": "apply CHO bond 1086 primer (Part #2 of CHO Bond 1038) to both surfaces and allow to dry 30 minutes prior to application of 1038 adhesive"
+    },
+    {
+      "op": 3030,
+      "label": "Overcoat fastener tails PS870: 24hr flash + 8hr @125F (accel)",
+      "dwell_value": 32,
+      "dwell_unit": "hr",
+      "gate": "cure before next",
+      "source_quote": "flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 8 hours"
+    },
+    {
+      "op": 3200,
+      "label": "Fay seal LE skins PS870 C-12: 24hr flash + 48hr @125F (accel)",
+      "dwell_value": 72,
+      "dwell_unit": "hr",
+      "gate": "cure before next",
+      "source_quote": "flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 48 hours minimum. (GAMPS 7115 Rev T Table VI: P/S 870 C-12"
+    },
+    {
+      "op": 3220,
+      "label": "Aero seal GMS4114 tack-free; topcoat within 7 days",
+      "dwell_value": 2,
+      "dwell_unit": "hr",
+      "gate": "tack-free",
+      "source_quote": "room temperature until tack free"
+    },
+    {
+      "op": 3400,
+      "label": "FIP seal PS870 B-2: 24hr flash + 8hr @125F (accel)",
+      "dwell_value": 32,
+      "dwell_unit": "hr",
+      "gate": "cure before next",
+      "source_quote": "flash for a minimum of 24 hours followed by an elevated temperature cure of 125 Deg F for 8 hours minimum"
+    },
+    {
+      "op": 3700,
+      "label": "Aero seal gaps GMS4114 tack-free (Friday-miss driver)",
+      "dwell_value": 2,
+      "dwell_unit": "hr",
+      "gate": "tack-free",
+      "source_quote": "protect the sealant during Cure to Tack Free Stage"
+    },
+    {
+      "op": 3800,
+      "label": "Prep&Prime: primer flash + topcoat dry-to-handle before install",
+      "dwell_value": 4,
+      "dwell_unit": "hr",
+      "gate": "dry-to-handle",
+      "source_quote": "Allow to dry for 15 minutes. After drying is complete, wipe off excess"
+    },
+    {
+      "op": 3800,
+      "label": "GATE — Topcoat 24hr @75F cure (tape-test, parallel)",
+      "dwell_value": 24,
+      "dwell_unit": "hr",
+      "gate": "24hr topcoat cure",
+      "source_quote": "Do not remove tape for 24 hours if tape is used"
+    },
+    {
+      "op": 4010,
+      "label": "Cor Ban GAC115AD1 CIC dry to tack-free",
+      "dwell_value": 4,
+      "dwell_unit": "hr",
+      "gate": "tack-free",
+      "source_quote": "until tack free"
+    }
+  ],
+  "complexity": {
+    "char_count": 61106,
+    "op_count": 11,
+    "hold_points": 41,
+    "cure_mentions": 18,
+    "inspection_points": 34
+  }
+}

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RTG · Elevator Matrix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --canvas:#f7f8fa; --panel:#ffffff; --panel2:#fbfcfd; --border:#e5e7eb; --border2:#eef0f3;
+  --text:#1a1f2e; --muted:#5b6473; --faint:#9aa4b6;
+  --brand:#2f6fdb;
+  --done:#1e7a44;
+  --wip-bg:#f5a623; --wip-tx:#1a1200;
+  --late-bg:#fbe3e3; --late-tx:#b42318;
+  --early-bg:#dff3e6; --early-tx:#1e7a44;
+  --ontime-tx:#5b6473;
+  --cure:#7c5cbf; --alert:#c0392b;
+  --seam:#c7ccd6;
+  --focus:#2f6fdb;
+}
+.dark{
+  --canvas:#0f1117; --panel:#161b27; --panel2:#1a2030; --border:#242b3a; --border2:#1f2634;
+  --text:#e6e9ef; --muted:#9aa4b6; --faint:#6b7688;
+  --brand:#5b8def;
+  --done:#4ade80;
+  --wip-bg:#b9791f; --wip-tx:#ffe4b0;
+  --late-bg:#4a1d1d; --late-tx:#ff8a80;
+  --early-bg:#123524; --early-tx:#6ee7a0;
+  --ontime-tx:#9aa4b6;
+  --cure:#a78bda; --alert:#ff6b5e;
+  --seam:#3a4152;
+}
+*{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;}
+.num{font-family:'JetBrains Mono',ui-monospace,'Cascadia Code',Consolas,monospace;font-variant-numeric:tabular-nums;}
+body{margin:0;background:var(--canvas);color:var(--text);font-size:13px;transition:background .15s,color .15s;}
+a{color:inherit;text-decoration:none;}
+.layout{display:flex;height:100vh;overflow:hidden;}
+
+/* sidebar */
+.side{width:224px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;}
+.brand{height:52px;display:flex;align-items:center;gap:9px;padding:0 18px;border-bottom:1px solid var(--border2);}
+.logo{width:26px;height:26px;border-radius:7px;background:var(--brand);display:flex;align-items:center;justify-content:center;}
+.brand b{font-size:14px;font-weight:600;letter-spacing:-.01em;}
+.nav{flex:1;padding:14px 10px;overflow:auto;}
+.nlabel{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:6px 8px;margin-top:8px;}
+.nlink{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;color:var(--muted);font-size:13px;margin-bottom:1px;cursor:pointer;}
+.nlink:hover{background:var(--panel2);color:var(--text);}
+.nlink.active{background:color-mix(in srgb,var(--brand) 12%,transparent);color:var(--brand);font-weight:500;}
+.nlink .cnt{font-size:11px;}
+.sfoot{padding:12px;border-top:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;}
+.pill{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:500;}
+.pill.live{background:color-mix(in srgb,var(--done) 14%,transparent);color:var(--done);}
+.tgl{width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.tgl:hover{background:var(--panel2);}
+:focus-visible{outline:2px solid var(--focus);outline-offset:1px;border-radius:4px;}
+
+/* main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.cmd{height:52px;flex-shrink:0;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:16px;}
+.cmd h1{font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;}
+.cmd .sub{color:var(--faint);font-size:12px;margin-left:8px;}
+.cmd .right{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--muted);}
+.asof{color:var(--faint);}
+.alert{color:var(--alert);font-weight:600;}
+.alert .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--alert);margin-right:5px;vertical-align:middle;}
+.seg{display:inline-flex;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:2px;font-size:12px;}
+.seg button{border:none;background:transparent;color:var(--muted);padding:4px 11px;border-radius:6px;cursor:pointer;font-weight:500;}
+.seg button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+.badge{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-weight:500;}
+
+.caveat{padding:7px 22px;font-size:11.5px;color:var(--muted);border-bottom:1px solid var(--border2);background:var(--panel2);}
+.caveat b{color:var(--text);}
+.legend{padding:8px 22px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border2);align-items:center;}
+.lg{display:inline-flex;align-items:center;gap:5px;}
+.chip{display:inline-block;padding:1px 6px;border-radius:5px;font-size:10.5px;font-weight:600;}
+.chip.wip{background:var(--wip-bg);color:var(--wip-tx);}
+.dotg{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+/* grid */
+.wrap{flex:1;overflow:auto;padding:18px 22px;}
+.frame{display:inline-block;min-width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+table{border-collapse:separate;border-spacing:0;font-size:12px;}
+th,td{padding:0;}
+/* sticky ladder */
+thead th{position:sticky;background:var(--panel);}
+.corner{left:0;top:0;z-index:40;background:var(--panel);box-shadow:1px 0 0 var(--border), 0 1px 0 var(--border);}
+.rowhead{position:sticky;left:0;z-index:20;background:var(--panel);box-shadow:1px 0 0 var(--border);}
+thead tr th{top:0;z-index:30;}
+thead tr.r-band th{top:0;}
+.opcol{min-width:252px;text-align:left;}
+.ucol{min-width:78px;text-align:center;}
+
+/* group bands */
+.gband{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 8px;color:var(--muted);background:var(--panel2);border-bottom:1px solid var(--border);border-left:2px solid var(--brand);}
+.gband.rh{border-left-color:#8b5cf6;}
+.gband.un{border-left-color:var(--faint);color:var(--faint);}
+/* serial header */
+.uhead{padding:8px 4px;border-bottom:1px solid var(--border);border-left:1px solid var(--border2);}
+.uhead .ser{font-weight:600;font-size:13px;}
+.uhead .so{font-size:10px;color:var(--faint);}
+.uhead.bumped .ser{color:var(--alert);}
+.grpsep{border-left:2px solid var(--border)!important;}
+/* metric rows */
+.mrow th.rowhead{font-size:11px;font-weight:500;color:var(--muted);text-align:left;padding:3px 8px;}
+.mrow td{font-size:11px;text-align:center;padding:3px 4px;color:var(--muted);border-left:1px solid var(--border2);}
+.mrow.rtg th.rowhead,.mrow.rtg td{border-top:1px dotted var(--seam);border-bottom:1px dotted var(--seam);color:var(--text);font-weight:600;}
+/* delta pills */
+.dpill{display:inline-block;min-width:38px;padding:1px 6px;border-radius:5px;font-size:11px;font-weight:600;}
+.dpill.late{background:var(--late-bg);color:var(--late-tx);}                 /* filled: >2d late */
+.dpill.latemild{background:transparent;border:1px solid var(--late-tx);color:var(--late-tx);} /* outlined: 1-2d late */
+.dpill.early{background:transparent;border:1px solid var(--early-tx);color:var(--early-tx);}
+.dpill.on{background:transparent;color:var(--ontime-tx);}
+
+/* milestone band */
+.msband td{background:var(--panel2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);border-left:3px solid var(--brand);
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:5px 10px;}
+/* op rows */
+tbody tr.op td{border-bottom:1px solid var(--border2);height:27px;}
+tbody tr.op:hover td{background:color-mix(in srgb,var(--brand) 5%,transparent);}
+.oplabel{text-align:left;padding:4px 10px;}
+.oplabel .opn{color:var(--faint);}
+.oplabel .meta{color:var(--faint);font-size:10.5px;}
+.cell{text-align:center;border-left:1px solid var(--border2);color:var(--muted);}
+.cell.done{color:var(--done);font-weight:600;}
+.cell.wip{}
+.cell.wip .chip{margin:0 auto;}
+.cell.up{color:var(--faint);}
+.cell.seam-top{box-shadow:inset 0 2px 0 -1px var(--seam);}  /* front-line seam */
+/* cure/gate rows: tint + glyph, no warm rule */
+tr.cure td,tr.gate td{background:var(--panel2);}
+.cure .oplabel{color:var(--cure);font-style:italic;font-size:11px;}
+.gate .oplabel{color:var(--muted);font-style:italic;font-size:11px;}
+.gate .oplabel .gk{color:var(--text);font-weight:600;font-style:normal;}
+.cdot{color:var(--cure);}
+/* stall/mrb row hatch */
+.bumped-col{background:repeating-linear-gradient(45deg,transparent,transparent 5px,color-mix(in srgb,var(--alert) 9%,transparent) 5px,color-mix(in srgb,var(--alert) 9%,transparent) 10px);}
+
+@media print{.side,.tgl,.caveat{display:none;}.main{overflow:visible;}.wrap{overflow:visible;padding:0;}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="side">
+    <div class="brand"><div class="logo"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 13L8 3l5 10" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.2 10h5.6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg></div><b>RTG Tracker</b></div>
+    <nav class="nav">
+      <div class="nlabel">Workspace</div>
+      <a class="nlink"><span>Dashboard</span></a>
+      <div class="nlabel">Programs</div>
+      <a class="nlink active"><span>G500 Elevator</span><span class="cnt num">17</span></a>
+      <a class="nlink"><span>Aeronose Radome</span><span class="cnt num faint">11</span></a>
+      <a class="nlink"><span>Aegis Reflector</span><span class="cnt num faint">5</span></a>
+      <div class="nlabel">Tools</div>
+      <a class="nlink"><span>Levers</span></a>
+      <a class="nlink"><span>Admin</span></a>
+    </nav>
+    <div class="sfoot">
+      <span class="pill live">● live IFS</span>
+      <button class="tgl" onclick="tt()" title="Toggle theme" id="tglbtn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.2" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v1.6M8 13.4V15M15 8h-1.6M2.6 8H1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1M12.9 12.9l-1.1-1.1M4.2 4.2L3.1 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="cmd">
+      <div><h1>G500 Elevator<span class="sub num">531335 · Operation Tracker</span></h1></div>
+      <div class="right">
+        <span class="asof">as-of <span class="num">08/22 06:00</span></span>
+        <span class="alert"><span class="dot"></span>WC221 paint <span class="num">118%</span></span>
+        <span class="seg"><button class="on">Matrix</button><button>Summary</button></span>
+        <span class="badge">EMPIRICAL · n=<span class="num">8</span></span>
+      </div>
+    </div>
+    <div class="caveat"><b>PRELIMINARY</b> — forecast = best-case floor + measured slip (~<span class="num">7d</span>), not guaranteed delivery. Δ vs RTG target.</div>
+    <div class="legend">
+      <span class="lg"><span style="color:var(--done);font-weight:700;">✓</span> done</span>
+      <span class="lg"><span class="chip wip">WIP</span> in&nbsp;work</span>
+      <span class="lg"><span class="num faint">09/04</span> upcoming</span>
+      <span class="lg"><span class="dotg" style="background:var(--cure)"></span> cure</span>
+      <span class="lg"><span style="color:var(--muted)">◇</span> gate</span>
+      <span class="lg"><span class="dpill late">▲ +7</span> late&gt;2d</span>
+      <span class="lg"><span class="dpill early">▼ -3</span> early</span>
+    </div>
+
+    <div class="wrap">
+      <div class="frame">
+      <table>
+        <thead>
+          <!-- group bands -->
+          <tr class="r-band">
+            <th class="corner opcol" rowspan="2" style="vertical-align:bottom;"><div class="gband" style="border:none;background:transparent;color:var(--faint);">Operation</div></th>
+            <th colspan="6" class="gband">LH — RTG slots</th>
+            <th colspan="5" class="gband rh grpsep">RH — RTG slots</th>
+            <th colspan="1" class="gband un grpsep">Bumped</th>
+          </tr>
+          <!-- serials -->
+          <tr>
+            <th class="uhead ucol"><div class="ser">LH 232</div><div class="so num">1455596</div></th>
+            <th class="uhead ucol"><div class="ser">LH 233</div><div class="so num">1456550</div></th>
+            <th class="uhead ucol"><div class="ser">LH 229</div><div class="so num">1452748</div></th>
+            <th class="uhead ucol"><div class="ser">LH 234</div><div class="so num">1457061</div></th>
+            <th class="uhead ucol"><div class="ser">LH 235</div><div class="so num">1458317</div></th>
+            <th class="uhead ucol"><div class="ser">LH 236</div><div class="so num">1459236</div></th>
+            <th class="uhead ucol grpsep"><div class="ser">RH 227</div><div class="so num">1452749</div></th>
+            <th class="uhead ucol"><div class="ser">RH 231</div><div class="so num">1456551</div></th>
+            <th class="uhead ucol"><div class="ser">RH 232</div><div class="so num">1457063</div></th>
+            <th class="uhead ucol"><div class="ser">RH 233</div><div class="so num">1458318</div></th>
+            <th class="uhead ucol"><div class="ser">RH 235</div><div class="so num">1460168</div></th>
+            <th class="uhead ucol bumped grpsep"><div class="ser">LH 238</div><div class="so">MRB · idle 9d</div></th>
+          </tr>
+          <!-- metric rows -->
+          <tr class="mrow"><th class="rowhead">Contract</th>
+            <td class="num">08/21</td><td class="num">08/28</td><td class="num">09/04</td><td class="num">09/11</td><td class="num">09/18</td><td class="num">09/25</td>
+            <td class="num grpsep">08/21</td><td class="num">08/28</td><td class="num">09/04</td><td class="num">09/11</td><td class="num">09/18</td><td class="grpsep faint">—</td></tr>
+          <tr class="mrow rtg"><th class="rowhead">RTG target</th>
+            <td class="num">08/21</td><td class="num">08/28</td><td class="num">09/04</td><td class="num">09/11</td><td class="num">09/18</td><td class="num">09/25</td>
+            <td class="num grpsep">08/21</td><td class="num">08/28</td><td class="num">09/04</td><td class="num">09/11</td><td class="num">09/18</td><td class="grpsep faint" style="font-weight:400">no RTG</td></tr>
+          <tr class="mrow"><th class="rowhead">Forecast P50</th>
+            <td class="num">08/28</td><td class="num">09/01</td><td class="num">09/02</td><td class="num">09/11</td><td class="num">09/15</td><td class="num">09/16</td>
+            <td class="num grpsep">08/22</td><td class="num">08/27</td><td class="num">09/04</td><td class="num">09/08</td><td class="num">09/15</td><td class="grpsep faint">—</td></tr>
+          <tr class="mrow"><th class="rowhead">Δ vs RTG</th>
+            <td><span class="dpill late num">▲ +7</span></td><td><span class="dpill latemild num">▲ +4</span></td><td><span class="dpill early num">▼ -2</span></td><td><span class="dpill on num">— 0</span></td><td><span class="dpill early num">▼ -3</span></td><td><span class="dpill early num">▼ -9</span></td>
+            <td class="grpsep"><span class="dpill latemild num">▲ +1</span></td><td><span class="dpill early num">▼ -1</span></td><td><span class="dpill on num">— 0</span></td><td><span class="dpill early num">▼ -3</span></td><td><span class="dpill early num">▼ -3</span></td><td class="grpsep faint">—</td></tr>
+        </thead>
+        <tbody>
+          <!-- ASSY JIG -->
+          <tr class="msband"><td colspan="13">Assy Jig</td></tr>
+          <tr class="op"><td class="rowhead oplabel"><span class="opn num">100</span> Mark Data Plate <span class="meta num">· 248 · 0.8h</span></td>
+            <td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td>
+            <td class="cell done grpsep">✓</td><td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td><td class="cell grpsep bumped-col"></td></tr>
+          <tr class="op"><td class="rowhead oplabel"><span class="opn num">600</span> Locate &amp; Shim Parts <span class="meta num">· 32684 · 17h</span></td>
+            <td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td>
+            <td class="cell wip"><span class="chip wip">WIP</span></td><td class="cell wip"><span class="chip wip">WIP</span></td><td class="cell wip"><span class="chip wip">WIP</span></td>
+            <td class="cell done grpsep">✓</td><td class="cell done">✓</td><td class="cell done">✓</td>
+            <td class="cell wip"><span class="chip wip">WIP</span></td><td class="cell wip"><span class="chip wip">WIP</span></td><td class="cell grpsep bumped-col num" style="color:var(--faint)">09/02</td></tr>
+          <tr class="op"><td class="rowhead oplabel"><span class="opn num">800</span> Liquid Shim Spar <span class="meta num">· 32684 · 6.5h</span></td>
+            <td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td>
+            <td class="cell up seam-top num">09/05</td><td class="cell up seam-top num">09/08</td><td class="cell up seam-top num">09/09</td>
+            <td class="cell done grpsep">✓</td><td class="cell done">✓</td><td class="cell up seam-top num">09/01</td><td class="cell up seam-top num">09/05</td><td class="cell up seam-top num">09/08</td><td class="cell grpsep bumped-col"></td></tr>
+          <tr class="op cure"><td class="rowhead oplabel"><span class="cdot">●</span> Liquid shim RT cure <span class="meta num">· 8h dwell</span></td>
+            <td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell done grpsep">✓</td><td class="cell done">✓</td><td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell grpsep bumped-col"></td></tr>
+
+          <!-- ASSEMBLY 1 -->
+          <tr class="msband"><td colspan="13">Assembly 1</td></tr>
+          <tr class="op"><td class="rowhead oplabel"><span class="opn num">2300</span> Install &amp; Fillet Seal <span class="meta num">· 32684 · 18h</span></td>
+            <td class="cell done">✓</td><td class="cell done">✓</td><td class="cell done">✓</td><td class="cell up num">09/06</td><td class="cell up num">09/10</td><td class="cell up num">09/11</td>
+            <td class="cell done grpsep">✓</td><td class="cell done">✓</td><td class="cell up num">09/03</td><td class="cell up num">09/07</td><td class="cell up num">09/10</td><td class="cell grpsep bumped-col"></td></tr>
+
+          <!-- ASSEMBLY 2 -->
+          <tr class="msband"><td colspan="13">Assembly 2</td></tr>
+          <tr class="op"><td class="rowhead oplabel"><span class="opn num">3030</span> Fay Seal <span class="meta num">· 32684 · 12h</span></td>
+            <td class="cell wip"><span class="chip wip">WIP</span></td><td class="cell up seam-top num">08/29</td><td class="cell up seam-top num">08/31</td><td class="cell up num">09/14</td><td class="cell up num">09/17</td><td class="cell up num">09/18</td>
+            <td class="cell up seam-top grpsep num">08/24</td><td class="cell up seam-top num">08/28</td><td class="cell up num">09/06</td><td class="cell up num">09/10</td><td class="cell up num">09/13</td><td class="cell grpsep bumped-col"></td></tr>
+
+          <!-- FINISH-SHIP -->
+          <tr class="msband"><td colspan="13">Finish / Ship</td></tr>
+          <tr class="op"><td class="rowhead oplabel"><span class="opn num">3800</span> Prep &amp; Prime <span class="meta num">· 221 · 30.5h</span></td>
+            <td class="cell up num">08/26</td><td class="cell up num">08/30</td><td class="cell up num">09/01</td><td class="cell up num">09/16</td><td class="cell up num">09/19</td><td class="cell up num">09/20</td>
+            <td class="cell up grpsep num">08/21</td><td class="cell up num">08/25</td><td class="cell up num">09/02</td><td class="cell up num">09/06</td><td class="cell up num">09/12</td><td class="cell grpsep bumped-col"></td></tr>
+          <tr class="op gate"><td class="rowhead oplabel"><span class="gk">◇ GATE</span> Topcoat 24hr tape-test <span class="meta num">· 24h dwell</span></td>
+            <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+            <td class="cell grpsep"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell grpsep bumped-col"></td></tr>
+          <tr class="op"><td class="rowhead oplabel"><span class="opn num">4200</span> Pack &amp; Ship <span class="meta num">· P2PCK · 3h</span></td>
+            <td class="cell up num">08/28</td><td class="cell up num">09/01</td><td class="cell up num">09/02</td><td class="cell up num">09/11</td><td class="cell up num">09/15</td><td class="cell up num">09/16</td>
+            <td class="cell up grpsep num">08/22</td><td class="cell up num">08/27</td><td class="cell up num">09/04</td><td class="cell up num">09/08</td><td class="cell up num">09/15</td><td class="cell grpsep bumped-col"></td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function tt(){document.documentElement.classList.toggle('dark');localStorage.setItem('rtg-theme',document.documentElement.classList.contains('dark')?'dark':'light');}
+if(localStorage.getItem('rtg-theme')==='dark')document.documentElement.classList.add('dark');
+</script>
+</body>
+</html>

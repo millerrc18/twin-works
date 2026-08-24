@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% set active_page = 'dashboard' %}
+
+{% block cmdtitle %}<h1>Dashboard</h1>{% endblock %}
+{% block cmdright %}<span class="asof">data: {{ data_source|default('snapshot') }}</span>{% endblock %}
+
+{% block head %}
+<style>
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.kpi .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+.kpi .v{font-size:26px;font-weight:600;margin-top:6px;letter-spacing:-.02em;}
+.kpi .s{font-size:11px;color:var(--muted);margin-top:2px;}
+.kpi.alert .v{color:var(--alert);}
+.seclabel{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 12px;}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.pcard{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:box-shadow .15s,transform .12s,border-color .15s;display:block;}
+.pcard:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);border-color:color-mix(in srgb,var(--brand) 40%,var(--border));}
+.pcard .top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.pcard h3{margin:0;font-size:16px;font-weight:600;}
+.pcard .badge2{font-size:10.5px;padding:3px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-weight:500;}
+.pcard .badge2.trained{background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);border-color:transparent;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin:14px 0;}
+.stat .n{font-size:22px;font-weight:600;} .stat .l{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-top:1px;}
+.stat.behind .n{color:var(--alert);} .stat.stall .n{color:var(--wip-bg);} .stat.zero .n{color:var(--faint);}
+.pnote{font-size:11px;color:var(--muted);border-top:1px solid var(--border2);padding-top:10px;}
+.pnote b{color:var(--text);}
+.spark{height:2px;background:linear-gradient(90deg,var(--early-tx),var(--wip-bg),var(--late-tx));border-radius:2px;margin-top:12px;opacity:.5;}
+.discl{margin-top:18px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:11.5px;color:var(--muted);}
+.discl b{color:var(--text);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kpis">
+  <div class="kpi"><div class="k">Forecast accuracy</div><div class="v"><span class="num">7.1</span><span style="font-size:13px;color:var(--muted)">d MAE</span></div><div class="s">PRELIMINARY · n=8</div></div>
+  <div class="kpi"><div class="k">On-time delivery</div><div class="v num">↑</div><div class="s">tracked vs RTG target</div></div>
+  <div class="kpi"><div class="k">Throughput</div><div class="v"><span class="num">1.4</span><span style="font-size:13px;color:var(--muted)">/wk</span></div><div class="s">target cadence</div></div>
+  <div class="kpi alert"><div class="k">Binding constraint</div><div class="v num">118%</div><div class="s">WC221 paint · over capacity</div></div>
+</div>
+
+<div class="seclabel">Programs</div>
+<div class="cards">
+  {% for p in programs %}
+  <a href="/forecast/{{ p.program }}" class="pcard">
+    <div class="top">
+      <div><h3>{{ p.name }}</h3><div class="num" style="font-size:11px;color:var(--faint);margin-top:2px">{{ p.program }}</div></div>
+      <span class="badge2 {{ 'trained' if p.model_status=='TRAINED' else '' }}">{{ p.model_status }}{% if p.model_status=='EMPIRICAL' %} · n=<span class="num">{{ p.n_scored }}</span>{% endif %}</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n num">{{ p.wip }}</div><div class="l">WIP</div></div>
+      <div class="stat {{ 'behind' if p.behind else 'zero' }}"><div class="n num">{{ p.behind }}</div><div class="l">behind</div></div>
+      <div class="stat {{ 'stall' if p.stalled else 'zero' }}"><div class="n num">{{ p.stalled }}</div><div class="l">stalled</div></div>
+    </div>
+    <div class="pnote">Model runs <b><span class="num">{{ p.bias_days }}d</span></b> optimistic — P50 de-biases, P80 adds slack.</div>
+    <div class="spark"></div>
+  </a>
+  {% endfor %}
+</div>
+
+<div class="discl"><b>PRELIMINARY.</b> Accuracy is EMPIRICAL (backtest n=8 recent-production ships, directional).
+Forecasts show a de-biased P50 + conservative P80 — best-case floor plus measured slip, not a guaranteed
+delivery date. The forward log accrues honest accuracy as units ship.</div>
+{% endblock %}

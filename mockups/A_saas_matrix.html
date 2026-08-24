@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RTG Tracker — Elevator Matrix</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+    /* subtle zebra + hover on op rows */
+    tbody tr.oprow:hover td { background-color: rgba(59,111,212,0.05); }
+    .dark tbody tr.oprow:hover td { background-color: rgba(59,111,212,0.12); }
+  </style>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { colors: {
+      navy:'#16243D', 'navy-light':'#24406B', brand:'#3B6FD4', 'brand-dim':'#2952A8' } } } }
+  </script>
+</head>
+<body class="h-full bg-gray-50 dark:bg-[#0f1117] text-gray-900 dark:text-gray-100 transition-colors duration-200">
+<div class="flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="w-56 flex-shrink-0 bg-white dark:bg-[#161b27] border-r border-gray-200 dark:border-gray-800 flex flex-col">
+    <div class="h-14 flex items-center px-5 border-b border-gray-100 dark:border-gray-800">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-brand flex items-center justify-center">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 13L8 3L13 13" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10h6" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <span class="text-sm font-semibold tracking-tight dark:text-white">RTG Tracker</span>
+      </div>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <p class="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Workspace</p>
+      <a href="A_saas_landing.html" class="flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".6"/><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/><rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".4"/></svg>
+        Dashboard
+      </a>
+      <p class="px-2 pt-4 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Programs</p>
+      <a href="#" class="flex items-center justify-between px-2 py-2 rounded-lg text-sm font-medium bg-brand/10 text-brand dark:bg-brand/20 dark:text-blue-400">
+        <span>G500 Elevator</span><span class="text-[10px] px-1.5 py-0.5 rounded bg-brand/20">17</span></a>
+      <a href="#" class="flex items-center justify-between px-2 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+        <span>Aeronose Radome</span><span class="text-[10px] text-gray-400">11</span></a>
+      <a href="#" class="flex items-center justify-between px-2 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+        <span>Aegis Reflector</span><span class="text-[10px] text-gray-400">5</span></a>
+      <p class="px-2 pt-4 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Tools</p>
+      <a href="#" class="flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">Levers</a>
+      <a href="#" class="flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">Admin</a>
+    </nav>
+    <div class="px-3 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+      <span class="text-[11px] px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 font-medium">● live IFS</span>
+      <button onclick="document.documentElement.classList.toggle('dark')" class="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v2M8 13v2M15 8h-2M3 8H1M13 3l-1.4 1.4M4.4 11.6L3 13M13 13l-1.4-1.4M4.4 4.4L3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- top bar -->
+    <header class="h-14 flex-shrink-0 bg-white dark:bg-[#161b27] border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6">
+      <div class="flex items-baseline gap-3">
+        <h1 class="text-lg font-semibold tracking-tight">G500 Elevator</h1>
+        <span class="text-xs text-gray-400">531335 · Operation Tracker</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="inline-flex rounded-lg bg-gray-100 dark:bg-gray-800 p-0.5 text-xs font-medium">
+          <button class="px-3 py-1 rounded-md bg-white dark:bg-gray-700 shadow-sm">Matrix</button>
+          <button class="px-3 py-1 rounded-md text-gray-500">Summary</button>
+        </div>
+        <span class="text-[11px] px-2 py-1 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 font-medium">EMPIRICAL · n=8</span>
+      </div>
+    </header>
+
+    <!-- caveat -->
+    <div class="px-6 py-2 bg-amber-50/60 dark:bg-amber-900/10 border-b border-amber-100 dark:border-amber-900/30 text-[11px] text-amber-800 dark:text-amber-300/80">
+      <span class="font-semibold">PRELIMINARY</span> — forecast = best-case floor + measured slip (~7d), not guaranteed delivery. Δ measured vs RTG target.
+    </div>
+
+    <!-- legend -->
+    <div class="px-6 py-2.5 flex flex-wrap gap-2 text-[11px] border-b border-gray-100 dark:border-gray-800">
+      <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 font-medium">C&nbsp;done</span>
+      <span class="px-2 py-0.5 rounded-md bg-amber-200 text-amber-800 dark:bg-amber-500/30 dark:text-amber-200 font-medium">WIP</span>
+      <span class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">upcoming</span>
+      <span class="px-2 py-0.5 rounded-md bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">cure</span>
+      <span class="px-2 py-0.5 rounded-md bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">gate</span>
+      <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800">RTG target</span>
+    </div>
+
+    <!-- matrix -->
+    <div class="flex-1 overflow-auto p-6">
+      <div class="inline-block min-w-full rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden bg-white dark:bg-[#161b27]">
+      <table class="border-collapse text-xs" style="min-width:max-content">
+        <thead class="sticky top-0 z-20">
+          <!-- group bands -->
+          <tr>
+            <th class="sticky left-0 z-30 bg-white dark:bg-[#161b27] px-3 py-2 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider border-b border-r border-gray-200 dark:border-gray-800" style="min-width:250px">Operation</th>
+            <th colspan="6" class="px-3 py-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border-b border-l-2 border-blue-200 dark:border-blue-800">LH — RTG slots</th>
+            <th colspan="5" class="px-3 py-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 border-b border-l-2 border-violet-200 dark:border-violet-800">RH — RTG slots</th>
+            <th colspan="1" class="px-3 py-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-gray-50 dark:bg-gray-800/50 border-b border-l-2 border-gray-300 dark:border-gray-700">Bumped</th>
+          </tr>
+          <!-- unit serials -->
+          <tr class="bg-gray-50 dark:bg-[#1b2130]">
+            <th class="sticky left-0 z-30 bg-gray-50 dark:bg-[#1b2130] px-3 py-2 text-left border-b border-r border-gray-200 dark:border-gray-800"></th>
+            <!-- LH -->
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800" style="min-width:78px"><div class="font-semibold text-sm">LH 232</div><div class="text-[10px] text-gray-400">1455596</div></th>
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800"><div class="font-semibold text-sm">LH 233</div><div class="text-[10px] text-gray-400">1456550</div></th>
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800"><div class="font-semibold text-sm">LH 229</div><div class="text-[10px] text-gray-400">1452748</div></th>
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800"><div class="font-semibold text-sm">LH 234</div><div class="text-[10px] text-gray-400">1457061</div></th>
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800"><div class="font-semibold text-sm">LH 235</div><div class="text-[10px] text-gray-400">1458317</div></th>
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800"><div class="font-semibold text-sm">LH 236</div><div class="text-[10px] text-gray-400">1459236</div></th>
+            <!-- RH -->
+            <th class="px-2 py-2 text-center border-b border-l-2 border-violet-200 dark:border-violet-800"><div class="font-semibold text-sm">RH 227</div><div class="text-[10px] text-gray-400">1452749</div></th>
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800"><div class="font-semibold text-sm">RH 231</div><div class="text-[10px] text-gray-400">1456551</div></th>
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800"><div class="font-semibold text-sm">RH 232</div><div class="text-[10px] text-gray-400">1457063</div></th>
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800"><div class="font-semibold text-sm">RH 233</div><div class="text-[10px] text-gray-400">1458318</div></th>
+            <th class="px-2 py-2 text-center border-b border-l border-gray-100 dark:border-gray-800"><div class="font-semibold text-sm">RH 235</div><div class="text-[10px] text-gray-400">1460168</div></th>
+            <!-- bumped -->
+            <th class="px-2 py-2 text-center border-b border-l-2 border-gray-300 dark:border-gray-700 bg-red-50/50 dark:bg-red-900/10"><div class="font-semibold text-sm text-red-700 dark:text-red-400">LH 238</div><div class="text-[10px] text-red-500">MRB · idle 9d</div></th>
+          </tr>
+          <!-- header metric rows -->
+          <!-- Contract -->
+          <tr class="text-[11px] text-gray-500 dark:text-gray-400">
+            <th class="sticky left-0 z-30 bg-white dark:bg-[#161b27] px-3 py-1 text-left font-medium border-r border-gray-200 dark:border-gray-800">Contract</th>
+            <td class="px-2 py-1 text-center">08/21</td><td class="px-2 py-1 text-center">08/28</td><td class="px-2 py-1 text-center">09/04</td><td class="px-2 py-1 text-center">09/11</td><td class="px-2 py-1 text-center">09/18</td><td class="px-2 py-1 text-center">09/25</td>
+            <td class="px-2 py-1 text-center border-l-2 border-violet-100 dark:border-violet-900">08/21</td><td class="px-2 py-1 text-center">08/28</td><td class="px-2 py-1 text-center">09/04</td><td class="px-2 py-1 text-center">09/11</td><td class="px-2 py-1 text-center">09/18</td>
+            <td class="px-2 py-1 text-center border-l-2 border-gray-200 dark:border-gray-700 text-gray-400">—</td>
+          </tr>
+          <!-- RTG target (highlighted) -->
+          <tr class="text-[11px] font-semibold text-amber-700 dark:text-amber-300 border-y border-amber-200/60 dark:border-amber-800/40">
+            <th class="sticky left-0 z-30 bg-amber-50 dark:bg-[#211d10] px-3 py-1 text-left border-r border-gray-200 dark:border-gray-800">RTG target</th>
+            <td class="px-2 py-1 text-center">08/21</td><td class="px-2 py-1 text-center">08/28</td><td class="px-2 py-1 text-center">09/04</td><td class="px-2 py-1 text-center">09/11</td><td class="px-2 py-1 text-center">09/18</td><td class="px-2 py-1 text-center">09/25</td>
+            <td class="px-2 py-1 text-center border-l-2 border-violet-100 dark:border-violet-900">08/21</td><td class="px-2 py-1 text-center">08/28</td><td class="px-2 py-1 text-center">09/04</td><td class="px-2 py-1 text-center">09/11</td><td class="px-2 py-1 text-center">09/18</td>
+            <td class="px-2 py-1 text-center border-l-2 border-gray-200 dark:border-gray-700 text-gray-400 font-normal">no RTG</td>
+          </tr>
+          <!-- Forecast P50 -->
+          <tr class="text-[11px] font-semibold">
+            <th class="sticky left-0 z-30 bg-white dark:bg-[#161b27] px-3 py-1 text-left border-r border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300">Forecast P50</th>
+            <td class="px-2 py-1 text-center text-rose-600 dark:text-rose-400">08/28</td>
+            <td class="px-2 py-1 text-center text-rose-600 dark:text-rose-400">09/01</td>
+            <td class="px-2 py-1 text-center text-emerald-600 dark:text-emerald-400">09/02</td>
+            <td class="px-2 py-1 text-center text-gray-600 dark:text-gray-300">09/11</td>
+            <td class="px-2 py-1 text-center text-emerald-600 dark:text-emerald-400">09/15</td>
+            <td class="px-2 py-1 text-center text-emerald-600 dark:text-emerald-400">09/16</td>
+            <td class="px-2 py-1 text-center border-l-2 border-violet-100 dark:border-violet-900 text-rose-600 dark:text-rose-400">08/22</td>
+            <td class="px-2 py-1 text-center text-emerald-600 dark:text-emerald-400">08/27</td>
+            <td class="px-2 py-1 text-center text-gray-600 dark:text-gray-300">09/04</td>
+            <td class="px-2 py-1 text-center text-emerald-600 dark:text-emerald-400">09/08</td>
+            <td class="px-2 py-1 text-center text-emerald-600 dark:text-emerald-400">09/15</td>
+            <td class="px-2 py-1 text-center border-l-2 border-gray-200 dark:border-gray-700 text-gray-400">—</td>
+          </tr>
+          <!-- Delta pills -->
+          <tr class="text-[11px]">
+            <th class="sticky left-0 z-30 bg-white dark:bg-[#161b27] px-3 py-1.5 text-left border-r border-b-2 border-gray-200 dark:border-gray-800 text-gray-500">Δ vs RTG</th>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">+7</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">+4</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">-2</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">0</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">-3</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">-9</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800 border-l-2 border-l-violet-100 dark:border-l-violet-900"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">+1</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">-1</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">0</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">-3</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800"><span class="inline-block px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">-3</span></td>
+            <td class="px-2 py-1.5 text-center border-b-2 border-gray-200 dark:border-gray-800 border-l-2 border-l-gray-200 dark:border-l-gray-700 text-gray-400">—</td>
+          </tr>
+          <!-- reassign affordance -->
+          <tr class="text-[10px] bg-gray-50/60 dark:bg-gray-800/30">
+            <th class="sticky left-0 z-30 bg-gray-50 dark:bg-[#161b27] px-3 py-1 text-left text-gray-400 border-r border-gray-200 dark:border-gray-800">assign ▾</th>
+            <td colspan="6" class="px-2 py-1 text-center text-gray-400 border-l-2 border-blue-100 dark:border-blue-900"><span class="italic">click a slot serial to reassign on a swap</span></td>
+            <td colspan="5" class="px-2 py-1 text-center text-gray-400 border-l-2 border-violet-100 dark:border-violet-900"></td>
+            <td class="border-l-2 border-gray-200 dark:border-gray-700"></td>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ASSY JIG band -->
+          <tr><td colspan="13" class="sticky left-0 bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest border-l-2 border-brand">Assy Jig</td></tr>
+          <tr class="oprow"><td class="sticky left-0 bg-white dark:bg-[#161b27] px-3 py-1.5 border-b border-gray-100 dark:border-gray-800"><span class="text-gray-400 tabular-nums">100</span> Mark Data Plate <span class="text-gray-400 text-[10px]">· 248 · 0.8h</span></td>
+            <!-- LH all done, RH done -->
+            <td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td>
+            <td class="text-center border-b border-l-2 border-violet-100 dark:border-violet-900 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td>
+            <td class="text-center border-b border-l-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 text-gray-300">—</td></tr>
+          <tr class="oprow"><td class="sticky left-0 bg-white dark:bg-[#161b27] px-3 py-1.5 border-b border-gray-100 dark:border-gray-800"><span class="text-gray-400 tabular-nums">600</span> Locate &amp; Shim Parts <span class="text-gray-400 text-[10px]">· 32684 · 17h</span></td>
+            <td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 font-semibold">WIP</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 font-semibold">WIP</td>
+            <td class="text-center border-b border-l-2 border-violet-100 dark:border-violet-900 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 font-semibold">WIP</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 font-semibold">WIP</td>
+            <td class="text-center border-b border-l-2 border-gray-200 dark:border-gray-700 text-gray-400">09/02</td></tr>
+          <tr class="oprow"><td class="sticky left-0 bg-white dark:bg-[#161b27] px-3 py-1.5 border-b border-gray-100 dark:border-gray-800"><span class="text-gray-400 tabular-nums">800</span> Liquid Shim Spar <span class="text-gray-400 text-[10px]">· 32684 · 6.5h</span></td>
+            <td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/05</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/08</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/09</td>
+            <td class="text-center border-b border-l-2 border-violet-100 dark:border-violet-900 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/01</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/05</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/08</td>
+            <td class="text-center border-b border-l-2 border-gray-200 dark:border-gray-700 text-gray-400">—</td></tr>
+          <!-- cure row -->
+          <tr class="oprow"><td class="sticky left-0 bg-violet-50 dark:bg-violet-900/20 px-3 py-1 border-b border-gray-100 dark:border-gray-800 italic text-violet-700 dark:text-violet-300 text-[11px]">Liquid shim RT cure · 8h dwell</td>
+            <td colspan="11" class="border-b border-l border-gray-100 dark:border-gray-800 bg-violet-50/40 dark:bg-violet-900/10"></td>
+            <td class="border-b border-l-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40"></td></tr>
+
+          <!-- ASSEMBLY 1 band -->
+          <tr><td colspan="13" class="sticky left-0 bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest border-l-2 border-brand">Assembly 1</td></tr>
+          <tr class="oprow"><td class="sticky left-0 bg-white dark:bg-[#161b27] px-3 py-1.5 border-b border-gray-100 dark:border-gray-800"><span class="text-gray-400 tabular-nums">2300</span> Install &amp; Fillet Seal <span class="text-gray-400 text-[10px]">· 32684 · 18h</span></td>
+            <td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/06</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/10</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/11</td>
+            <td class="text-center border-b border-l-2 border-violet-100 dark:border-violet-900 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400 font-semibold">C</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/03</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/07</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/10</td>
+            <td class="text-center border-b border-l-2 border-gray-200 dark:border-gray-700 text-gray-400">—</td></tr>
+
+          <!-- ASSEMBLY 2 band -->
+          <tr><td colspan="13" class="sticky left-0 bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest border-l-2 border-brand">Assembly 2</td></tr>
+          <tr class="oprow"><td class="sticky left-0 bg-white dark:bg-[#161b27] px-3 py-1.5 border-b border-gray-100 dark:border-gray-800"><span class="text-gray-400 tabular-nums">3030</span> Fay Seal <span class="text-gray-400 text-[10px]">· 32684 · 12h</span></td>
+            <td class="text-center border-b border-l border-gray-100 dark:border-gray-800 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 font-semibold">WIP</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">08/29</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">08/31</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/14</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/17</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/18</td>
+            <td class="text-center border-b border-l-2 border-violet-100 dark:border-violet-900 text-gray-400">08/24</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">08/28</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/06</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/10</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/13</td>
+            <td class="text-center border-b border-l-2 border-gray-200 dark:border-gray-700 text-gray-400">—</td></tr>
+
+          <!-- FINISH-SHIP band -->
+          <tr><td colspan="13" class="sticky left-0 bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest border-l-2 border-brand">Finish / Ship</td></tr>
+          <tr class="oprow"><td class="sticky left-0 bg-white dark:bg-[#161b27] px-3 py-1.5 border-b border-gray-100 dark:border-gray-800"><span class="text-gray-400 tabular-nums">3800</span> Prep &amp; Prime <span class="text-gray-400 text-[10px]">· 221 · 30.5h</span></td>
+            <td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">08/26</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">08/30</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/01</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/16</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/19</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/20</td>
+            <td class="text-center border-b border-l-2 border-violet-100 dark:border-violet-900 text-gray-400">08/21</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">08/25</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/02</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/06</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/12</td>
+            <td class="text-center border-b border-l-2 border-gray-200 dark:border-gray-700 text-gray-400">—</td></tr>
+          <!-- gate row -->
+          <tr class="oprow"><td class="sticky left-0 bg-orange-50 dark:bg-orange-900/20 px-3 py-1 border-b border-gray-100 dark:border-gray-800 italic text-orange-700 dark:text-orange-300 text-[11px]">▸ GATE: Topcoat 24hr tape-test · 24h dwell</td>
+            <td colspan="11" class="border-b border-l border-gray-100 dark:border-gray-800 bg-orange-50/40 dark:bg-orange-900/10"></td>
+            <td class="border-b border-l-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40"></td></tr>
+          <tr class="oprow"><td class="sticky left-0 bg-white dark:bg-[#161b27] px-3 py-1.5 border-b border-gray-100 dark:border-gray-800"><span class="text-gray-400 tabular-nums">4200</span> Pack &amp; Ship <span class="text-gray-400 text-[10px]">· P2PCK · 3h</span></td>
+            <td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">08/28</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/01</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/02</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/11</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/15</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/16</td>
+            <td class="text-center border-b border-l-2 border-violet-100 dark:border-violet-900 text-gray-400">08/22</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">08/27</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/04</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/08</td><td class="text-center border-b border-l border-gray-100 dark:border-gray-800 text-gray-400">09/15</td>
+            <td class="text-center border-b border-l-2 border-gray-200 dark:border-gray-700 text-gray-400">—</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RTG · Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{
+  --canvas:#f7f8fa;--panel:#ffffff;--panel2:#fbfcfd;--border:#e5e7eb;--border2:#eef0f3;
+  --text:#1a1f2e;--muted:#5b6473;--faint:#9aa4b6;--brand:#2f6fdb;--done:#1e7a44;
+  --wip-bg:#f5a623;--wip-tx:#1a1200;--late-tx:#b42318;--early-tx:#1e7a44;--alert:#c0392b;--focus:#2f6fdb;
+}
+.dark{
+  --canvas:#0f1117;--panel:#161b27;--panel2:#1a2030;--border:#242b3a;--border2:#1f2634;
+  --text:#e6e9ef;--muted:#9aa4b6;--faint:#6b7688;--brand:#5b8def;--done:#4ade80;
+  --wip-bg:#b9791f;--wip-tx:#ffe4b0;--late-tx:#ff8a80;--early-tx:#6ee7a0;--alert:#ff6b5e;
+}
+*{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;}
+.num{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums;}
+body{margin:0;background:var(--canvas);color:var(--text);font-size:13px;transition:background .15s,color .15s;}
+a{color:inherit;text-decoration:none;}
+.layout{display:flex;height:100vh;overflow:hidden;}
+.side{width:224px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;}
+.brand{height:52px;display:flex;align-items:center;gap:9px;padding:0 18px;border-bottom:1px solid var(--border2);}
+.logo{width:26px;height:26px;border-radius:7px;background:var(--brand);display:flex;align-items:center;justify-content:center;}
+.brand b{font-size:14px;font-weight:600;}
+.nav{flex:1;padding:14px 10px;}
+.nlabel{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:6px 8px;margin-top:8px;}
+.nlink{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;color:var(--muted);margin-bottom:1px;cursor:pointer;}
+.nlink:hover{background:var(--panel2);color:var(--text);}
+.nlink.active{background:color-mix(in srgb,var(--brand) 12%,transparent);color:var(--brand);font-weight:500;}
+.cnt{font-size:11px;}
+.sfoot{padding:12px;border-top:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;}
+.pill{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:500;}
+.pill.live{background:color-mix(in srgb,var(--done) 14%,transparent);color:var(--done);}
+.tgl{width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;}
+.tgl:hover{background:var(--panel2);}
+:focus-visible{outline:2px solid var(--focus);outline-offset:1px;border-radius:4px;}
+.main{flex:1;display:flex;flex-direction:column;overflow:auto;}
+.cmd{height:52px;flex-shrink:0;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 26px;}
+.cmd h1{font-size:16px;font-weight:600;margin:0;}
+.cmd .right{display:flex;gap:14px;align-items:center;font-size:12px;color:var(--muted);}
+.asof{color:var(--faint);}
+.content{padding:26px;max-width:1100px;}
+
+/* KPI strip */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.kpi .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+.kpi .v{font-size:26px;font-weight:600;margin-top:6px;letter-spacing:-.02em;}
+.kpi .s{font-size:11px;color:var(--muted);margin-top:2px;}
+.kpi.alert .v{color:var(--alert);}
+
+.seclabel{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 12px;}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:box-shadow .15s,transform .12s,border-color .15s;}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);border-color:color-mix(in srgb,var(--brand) 40%,var(--border));}
+.card .top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.card h3{margin:0;font-size:16px;font-weight:600;}
+.card .pid{font-size:11px;color:var(--faint);margin-top:2px;}
+.badge{font-size:10.5px;padding:3px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-weight:500;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin:14px 0;}
+.stat .n{font-size:22px;font-weight:600;}
+.stat .l{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-top:1px;}
+.stat.behind .n{color:var(--alert);} .stat.stall .n{color:var(--wip-bg);}
+.card .note{font-size:11px;color:var(--muted);border-top:1px solid var(--border2);padding-top:10px;}
+.card .note b{color:var(--text);}
+.spark{height:2px;background:linear-gradient(90deg,var(--early-tx),var(--wip-bg),var(--late-tx));border-radius:2px;margin-top:12px;opacity:.6;}
+.dpill{display:inline-block;padding:1px 6px;border-radius:5px;font-size:11px;font-weight:600;}
+.dpill.late{background:transparent;border:1px solid var(--late-tx);color:var(--late-tx);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <div class="brand"><div class="logo"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 13L8 3l5 10" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.2 10h5.6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg></div><b>RTG Tracker</b></div>
+    <nav class="nav">
+      <div class="nlabel">Workspace</div>
+      <a class="nlink active"><span>Dashboard</span></a>
+      <div class="nlabel">Programs</div>
+      <a class="nlink" href="refined_matrix.html"><span>G500 Elevator</span><span class="cnt num">17</span></a>
+      <a class="nlink"><span>Aeronose Radome</span><span class="cnt num faint">11</span></a>
+      <a class="nlink"><span>Aegis Reflector</span><span class="cnt num faint">5</span></a>
+      <div class="nlabel">Tools</div>
+      <a class="nlink"><span>Levers</span></a><a class="nlink"><span>Admin</span></a>
+    </nav>
+    <div class="sfoot"><span class="pill live">● live IFS</span>
+      <button class="tgl" onclick="tt()" title="Toggle theme"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.2" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v1.6M8 13.4V15M15 8h-1.6M2.6 8H1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1M12.9 12.9l-1.1-1.1M4.2 4.2L3.1 3.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="cmd"><h1>Dashboard</h1><div class="right"><span class="asof">as-of <span class="num">08/22 06:00</span></span></div></div>
+    <div class="content">
+      <!-- KPI strip -->
+      <div class="kpis">
+        <div class="kpi"><div class="k">Forecast accuracy</div><div class="v num">7.1<span style="font-size:14px;color:var(--muted)">d MAE</span></div><div class="s">PRELIMINARY · n=8</div></div>
+        <div class="kpi"><div class="k">On-time delivery</div><div class="v num">↑</div><div class="s">trending up vs RTG</div></div>
+        <div class="kpi"><div class="k">Throughput</div><div class="v num">1.4<span style="font-size:14px;color:var(--muted)">/wk</span></div><div class="s">at target cadence</div></div>
+        <div class="kpi alert"><div class="k">Binding constraint</div><div class="v num">118%</div><div class="s">WC221 paint · over capacity</div></div>
+      </div>
+
+      <div class="seclabel">Programs</div>
+      <div class="cards">
+        <!-- Elevator -->
+        <a class="card" href="refined_matrix.html">
+          <div class="top"><div><h3>G500 Elevator</h3><div class="pid num">531335</div></div><span class="badge">EMPIRICAL · n=<span class="num">8</span></span></div>
+          <div class="stats">
+            <div class="stat"><div class="n num">17</div><div class="l">WIP</div></div>
+            <div class="stat behind"><div class="n num">6</div><div class="l">behind</div></div>
+            <div class="stat"><div class="n num faint">0</div><div class="l">stalled</div></div>
+          </div>
+          <div class="note">Model runs <b>~7d optimistic</b> · ships ~<b>1.5/wk</b> · <span class="dpill late">6 late vs RTG</span></div>
+          <div class="spark"></div>
+        </a>
+        <!-- Radome -->
+        <a class="card">
+          <div class="top"><div><h3>Aeronose Radome</h3><div class="pid num">C48178</div></div><span class="badge">EMPIRICAL · n=<span class="num">8</span></span></div>
+          <div class="stats">
+            <div class="stat"><div class="n num">11</div><div class="l">WIP</div></div>
+            <div class="stat behind"><div class="n num">1</div><div class="l">behind</div></div>
+            <div class="stat stall"><div class="n num">7</div><div class="l">parked</div></div>
+          </div>
+          <div class="note">Model runs <b>~7.8d optimistic</b> · ships ~<b>0.5/wk</b> · 7 parked units</div>
+          <div class="spark"></div>
+        </a>
+        <!-- Aegis -->
+        <a class="card">
+          <div class="top"><div><h3>Aegis Reflector</h3><div class="pid num">530349 · DPAS</div></div><span class="badge">no RTG</span></div>
+          <div class="stats">
+            <div class="stat"><div class="n num">5</div><div class="l">WIP</div></div>
+            <div class="stat"><div class="n num faint">0</div><div class="l">behind</div></div>
+            <div class="stat stall"><div class="n num">2</div><div class="l">stalled</div></div>
+          </div>
+          <div class="note">Model runs <b>~7.1d optimistic</b> · anchored to <b>contract</b> (no RTG plan)</div>
+          <div class="spark"></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function tt(){document.documentElement.classList.toggle('dark');localStorage.setItem('rtg-theme',document.documentElement.classList.contains('dark')?'dark':'light');}
+if(localStorage.getItem('rtg-theme')==='dark')document.documentElement.classList.add('dark');
+</script>
+</body>
+</html>

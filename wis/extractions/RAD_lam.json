@@ -1,0 +1,38 @@
+{
+  "program": "RAD",
+  "source_file": "wis/WI 3700ED0001-101 LAM.docx",
+  "provider": "claude-opus-4-7",
+  "cures": [
+    {
+      "op": 170,
+      "label": "Adhesive lay-up within 8hr of peel-ply removal",
+      "dwell_value": 8,
+      "dwell_unit": "hr",
+      "gate": "peel-ply-to-bond",
+      "source_quote": "Adhesive lay-up MUST be completed within 8hrs. of peel ply removal"
+    },
+    {
+      "op": 410,
+      "label": "Plug install within 8hr of surface prep",
+      "dwell_value": 8,
+      "dwell_unit": "hr",
+      "gate": "surface-prep-to-bond",
+      "source_quote": "Plug installation MUST be within 8 hours of surface preparation"
+    },
+    {
+      "op": 450,
+      "label": "Sand plug bonding side within 8hr of bonding",
+      "dwell_value": 8,
+      "dwell_unit": "hr",
+      "gate": "sand-to-bond",
+      "source_quote": "sand the bonding side of the plugs within 8 hours of bonding"
+    }
+  ],
+  "complexity": {
+    "char_count": 49507,
+    "op_count": 9,
+    "hold_points": 12,
+    "cure_mentions": 37,
+    "inspection_points": 15
+  }
+}

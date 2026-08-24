@@ -1,0 +1,32 @@
+{% if not result %}
+<div style="color:var(--alert)">Unknown scenario.</div>
+{% else %}
+<div style="margin-bottom:10px;">
+  <span style="font-weight:600">{{ result.label }}</span>
+  <span style="color:var(--muted)">— <span class="num">{{ result.units_improved }}</span> units pulled in,
+    <span class="num">{{ result.total_days_pulled_in }}</span> days total (max <span class="num">{{ result.max_pull_in }}d</span>)</span>
+</div>
+{% if result.units_improved == 0 %}
+<div style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;color:var(--muted);">
+  No units move under this scenario — this capacity isn't the binding constraint for the current WIP.
+  Try the work center your units are actually queued at.
+</div>
+{% else %}
+<table style="width:100%;border-collapse:separate;border-spacing:0;font-size:12px;">
+  <thead><tr style="color:var(--faint);font-size:10px;text-transform:uppercase;letter-spacing:.06em;">
+    <th style="text-align:left;padding:5px 8px;">Unit</th><th style="padding:5px 8px;">Prog</th>
+    <th style="padding:5px 8px;">Baseline</th><th style="padding:5px 8px;">Scenario</th><th style="padding:5px 8px;">Δ</th></tr></thead>
+  <tbody>
+    {% for d in result.unit_deltas %}{% if d.delta_days != 0 %}
+    <tr style="border-top:1px solid var(--border2);">
+      <td style="padding:5px 8px;font-weight:600;">{{ d.serial }}</td>
+      <td style="padding:5px 8px;text-align:center;color:var(--muted)">{{ d.program }}</td>
+      <td style="padding:5px 8px;text-align:center;color:var(--faint)" class="num">{{ d.baseline_finish.strftime('%m/%d') }}</td>
+      <td style="padding:5px 8px;text-align:center" class="num">{{ d.scenario_finish.strftime('%m/%d') }}</td>
+      <td style="padding:5px 8px;text-align:center;font-weight:600;{{ 'color:var(--early-tx)' if d.delta_days<0 else 'color:var(--late-tx)' }}" class="num">{{ d.delta_days }}d</td>
+    </tr>
+    {% endif %}{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endif %}
