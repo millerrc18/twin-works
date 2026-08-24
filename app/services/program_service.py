@@ -162,6 +162,49 @@ async def seed_from_routers(db: AsyncSession, force: bool = False) -> dict:
     return dict(seeded=True, rows=n)
 
 
+async def create_program(db: AsyncSession, *, code, name, plant, project_id, part_nos,
+                         ops, cures=None, milestones=None, ceilings=None, crew_by_op=None,
+                         pack_op=None, ship_op=None, floor_op=0, dpas=False,
+                         train_threshold=25, hand_split=False, hand_map=None,
+                         rtg_source=None) -> dict:
+    """Create (or replace) a program row from validated onboarding input, then invalidate the
+    registry cache + export a snapshot. ops = [[opno,desc,wc,hr,ms],...]. Derives pack/ship op
+    from the max op if not given. Milestones/ceilings default to a single 'ALL' phase if omitted."""
+    from app.engines import router_registry as RR
+    code = code.strip().upper()
+    ops = [list(o) for o in ops]
+    if not code or not ops:
+        raise ValueError("code and at least one op are required")
+    maxop = max(int(o[0]) for o in ops)
+    ship_op = ship_op or maxop
+    pack_op = pack_op or ship_op
+    milestones = milestones or [["ALL", "All Ops"]]
+    ceilings = ceilings or [[milestones[0][0], maxop]]
+    row = dict(
+        code=code, name=name or code, plant=plant or "", project_id=project_id or "",
+        part_nos=json.dumps(part_nos or []),
+        pack_op=pack_op, ship_op=ship_op, floor_op=floor_op or 0,
+        ops_json=json.dumps(ops), cures_json=json.dumps(cures or []),
+        milestones_json=json.dumps(milestones), ceilings_json=json.dumps(ceilings),
+        crew_by_op_json=json.dumps({str(k): v for k, v in (crew_by_op or {}).items()}),
+        dpas=bool(dpas), train_threshold=int(train_threshold or 25),
+        rtg_source=rtg_source, hand_split=bool(hand_split),
+        hand_map_json=json.dumps(hand_map or {}), active=True,
+        created_at=datetime.utcnow(), updated_at=datetime.utcnow())
+    existing = (await db.execute(select(Program).where(Program.code == code))).scalar_one_or_none()
+    if existing:
+        for k, v in row.items():
+            if k != "created_at":
+                setattr(existing, k, v)
+    else:
+        db.add(Program(**row))
+    await db.commit()
+    invalidate_cache()
+    RR.rebuild()
+    _export_snapshot_all()
+    return dict(created=True, code=code, ops=len(ops))
+
+
 def _export_snapshot_all():
     """Export every active program to a timestamped JSON snapshot (diffable history; export-only)."""
     specs = load_specs()

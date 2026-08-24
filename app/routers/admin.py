@@ -100,6 +100,76 @@ async def seed_positions(db: AsyncSession = Depends(get_db)):
     return {"ok": True, **res}
 
 
+# ---------- add-new-program onboarding ----------
+@router.get("/programs")
+async def programs_page(request: Request, db: AsyncSession = Depends(get_db)):
+    """Onboarding page: list existing programs + the 'Add program' form."""
+    specs = PSVC.load_specs()
+    existing = []
+    for code in PSVC.program_order():
+        s = specs.get(code, {})
+        existing.append(dict(code=code, name=PSVC.name(code), plant=s.get("plant", ""),
+                             project_id=s.get("project_id", ""),
+                             parts=", ".join(s.get("part_nos", [])),
+                             ops=len(s.get("ops", [])), cures=len(s.get("cures", [])),
+                             dpas=s.get("dpas", False), threshold=PSVC.threshold(code)))
+    from app.data.ifs_routing import known_wcs
+    return templates.TemplateResponse(request, "programs.html", {
+        "app_name": settings.app_name, "data_source": settings.data_source,
+        "existing": existing, "known_wcs": sorted(known_wcs())})
+
+
+@router.post("/programs/discover")
+async def programs_discover(request: Request, db: AsyncSession = Depends(get_db)):
+    """Pull a part's routing from IFS + flag unknown work centers. Read-only."""
+    import asyncio
+    body = await request.json()
+    part_no = (body.get("part_no") or "").strip()
+    if not part_no:
+        return JSONResponse({"ok": False, "reason": "part_no required"}, status_code=400)
+    try:
+        client = await SYNC._client(db)          # raises NotConnected
+    except SYNC.NotConnected:
+        return JSONResponse({"ok": False, "reason": "Connect IFS first"}, status_code=400)
+    from app.data import ifs_routing as IR
+    try:
+        routing = await asyncio.to_thread(IR.discover_routing, client, part_no)
+    except Exception as e:
+        return JSONResponse({"ok": False, "reason": f"IFS query failed: {e}"[:200]}, status_code=502)
+    return {"ok": True, "routing": routing, "unknown_wcs": IR.unknown_wcs(routing),
+            "n_ops": len(routing)}
+
+
+@router.post("/programs/create")
+async def programs_create(request: Request, db: AsyncSession = Depends(get_db)):
+    """Create/replace a program from the onboarding form. Blocks on unknown WCs unless the PM
+    explicitly acknowledges (allow_unknown_wcs=true)."""
+    body = await request.json()
+    ops = body.get("ops") or []
+    if not body.get("code") or not ops:
+        return JSONResponse({"ok": False, "reason": "code + at least one op required"}, status_code=400)
+    from app.data.ifs_routing import unknown_wcs
+    routing = [dict(opno=o[0], wc=(o[2] if len(o) > 2 else ""), desc="") for o in ops]
+    unknown = unknown_wcs(routing)
+    if unknown and not body.get("allow_unknown_wcs"):
+        return JSONResponse({"ok": False, "reason": "unknown work centers",
+                             "unknown_wcs": unknown}, status_code=409)
+    try:
+        res = await PSVC.create_program(
+            db, code=body["code"], name=body.get("name"), plant=body.get("plant"),
+            project_id=body.get("project_id"), part_nos=body.get("part_nos") or [],
+            ops=ops, cures=body.get("cures"), milestones=body.get("milestones"),
+            ceilings=body.get("ceilings"), crew_by_op=body.get("crew_by_op"),
+            pack_op=body.get("pack_op"), ship_op=body.get("ship_op"),
+            floor_op=body.get("floor_op") or 0, dpas=body.get("dpas", False),
+            train_threshold=body.get("train_threshold") or 25,
+            hand_split=body.get("hand_split", False), hand_map=body.get("hand_map"),
+            rtg_source=body.get("rtg_source"))
+    except Exception as e:
+        return JSONResponse({"ok": False, "reason": str(e)[:200]}, status_code=400)
+    return {"ok": True, **res}
+
+
 @router.get("/model-status")
 async def model_status(request: Request, db: AsyncSession = Depends(get_db)):
     rows = (await db.execute(select(WIConstraint))).scalars().all()

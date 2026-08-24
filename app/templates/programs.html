@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% set active_page = 'admin' %}
+
+{% block cmdtitle %}<h1>Programs<span class="sub">onboard &amp; manage</span></h1>{% endblock %}
+{% block cmdright %}<span class="asof">data: {{ data_source|default('snapshot') }}</span>{% endblock %}
+
+{% block head %}
+<style>
+.atable{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px;}
+.atable thead th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600;padding:8px 10px;text-align:left;background:var(--panel2);border-bottom:1px solid var(--border);}
+.atable td{padding:7px 10px;border-bottom:1px solid var(--border2);color:var(--muted);}
+.atable td:first-child{color:var(--text);font-weight:600;}
+.h2{font-size:13px;font-weight:600;margin:22px 0 10px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;}
+.frow{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;}
+.fld{display:flex;flex-direction:column;gap:3px;}
+.fld label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600;}
+.fld input,.fld select{font-size:13px;padding:6px 9px;border:1px solid var(--border);border-radius:7px;background:var(--panel);color:var(--text);min-width:120px;}
+.fld.wide input{min-width:280px;}
+.btn{font-size:12px;padding:6px 13px;border:none;border-radius:7px;cursor:pointer;font-weight:500;}
+.btn.pri{background:var(--brand);color:#fff;} .btn.sec{background:var(--panel2);color:var(--text);border:1px solid var(--border);}
+.btn:disabled{opacity:.5;cursor:default;}
+.optbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+.optbl th{font-size:10px;text-transform:uppercase;color:var(--faint);text-align:left;padding:4px 6px;border-bottom:1px solid var(--border);}
+.optbl td{padding:2px 6px;border-bottom:1px solid var(--border2);}
+.optbl input{width:100%;font-size:12px;padding:3px 5px;border:1px solid var(--border2);border-radius:4px;background:var(--panel);color:var(--text);}
+.optbl input.num{width:64px;}
+.wc-bad{outline:2px solid var(--late-tx);}
+.msg{font-size:12px;padding:7px 11px;border-radius:7px;margin-top:10px;display:none;}
+.msg.ok{background:color-mix(in srgb,var(--done) 12%,transparent);color:var(--done);display:block;}
+.msg.err{background:var(--late-bg);color:var(--late-tx);display:block;}
+.msg.warn{background:color-mix(in srgb,var(--wip-bg) 18%,transparent);color:var(--wip-tx);display:block;}
+.pill{font-size:10.5px;padding:2px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);}
+.hint{font-size:11px;color:var(--faint);}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="h2">Tracked programs</div>
+<table class="atable">
+  <thead><tr><th>Code</th><th>Name</th><th>Plant</th><th>Project</th><th>Part(s)</th><th>Ops</th><th>Cures</th><th>DPAS</th><th>Train @</th></tr></thead>
+  <tbody>
+    {% for p in existing %}
+    <tr>
+      <td>{{ p.code }}</td><td style="text-transform:none">{{ p.name }}</td>
+      <td>{{ p.plant or '—' }}</td><td class="num">{{ p.project_id }}</td>
+      <td class="hint">{{ p.parts }}</td>
+      <td class="num">{{ p.ops }}</td><td class="num">{{ p.cures }}</td>
+      <td>{{ '✓' if p.dpas else '' }}</td><td class="num">{{ p.threshold }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="h2">Add a program</div>
+<div class="card" x-data="addProgram()">
+  <!-- 1. identity -->
+  <div class="frow">
+    <div class="fld"><label>Code</label><input x-model="f.code" placeholder="e.g. WING" maxlength="8" style="width:90px"></div>
+    <div class="fld wide"><label>Name</label><input x-model="f.name" placeholder="e.g. G700 Winglet"></div>
+    <div class="fld"><label>Plant</label><input x-model="f.plant" placeholder="e.g. Plant 2"></div>
+    <div class="fld"><label>IFS Project</label><input x-model="f.project_id" placeholder="e.g. 540123"></div>
+    <div class="fld wide"><label>Part number(s), comma-sep</label><input x-model="f.parts" placeholder="e.g. 72P9990001-101"></div>
+  </div>
+  <div class="frow">
+    <button class="btn sec" @click="discover()" :disabled="busy || !f.parts">Discover routing from IFS</button>
+    <label class="hint"><input type="checkbox" x-model="f.dpas"> DPAS-rated</label>
+    <label class="hint"><input type="checkbox" x-model="f.hand_split"> hand-split shipset (LH/RH)</label>
+    <div class="fld"><label>Train threshold</label><input class="num" type="number" x-model.number="f.train_threshold" style="width:70px"></div>
+    <span class="hint" x-show="busy">working…</span>
+  </div>
+
+  <!-- 2. discovered ops (editable) -->
+  <template x-if="ops.length">
+    <div>
+      <div style="font-size:12px;font-weight:600;margin:6px 0;">Operations <span class="hint" x-text="'('+ops.length+' ops)'"></span></div>
+      <div class="hint" style="margin-bottom:4px;">Edit descriptions, set the milestone phase, and hours/crew. Rows with a <b style="color:var(--late-tx)">red WC</b> have no capacity budget — define it in routers or map it before saving.</div>
+      <table class="optbl">
+        <thead><tr><th>Op</th><th>Description</th><th>WC</th><th>Hrs</th><th>Milestone</th><th>Crew</th></tr></thead>
+        <tbody>
+          <template x-for="(op,i) in ops" :key="i">
+            <tr>
+              <td class="num" x-text="op.opno" style="width:50px"></td>
+              <td><input x-model="op.desc"></td>
+              <td><input class="num" x-model="op.wc" :class="unknown.includes(op.wc)?'wc-bad':''" style="width:70px"></td>
+              <td><input class="num" type="number" x-model.number="op.hr" style="width:56px"></td>
+              <td><input x-model="op.ms" style="width:80px" placeholder="phase"></td>
+              <td><input class="num" type="number" x-model.number="op.crew" style="width:50px" placeholder="1"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <div class="msg warn" x-show="unknown.length" x-text="'Unknown work centers (no budget): '+unknown.join(', ')+' — will use DEFAULT_SHIFT unless acknowledged.'"></div>
+    </div>
+  </template>
+
+  <!-- 3. pooling preview -->
+  <template x-if="ops.length">
+    <div class="hint" style="margin-top:10px;" x-show="f.plant">
+      Pooling: this program will share capacity with existing programs in <b x-text="f.plant"></b>
+      that use the same work centers (paint/autoclave). Programs in other plants stay independent.
+    </div>
+  </template>
+
+  <!-- 4. save -->
+  <template x-if="ops.length">
+    <div style="margin-top:12px;">
+      <label class="hint" x-show="unknown.length"><input type="checkbox" x-model="f.allow_unknown_wcs"> acknowledge unknown WCs and save anyway</label>
+      <div style="margin-top:8px;">
+        <button class="btn pri" @click="save()" :disabled="busy || (unknown.length && !f.allow_unknown_wcs)">Create program</button>
+        <span class="hint">forecast + sync activate immediately; WIP fills on next position sync</span>
+      </div>
+    </div>
+  </template>
+
+  <div class="msg" :class="msgType" x-text="msg"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function addProgram(){
+  return {
+    f:{code:'',name:'',plant:'',project_id:'',parts:'',dpas:false,hand_split:false,
+       train_threshold:25,allow_unknown_wcs:false},
+    ops:[], unknown:[], busy:false, msg:'', msgType:'msg',
+    show(m,t){ this.msg=m; this.msgType='msg '+t; },
+    async discover(){
+      this.busy=true; this.msg='';
+      const part=this.f.parts.split(',')[0].trim();
+      const r=await fetch('/admin/programs/discover',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({part_no:part})});
+      const b=await r.json(); this.busy=false;
+      if(!b.ok){ this.show(b.reason||'discover failed','err'); return; }
+      this.ops=b.routing.map(o=>({opno:o.opno,desc:o.desc,wc:o.wc,hr:8,ms:'',crew:1}));
+      this.unknown=b.unknown_wcs||[];
+      this.show(b.n_ops+' ops discovered'+(this.unknown.length?'; '+this.unknown.length+' unknown WC(s)':''),
+                this.unknown.length?'warn':'ok');
+    },
+    async save(){
+      this.busy=true; this.msg='';
+      const ops=this.ops.map(o=>[o.opno,o.desc,o.wc,o.hr,o.ms||'ALL']);
+      const crew={}; this.ops.forEach(o=>{ if(o.crew&&o.crew!=1) crew[o.opno]=o.crew; });
+      const payload={code:this.f.code,name:this.f.name,plant:this.f.plant,
+        project_id:this.f.project_id,part_nos:this.f.parts.split(',').map(s=>s.trim()).filter(Boolean),
+        ops:ops,crew_by_op:crew,dpas:this.f.dpas,hand_split:this.f.hand_split,
+        train_threshold:this.f.train_threshold,allow_unknown_wcs:this.f.allow_unknown_wcs};
+      const r=await fetch('/admin/programs/create',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)});
+      const b=await r.json(); this.busy=false;
+      if(!b.ok){ this.show(b.reason+(b.unknown_wcs?': '+b.unknown_wcs.join(', '):''),'err'); return; }
+      this.show('Created '+b.code+' ('+b.ops+' ops). Reloading…','ok');
+      setTimeout(()=>location.reload(),1400);
+    }
+  };
+}
+</script>
+{% endblock %}
