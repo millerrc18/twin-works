@@ -6,8 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import ModelHistory
 from ml.model.registry import registry_model
-
-PROGRAMS = ("ELEV", "RAD", "AEGIS")
+from app.services import program_service as PSVC
 
 
 async def append_all(db: AsyncSession, source: str = "sync") -> int:
@@ -20,7 +19,7 @@ async def append_all(db: AsyncSession, source: str = "sync") -> int:
     except Exception:
         fwd = {}
     n = 0
-    for p in PROGRAMS:
+    for p in PSVC.program_order():
         pred = registry_model.predict(p)
         mae = (fwd.get(p) or {}).get("mae")
         db.add(ModelHistory(at=datetime.utcnow(), program=p, mode=pred.mode,

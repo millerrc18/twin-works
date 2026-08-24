@@ -88,6 +88,9 @@ def ifs_meta() -> dict:
     return dict(_SEED_IFS)
 
 
+_SEED_NAMES = {"ELEV": "G500 Elevator", "RAD": "Aeronose Radome", "AEGIS": "Aegis Reflector"}
+
+
 def program_order() -> list:
     specs = load_specs()
     if specs:
@@ -95,6 +98,25 @@ def program_order() -> list:
         extra = sorted(c for c in specs if c not in _SEED_ORDER)
         return [c for c in _SEED_ORDER if c in specs] + extra
     return list(_SEED_ORDER)
+
+
+def names() -> dict:
+    """{code: display name} from DB rows, else the seed defaults."""
+    specs = load_specs()
+    if specs:
+        return {c: s["name"] for c, s in specs.items()}
+    return dict(_SEED_NAMES)
+
+
+def name(code: str) -> str:
+    return names().get(code, code)
+
+
+def threshold(code: str) -> int:
+    specs = load_specs()
+    if specs and code in specs:
+        return specs[code]["train_threshold"]
+    return settings.n_train_threshold.get(code, settings.n_train_threshold_default)
 
 
 # ---------- async writes ----------

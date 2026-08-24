@@ -7,9 +7,14 @@ from app.engines.rtg_wrapper import run_pooled
 from app.engines.router_registry import registry
 from ml.model.registry import registry_model
 from ml.model.features import FeatureBuilder
+from app.services import program_service as PSVC
 
-PROGRAMS = ("ELEV", "RAD", "AEGIS")
 _fb = FeatureBuilder()
+
+
+def PROGRAMS():
+    """Active program codes (registry-driven; falls back to the seed 3)."""
+    return PSVC.program_order()
 
 
 @dataclass
@@ -63,7 +68,7 @@ def forecast_program(ds: DataSource, program: str) -> list[UnitForecast]:
 
 
 def all_programs(ds: DataSource) -> dict:
-    return {p: forecast_program(ds, p) for p in PROGRAMS}
+    return {p: forecast_program(ds, p) for p in PROGRAMS()}
 
 
 def program_summary(ds: DataSource, program: str) -> dict:

@@ -4,12 +4,11 @@ from app.engines.lever_engine import run_lever, bottleneck_load, back_solve, Lev
 from app.engines.router_registry import registry
 from ml.model.registry import registry_model
 from ml.model.features import FeatureBuilder
+from app.services import program_service as PSVC
 
 _fb = FeatureBuilder()
 # binding WC per program (the throttle a back-solve should relax)
 BINDING_WC = {"ELEV": "32684", "RAD": "AEROA", "AEGIS": "221"}
-
-PROGRAMS = ("ELEV", "RAD", "AEGIS")
 
 # preset levers the PM can try (label -> spec factory). Keeps the UI to real, meaningful knobs.
 PRESETS = {
@@ -22,7 +21,8 @@ PRESETS = {
 
 
 def _units_by_prog(ds: DataSource):
-    return {p: [u.as_sim_unit() for u in ds.get_wip_units(p) if not u.stalled] for p in PROGRAMS}
+    return {p: [u.as_sim_unit() for u in ds.get_wip_units(p) if not u.stalled]
+            for p in PSVC.program_order()}
 
 
 def get_bottlenecks(ds: DataSource):

@@ -98,7 +98,8 @@ class LiveMcpDataSource(DataSource):
             return snap
 
     def _live_wip(self, program: str) -> list[UnitRecord]:
-        proj, parts = PROG_IFS[program]
+        from app.services.program_service import ifs_meta
+        proj, parts = ifs_meta().get(program, PROG_IFS.get(program))
         parts_in = ",".join(f"'{p}'" for p in parts)
         wip = self._q(SQL_WIP.format(project=proj, parts=parts_in))
         sos = [r["SO"] for r in wip]

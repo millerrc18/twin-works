@@ -14,9 +14,13 @@ from ml.model.trainer import train_all
 from ml.model.loader import refresh_registry
 from ml.model.registry import registry_model
 from app.services import sync_service as SYNC
+from app.services import program_service as PSVC
 
 router = APIRouter(prefix="/admin")
-PROGRAMS = ("ELEV", "RAD", "AEGIS")
+
+
+def PROGRAMS():
+    return PSVC.program_order()
 
 
 @router.post("/sync-positions")
@@ -103,7 +107,7 @@ async def model_status(request: Request, db: AsyncSession = Depends(get_db)):
     for r in rows:
         by_prog.setdefault(r.program, []).append(r)
     models = []
-    for p in PROGRAMS:
+    for p in PROGRAMS():
         pred = registry_model.predict(p)
         models.append(dict(program=p, mode=pred.mode, n_scored=pred.n_scored,
                            threshold=registry_model.threshold_for(p),
@@ -157,4 +161,4 @@ async def retrain(db: AsyncSession = Depends(get_db)):
     results = await train_all(db)
     reg = await refresh_registry(db)
     return dict(train=results, registry=reg,
-                thresholds={p: registry_model.threshold_for(p) for p in PROGRAMS})
+                thresholds={p: registry_model.threshold_for(p) for p in PROGRAMS()})

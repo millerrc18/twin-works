@@ -19,15 +19,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import SyncRun, PositionState
 from app.data import token_store
 from app.data.ifs_mcp_client import IfsMcpClient
-from app.data.live_source import PROG_IFS, SQL_WIP, SQL_POSITION, SQL_LASTCLK
+from app.data.live_source import SQL_WIP, SQL_POSITION, SQL_LASTCLK
 from app.data import wip_tables as W
 from app.services import position_state as PS
 from app.services import forecast_log_service as FL
+from app.services import program_service as PSVC
 
-PROGRAMS = ("ELEV", "RAD", "AEGIS")
 
-# pack/ship op per program (physical ship = last-clock on this op)
-PACK_OP = {"ELEV": 4200, "RAD": 790, "AEGIS": 380}
+def PROGRAMS():
+    return PSVC.program_order()
+
+def _pack_op(program: str) -> int:
+    """Pack op (physical-ship signal) from the registry ProgramSpec."""
+    from app.engines.router_registry import registry
+    return registry.spec(program).pack_op
 
 # Only process ships that shipped on/after this date — the RTG program window. Older ships are
 # history (already covered by the retrospective backtest); pulling them all floods the forward set.
@@ -114,7 +119,7 @@ async def _client(db: AsyncSession) -> IfsMcpClient:
 
 def _pull_program(client: IfsMcpClient, program: str) -> dict:
     """Blocking IFS pull for one program: {so: dict(maxop,last_clock,due,serial)}. Thread-run."""
-    proj, parts = PROG_IFS[program]
+    proj, parts = PSVC.ifs_meta()[program]
     parts_in = ",".join(f"'{p}'" for p in parts)
 
     def rows(res):
@@ -190,7 +195,7 @@ async def sync_positions(db: AsyncSession) -> dict:
         await PS.seed_from_baseline(db)              # no-op if already seeded
 
         moved, new_stall, unknown = [], [], []
-        for program in PROGRAMS:
+        for program in PROGRAMS():
             pulled = await asyncio.to_thread(_pull_program, client, program)
             # snapshot prior maxops for the diff
             prior = {r.so: r.maxop for r in (await db.execute(
@@ -229,7 +234,7 @@ def _pull_closed(client: IfsMcpClient, program: str) -> dict:
     """Blocking pull of SHIPPED SOs since SHIP_SINCE (pack-op clocked OR closed).
     {so: dict(closed, due, pack, ship, serial)}. `ship` = pack date if present else close date —
     the date used as the actual ship for accuracy scoring."""
-    proj, parts = PROG_IFS[program]
+    proj, parts = PSVC.ifs_meta()[program]
     parts_in = ",".join(f"'{p}'" for p in parts)
 
     def rows(res):
@@ -237,7 +242,7 @@ def _pull_closed(client: IfsMcpClient, program: str) -> dict:
 
     shipped = rows(client.execute_query(
         SQL_CLOSED.format(project=proj, parts=parts_in, since=SHIP_SINCE,
-                          packop=PACK_OP[program])))
+                          packop=_pack_op(program))))
     sos = [r["SO"] for r in shipped]
     if not sos:
         return {}
@@ -268,7 +273,7 @@ async def preview_ships(db: AsyncSession) -> dict:
     from app.services import accuracy_forward as AF
     counts = AF.forward_counts()
     new_by_prog, would_train = {}, []
-    for program in PROGRAMS:
+    for program in PROGRAMS():
         pulled = await asyncio.to_thread(_pull_closed, client, program)
         fresh = [dict(so=so, serial=d["serial"], closed=d["closed"])
                  for so, d in pulled.items() if so not in known]
@@ -292,7 +297,7 @@ async def process_ships_fast(db: AsyncSession) -> dict:
         await PS.seed_from_baseline(db)
         known = await _already_closed_sos(db)
         recorded = []
-        for program in PROGRAMS:
+        for program in PROGRAMS():
             pulled = await asyncio.to_thread(_pull_closed, client, program)
             for so, d in pulled.items():
                 if so in known:

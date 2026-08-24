@@ -9,12 +9,10 @@ from app.database import get_db
 from app.data.live_source import get_data_source
 from app.data import token_store
 from app.services import forecast_service as FS
+from app.services import program_service as PSVC
 from app.engines.router_registry import registry
 
 router = APIRouter()
-
-PROG_ORDER = ("ELEV", "RAD", "AEGIS")
-PROG_NAME = {"ELEV": "G500 Elevator", "RAD": "Aeronose Radome", "AEGIS": "Aegis Reflector"}
 
 
 async def _ds(db: AsyncSession):
@@ -26,9 +24,9 @@ async def _ds(db: AsyncSession):
 async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
     ds = await _ds(db)
     cards = []
-    for p in PROG_ORDER:
+    for p in PSVC.program_order():
         s = FS.program_summary(ds, p)
-        s["name"] = PROG_NAME[p]
+        s["name"] = PSVC.name(p)
         cards.append(s)
     return templates.TemplateResponse(request, "dashboard.html",
                                       {"app_name": settings.app_name,
@@ -45,7 +43,7 @@ async def forecast(request: Request, program: str, view: str = "matrix",
     ds = await _ds(db)
     program = program.upper()
     ctx = {"app_name": settings.app_name, "data_source": settings.data_source,
-           "program": program, "program_name": PROG_NAME.get(program, program),
+           "program": program, "program_name": PSVC.name(program),
            "view": view, "flt": filter}
     if view == "summary":
         fc = FS.forecast_program(ds, program)
