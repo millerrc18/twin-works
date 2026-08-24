@@ -59,7 +59,9 @@ def load_specs() -> dict:
         con.row_factory = sqlite3.Row
         for r in con.execute("SELECT * FROM program WHERE active=1"):
             out[r["code"]] = dict(
-                code=r["code"], name=r["name"], project_id=r["project_id"],
+                code=r["code"], name=r["name"],
+                plant=(r["plant"] if "plant" in r.keys() else ""),
+                project_id=r["project_id"],
                 part_nos=json.loads(r["part_nos"]),
                 pack_op=r["pack_op"], ship_op=r["ship_op"], floor_op=r["floor_op"],
                 ops=json.loads(r["ops_json"]), cures=json.loads(r["cures_json"]),
@@ -135,12 +137,15 @@ async def seed_from_routers(db: AsyncSession, force: bool = False) -> dict:
     cures_by = {"ELEV": R.ELEVATOR_CURES, "RAD": R.RADOME_CURES, "AEGIS": R.AEGIS_CURES}
     ms_by = {"ELEV": R.ELEV_MILESTONES, "RAD": R.RAD_MILESTONES, "AEGIS": R.AEGIS_MILESTONES}
     names = {"ELEV": "G500 Elevator", "RAD": "Aeronose Radome", "AEGIS": "Aegis Reflector"}
+    # plant is the pooling boundary: ELEV+AEGIS = Plant 2 (share paint/autoclave), RAD = Plant 3
+    plants = {"ELEV": "Plant 2", "AEGIS": "Plant 2", "RAD": "Plant 3"}
     thresholds = settings.n_train_threshold
     n = 0
     for code in _SEED_ORDER:
         proj, parts = _SEED_IFS[code]
         db.add(Program(
-            code=code, name=names[code], project_id=proj, part_nos=json.dumps(parts),
+            code=code, name=names[code], plant=plants.get(code, ""),
+            project_id=proj, part_nos=json.dumps(parts),
             pack_op=PACK_OP[code], ship_op=SHIP_OP[code], floor_op=FLOOR_OP[code],
             ops_json=json.dumps(ops_by[code]), cures_json=json.dumps(cures_by[code]),
             milestones_json=json.dumps(ms_by[code]),

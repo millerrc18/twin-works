@@ -78,10 +78,10 @@ def build_training_rows() -> list[dict]:
         if not any(u["so"] == so for u in pool):
             pool.append(dict(serial=so, so=so, maxop=maxop_S, commit=None, program=prog))
         as_of = DT.combine(S, DT.min.time()).replace(hour=6)
-        elev = [u for u in pool if u["program"] == "ELEV"]
-        aeg = [u for u in pool if u["program"] == "AEGIS"]
-        rad = [u for u in pool if u["program"] == "RAD"]
-        sim = run_pooled(elev, aeg, rad, as_of)
+        units_by_program = {}
+        for u in pool:
+            units_by_program.setdefault(u["program"], []).append(u)
+        sim = run_pooled(units_by_program, as_of)
         r = sim.get(so)
         sim_fin = r["finish"].date() if r and r.get("finish") else None
         if sim_fin is None:

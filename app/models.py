@@ -152,6 +152,7 @@ class Program(Base):
     __tablename__ = "program"
     code: Mapped[str] = mapped_column(String(8), primary_key=True)   # ELEV | RAD | AEGIS | new
     name: Mapped[str] = mapped_column(String(64))
+    plant: Mapped[str] = mapped_column(String(16), default="")       # physical plant (pooling boundary)
     project_id: Mapped[str] = mapped_column(String(16))              # IFS PROJECT_ID
     part_nos: Mapped[str] = mapped_column(Text)                      # JSON list of PART_NO
     pack_op: Mapped[int] = mapped_column(Integer)

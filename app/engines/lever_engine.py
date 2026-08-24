@@ -71,20 +71,17 @@ class LeverResult:
     max_pull_in: int
 
 
-def _sim_all(elev, aeg, rad, as_of):
-    return run_pooled(elev, aeg, rad, as_of)
+def _sim_all(units_by_prog, as_of):
+    """Run the pooled sim for all programs. Accepts the {code: [units]} dict directly."""
+    return run_pooled(units_by_prog, as_of)
 
 
 def run_lever(units_by_prog: dict, as_of: datetime, spec: LeverSpec) -> LeverResult:
     """units_by_prog: {'ELEV':[sim_unit...], 'RAD':[...], 'AEGIS':[...]}. Returns deltas
     of scenario vs baseline finishes (negative delta = pulled EARLIER = good)."""
-    elev = units_by_prog.get("ELEV", [])
-    aeg = units_by_prog.get("AEGIS", [])
-    rad = units_by_prog.get("RAD", [])
-
-    baseline = _sim_all(elev, aeg, rad, as_of)
+    baseline = _sim_all(units_by_prog, as_of)
     with _apply(spec):
-        scenario = _sim_all(elev, aeg, rad, as_of)
+        scenario = _sim_all(units_by_prog, as_of)
 
     prog_of = {}
     for p, us in units_by_prog.items():
@@ -128,10 +125,8 @@ def back_solve(units_by_prog: dict, as_of: datetime, serial: str, program: str,
     DATA-GATED: only meaningful once the ML model is TRAINED (caller enforces)."""
     def finish_with(mult):
         spec = LeverSpec(wc_budget_global={binding_wc: mult}, label="backsolve")
-        elev = units_by_prog.get("ELEV", []); aeg = units_by_prog.get("AEGIS", [])
-        rad = units_by_prog.get("RAD", [])
         with _apply(spec):
-            sim = _sim_all(elev, aeg, rad, as_of)
+            sim = _sim_all(units_by_prog, as_of)
         r = sim.get(serial)
         if not (r and r.get("finish")):
             return None
@@ -160,10 +155,7 @@ def bottleneck_load(units_by_prog: dict, as_of: datetime) -> list:
     """Systemic view: for each shared/bottleneck WC, weekly demand (from the baseline op
     schedule) vs available budget. Flags weeks over 100%. Returns per-WC summary rows."""
     from collections import defaultdict
-    elev = units_by_prog.get("ELEV", [])
-    aeg = units_by_prog.get("AEGIS", [])
-    rad = units_by_prog.get("RAD", [])
-    sim = _sim_all(elev, aeg, rad, as_of)
+    sim = _sim_all(units_by_prog, as_of)
 
     # demand = labor hours scheduled per WC per ISO week, from each unit's op schedule
     # (op_dt gives the scheduled start of each remaining op; hr from the registry).

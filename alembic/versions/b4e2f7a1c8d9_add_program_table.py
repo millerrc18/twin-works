@@ -22,6 +22,7 @@ def upgrade() -> None:
         "program",
         sa.Column("code", sa.String(length=8), primary_key=True),
         sa.Column("name", sa.String(length=64), nullable=False),
+        sa.Column("plant", sa.String(length=16), nullable=False, server_default=""),
         sa.Column("project_id", sa.String(length=16), nullable=False),
         sa.Column("part_nos", sa.Text(), nullable=False),
         sa.Column("pack_op", sa.Integer(), nullable=False),

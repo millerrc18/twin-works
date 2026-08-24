@@ -34,10 +34,11 @@ class UnitForecast:
 
 
 def _pooled_sim(ds: DataSource):
-    elev = [u.as_sim_unit() for u in ds.get_wip_units("ELEV") if not u.stalled]
-    aeg = [u.as_sim_unit() for u in ds.get_wip_units("AEGIS") if not u.stalled]
-    rad = [u.as_sim_unit() for u in ds.get_wip_units("RAD") if not u.stalled]
-    return run_pooled(elev, aeg, rad, ds.as_of())
+    units_by_program = {
+        p: [u.as_sim_unit() for u in ds.get_wip_units(p) if not u.stalled]
+        for p in PROGRAMS()
+    }
+    return run_pooled(units_by_program, ds.as_of())
 
 
 def forecast_program(ds: DataSource, program: str) -> list[UnitForecast]:

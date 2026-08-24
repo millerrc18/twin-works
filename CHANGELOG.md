@@ -21,10 +21,19 @@ Config-driven program registry so new programs onboard via UI, not code. Plan cr
   `test_db_and_routers_sources_agree` (DB vs routers config identical). Run: `pytest`. Re-capture
   the golden master only when a forecast change is INTENTIONAL. This is the safety net for the rest
   of #81 and all future engine work.
-- STILL TODO (next session): swap PROG_NAME/ORDER/IFS/PACK_OP reads to registry; transitive
-  shared-WC pooling refactor of run_pooled (4 callers: forecast_service, matrix_service,
-  lever_engine, dataset.py); IFS routing discovery + unknown-WC gate; /admin/programs UI;
-  synthetic-4th-program test; then flag-gated cutover. Gate every step with `pytest`.
+- **Step 2 DONE** — PROG_NAME/ORDER/IFS/PACK_OP + all 5 PROGRAMS tuples now read from the
+  registry (program_service). live_source + sync_service pull IFS meta + pack op from the registry.
+- **Step 3 DONE — transitive shared-WC pooling** — `run_pooled(units_by_program, as_of)` (all 4
+  callers converted). Pools = connected components of the Program<->WorkCenter graph over SHARED
+  WCs, guarded by PLANT (ELEV+AEGIS=Plant 2, RAD=Plant 3). Two site facts from the PM: WC names are
+  globally unique site-wide (a shared WC = same physical resource) AND plant is a hard boundary
+  (belt-and-suspenders so a mis-entered WC can't pool across plants). Reproduces the original rule
+  exactly (ELEV+AEGIS pool, RAD separate) but a new program auto-pools iff same plant + shared WC.
+  Added `plant` column to program table + seeded values.
+- **Regression suite grown**: `tests/test_pooling.py` (4 tests: seed rule, derived shared-WCs,
+  cross-plant guard blocks, same-plant pools). All 6 tests green; forecasts byte-identical.
+- STILL TODO (next session): IFS routing discovery + unknown-WC gate; /admin/programs UI;
+  synthetic-4th-program end-to-end test; then flag-gated cutover. Gate every step with `pytest`.
 
 ## 2026-08-24
 - **ELEV + AEGIS WI ingestion completed** — head serials/cures were mined but never extracted

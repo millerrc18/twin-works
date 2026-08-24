@@ -64,10 +64,12 @@ def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all") -> 
     filling any slot go in an 'unassigned' group at the right. Aegis (no slots) is
     serial-anchored, sorted by contract."""
     spec = registry.spec(program)
-    elev = [u.as_sim_unit() for u in ds.get_wip_units("ELEV") if not u.stalled]
-    aeg = [u.as_sim_unit() for u in ds.get_wip_units("AEGIS") if not u.stalled]
-    rad = [u.as_sim_unit() for u in ds.get_wip_units("RAD") if not u.stalled]
-    sim = run_pooled(elev, aeg, rad, ds.as_of())
+    from app.services.program_service import program_order
+    units_by_program = {
+        p: [u.as_sim_unit() for u in ds.get_wip_units(p) if not u.stalled]
+        for p in program_order()
+    }
+    sim = run_pooled(units_by_program, ds.as_of())
     ops, cures = spec.ops, spec.cures
 
     # index live units by serial
