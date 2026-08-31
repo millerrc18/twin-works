@@ -12,11 +12,10 @@ wc_shift_budget() read, running the sim, then restoring — no permanent global 
 import copy
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime, timedelta
 
 import routers as R
 from app.engines.rtg_wrapper import run_pooled
-from app.engines.router_registry import registry
 
 
 @dataclass
@@ -49,8 +48,10 @@ def _apply(spec: LeverSpec):
             R.CREW_BY_OP[opno] = cf
         yield
     finally:
-        R.WC_SHIFT.clear(); R.WC_SHIFT.update(orig_wc)
-        R.CREW_BY_OP.clear(); R.CREW_BY_OP.update(orig_crew)
+        R.WC_SHIFT.clear()
+        R.WC_SHIFT.update(orig_wc)
+        R.CREW_BY_OP.clear()
+        R.CREW_BY_OP.update(orig_crew)
 
 
 @dataclass

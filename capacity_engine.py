@@ -37,8 +37,10 @@ def is_workday(dd):
 
 def day_factor(dd):
     wd=dd.weekday()
-    if wd<5: return 1.0
-    if wd==5: return 0.5
+    if wd<5:
+        return 1.0
+    if wd==5:
+        return 0.5
     return 0.25
 
 def simulate(units, ops_map, cures_map, as_of, profile=None):
@@ -79,16 +81,19 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
 
     def gate_op_for(label):
         for sub,gop in parallel_cure_gates.items():
-            if sub in label: return gop
+            if sub in label:
+                return gop
         return None
     # Build per-unit remaining op queue. Labor hrs divided by crew factor (floor runs
     # multi-operator on big paint/seal ops — ERP router is serial CREW_SIZE=1).
     # Parallel-gate cures ('pgate') don't block the unit; they set a not-before time
     # on their gate op (e.g. topcoat 24hr must elapse before final inspection).
     def build_queue(program, maxop):
-        ops=ops_map[program]; cures=cures_map[program]
+        ops=ops_map[program]
+        cures=cures_map[program]
         cby={}
-        for c in cures: cby.setdefault(c[0],[]).append(c)
+        for c in cures:
+            cby.setdefault(c[0],[]).append(c)
         q=[]
         for (opno,desc,wc,hrs,ms) in ops:
             if maxop is not None and opno<=maxop:
@@ -146,7 +151,8 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
         return 1.0 if wd<5 else (0.5 if wd==5 else 0.25)
 
     cur=as_of.replace(hour=SHIFT_START, minute=0, second=0, microsecond=0)
-    if cur < as_of: cur = as_of
+    if cur < as_of:
+        cur = as_of
     maxsteps=1200
     dd=cur.date()
     while maxsteps>0 and any(state[s]['finish'] is None for s in state):
@@ -189,13 +195,15 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
                 b=budget[key]
                 return budget[b] if isinstance(b,tuple) else b
             def useb(prog, wc, amt):
-                key=(prog,wc); b=budget[key]
+                key=(prog,wc)
+                b=budget[key]
                 pk=b if isinstance(b,tuple) else key
                 budget[pk]=budget[pk]-amt
 
             for s in serial_order:
                 st=state[s]
-                if st['finish'] is not None: continue
+                if st['finish'] is not None:
+                    continue
                 prog=unit_prog[s]
                 fac=day_fac(prog, dd)
                 if fac<=0:  # program not working this day (e.g. elevator off-weekend)
@@ -209,7 +217,8 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
                         continue  # still curing through this shift
                 else:
                     st['clock']=max(sh_open, as_of, st['clock'])
-                if st['clock']>=sh_close: continue
+                if st['clock']>=sh_close:
+                    continue
                 # advance through queue within this shift
                 while st['idx'] < len(st['queue']):
                     item=st['queue'][st['idx']]
@@ -220,7 +229,8 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
                             if nb <= sh_close:
                                 st['clock']=max(nb, st['clock'])
                             else:
-                                st['cure_until']=nb; break
+                                st['cure_until']=nb
+                                break
                         if opno not in st['op_dt']:
                             st['op_dt'][opno]=st['clock']
                         avail=getb(prog, wc)
@@ -237,7 +247,8 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
                             break
                     elif item[0]=='pgate':
                         _,clabel,gop,dwell,_,_station=item
-                        cs=st['clock']; st['cure_dt'][clabel]=cs
+                        cs=st['clock']
+                        st['cure_dt'][clabel]=cs
                         st['gate_nb'][gop]=cs+timedelta(hours=dwell)
                         st['idx']+=1
                     else:  # serial cure

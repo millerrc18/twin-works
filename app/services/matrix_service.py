@@ -122,7 +122,6 @@ def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all",
 
     if planning.configured_planning_basis == "PLAN_SLOTS":
         # slot-anchored: group by hand (LH, RH, '') then by target
-        from itertools import groupby
         slots_sorted = sorted(slots, key=lambda s: (s.hand, s.target_date or date.max))
         # preserve hand order LH, RH, '' as they appear
         hand_order = []

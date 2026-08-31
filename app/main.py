@@ -1,13 +1,11 @@
 """TwinWorks FastAPI entry point."""
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
 
 from app.config import settings
 from app.database import engine, Base
 from app import models  # noqa: F401  (register tables on Base.metadata)
-from app.templating import templates
 
 
 @asynccontextmanager
@@ -40,12 +38,12 @@ async def health():
     return {"ok": True, "data_source": settings.data_source, "llm": settings.llm_provider}
 
 
-from app.routers.dashboard import router as dashboard_router
-from app.routers.admin import router as admin_router
-from app.routers.levers import router as levers_router
-from app.routers.auth import router as auth_router
-from app.routers.factory_map import router as factory_map_router
-from app.routers.resources import router as resources_router
+from app.routers.dashboard import router as dashboard_router  # noqa: E402
+from app.routers.admin import router as admin_router  # noqa: E402
+from app.routers.levers import router as levers_router  # noqa: E402
+from app.routers.auth import router as auth_router  # noqa: E402
+from app.routers.factory_map import router as factory_map_router  # noqa: E402
+from app.routers.resources import router as resources_router  # noqa: E402
 app.include_router(dashboard_router)
 app.include_router(admin_router)
 app.include_router(levers_router)

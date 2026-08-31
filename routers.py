@@ -12,6 +12,8 @@
 # NOTE: "(NOWB)" = No Work Booked to a sub-order (in-line work); these ARE real
 # value-add ops and are KEPT (e.g. op 3800 Prep & Prime, 30.5 hr).
 
+import datetime as _dt
+
 # ---- ELEVATOR ----  (op_no, description, work_center, planned_hr, milestone)
 # milestone in {AJ, A1, A2, FS}
 ELEVATOR_OPS = [
@@ -355,9 +357,9 @@ def wc_shift_budget(program, wc, shift):
 # ELEVATOR-ONLY weekend OT rotation: 2 weekends ON, 1 OFF.
 # Anchor: weekend of 8/16-17 was OFF; 8/23-24 + 8/30-31 ON (mandatory OT); 9/6-7 OFF; repeat.
 # Returns weekend work factor for a date (elevator only). Weekdays always 1.0.
-import datetime as _dt
 def elevator_weekend_factor(dd):
-    if dd.weekday() < 5: return 1.0            # weekday
+    if dd.weekday() < 5:
+        return 1.0                             # weekday
     # OT-ON weekends (Sat/Sun) — mandatory, treat as ~full day
     on_weekends = {
         _dt.date(2026,8,23), _dt.date(2026,8,24),
@@ -368,7 +370,8 @@ def elevator_weekend_factor(dd):
         _dt.date(2026,10,4), _dt.date(2026,10,5),
         _dt.date(2026,10,11), _dt.date(2026,10,12),
     }
-    if dd in on_weekends: return 0.85          # mandatory OT weekend ~85% of weekday
+    if dd in on_weekends:
+        return 0.85                            # mandatory OT weekend ~85% of weekday
     return 0.0                                  # OFF weekend — no elevator work
 
 ELEV_MILESTONES = [("AJ","Assy Jig"),("A1","Assembly 1"),("A2","Assembly 2"),("FS","Finish / Ship")]
