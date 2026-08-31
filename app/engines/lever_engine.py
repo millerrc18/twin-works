@@ -154,40 +154,22 @@ def back_solve(units_by_prog: dict, as_of: datetime, serial: str, program: str,
 def bottleneck_load(units_by_prog: dict, as_of: datetime) -> list:
     """Systemic view: for each shared/bottleneck WC, weekly demand (from the baseline op
     schedule) vs available budget. Flags weeks over 100%. Returns per-WC summary rows."""
-    from collections import defaultdict
-    sim = _sim_all(units_by_prog, as_of)
+    from app.engines import rtg_wrapper as wrapper
+    from app.services.capacity_metrics import work_center_load_rows
 
-    # demand = labor hours scheduled per WC per ISO week, from each unit's op schedule
-    # (op_dt gives the scheduled start of each remaining op; hr from the registry).
-    wc_week_demand = defaultdict(lambda: defaultdict(float))
-    op_hr = {}
-    for prog in ("ELEV", "RAD", "AEGIS"):
-        for (opno, desc, wc, hr, ms) in registry.ops(prog):
-            op_hr[(prog, opno)] = (wc, hr)
-    prog_of = {u["serial"]: p for p, us in units_by_prog.items() for u in us}
-    for serial, r in sim.items():
-        prog = prog_of.get(serial)
-        for opno, dt in r.get("op_dt", {}).items():
-            wc, hr = op_hr.get((prog, opno), (None, 0))
-            if wc is None:
-                continue
-            wk = dt.isocalendar()[:2]
-            wc_week_demand[wc][wk] += hr
-
-    # available/wk per WC (sum of shift budgets * ~5 weekdays)
+    focus = sorted(wrapper.shared_wcs() | {"236", "32684", "AEROL", "AEROA"})
+    metrics = work_center_load_rows(units_by_prog, as_of, work_centers=set(focus))
     rows = []
-    focus = sorted(set(list(R.SHARED_WC) + ["236", "32684", "AEROL", "AEROA"]))
     for wc in focus:
-        # weekly available = sum over programs+shifts of daily budget * 5
-        avail = 0.0
-        for (prog, w), shifts in R.WC_SHIFT.items():
-            if w == wc:
-                avail += sum(shifts.values()) * 5
-        weeks = wc_week_demand.get(wc, {})
-        peak = max(weeks.values()) if weeks else 0.0
-        over = sum(1 for v in weeks.values() if avail and v > avail)
-        rows.append(dict(wc=wc, avail_per_wk=round(avail), peak_demand=round(peak),
-                         weeks_over=over, shared=(wc in R.SHARED_WC),
-                         util_pct=(round(100 * peak / avail) if avail else None)))
+        item = metrics[wc]
+        capacity = item["modeled_weekly_capacity_hours"]
+        rows.append(dict(
+            wc=wc,
+            avail_per_wk=round(capacity) if capacity is not None else 0,
+            peak_demand=round(item["peak_weekly_demand_hours"]),
+            weeks_over=item["weeks_over_capacity"],
+            shared=(wc in wrapper.shared_wcs()),
+            util_pct=item["peak_weekly_utilization_pct"],
+        ))
     rows.sort(key=lambda r: (r["util_pct"] or 0), reverse=True)
     return rows

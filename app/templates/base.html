@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}{{ app_name|default("RTG Tracker") }}{% endblock %}</title>
+  <title>{% block title %}{{ app_name|default("TwinWorks") }}{% endblock %}</title>
   <script>if(localStorage.getItem('rtg-theme')==='dark')document.documentElement.classList.add('dark');</script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config={darkMode:'class'}</script>
@@ -80,7 +80,7 @@
   <aside class="side">
     <div class="brand">
       <div class="logo"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 13L8 3l5 10" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.2 10h5.6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg></div>
-      <b>RTG Tracker</b>
+      <b>TwinWorks</b>
     </div>
     <nav class="nav">
       <div class="nlabel">Workspace</div>
@@ -90,6 +90,8 @@
       <a href="/forecast/RAD" class="nlink {{ 'active' if program=='RAD' else '' }}"><span>Aeronose Radome</span></a>
       <a href="/forecast/AEGIS" class="nlink {{ 'active' if program=='AEGIS' else '' }}"><span>Aegis Reflector</span></a>
       <div class="nlabel">Tools</div>
+      <a href="/factory-map" class="nlink {{ 'active' if active_page=='factory-map' else '' }}">Factory map</a>
+      <a href="/admin/resources" class="nlink {{ 'active' if active_page=='resources' else '' }}">Resources</a>
       <a href="/levers" class="nlink {{ 'active' if active_page=='levers' else '' }}">Levers</a>
       <a href="/admin/model-status" class="nlink {{ 'active' if active_page=='admin' else '' }}">Admin</a>
     </nav>
@@ -103,7 +105,7 @@
   </aside>
   <div class="main">
     <div class="cmd">
-      <div>{% block cmdtitle %}<h1>{{ app_name|default("RTG Tracker") }}</h1>{% endblock %}</div>
+      <div>{% block cmdtitle %}<h1>{{ app_name|default("TwinWorks") }}</h1>{% endblock %}</div>
       <div class="right">{% block cmdright %}
         <span class="asof">data: {{ data_source|default('snapshot') }}</span>
       {% endblock %}</div>

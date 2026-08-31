@@ -1,4 +1,4 @@
 <span class="seg">
-  <a href="/forecast/{{ program }}?view=matrix" class="{{ 'on' if view != 'summary' else '' }}">Matrix</a>
-  <a href="/forecast/{{ program }}?view=summary" class="{{ 'on' if view == 'summary' else '' }}">Summary</a>
+  <a href="/forecast/{{ program }}?view=matrix{% if selected_serial %}&serial={{ selected_serial|urlencode }}{% endif %}" class="{{ 'on' if view != 'summary' else '' }}">Matrix</a>
+  <a href="/forecast/{{ program }}?view=summary{% if selected_serial %}&serial={{ selected_serial|urlencode }}{% endif %}" class="{{ 'on' if view == 'summary' else '' }}">Summary</a>
 </span>

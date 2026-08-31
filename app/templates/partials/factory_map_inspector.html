@@ -1,0 +1,57 @@
+<section id="factory-inspector" class="factory-inspector" aria-live="polite">
+  <header class="inspector-head">
+    <div class="inspector-kicker">{{ resource.resource_kind|replace('-', ' ') }}</div>
+    <div class="inspector-titleline">
+      <h2>{{ resource.label }}</h2>
+      <span class="inspector-state {{ resource.telemetry.status }}">{{ resource.telemetry.status|replace('-', ' ') }}</span>
+    </div>
+    <p class="inspector-wc num">{{ resource.wc }}</p>
+  </header>
+
+  {% if not resource.is_relevant %}
+  <div class="inspector-note">Not in the selected program routing. Placement remains visible for facility context.</div>
+  {% endif %}
+
+  <dl class="inspector-facts">
+    <div><dt>Location</dt><dd>{{ resource.catalog.description or resource.label }}</dd></div>
+    <div><dt>Department</dt><dd>{{ resource.catalog.department or 'Not supplied' }}</dd></div>
+    <div><dt>Production line</dt><dd>{{ resource.catalog.production_line or 'Not supplied' }}</dd></div>
+    <div><dt>Map status</dt><dd>{{ resource.status|replace('-', ' ') }}</dd></div>
+  </dl>
+
+  <div class="signal-label">Capacity signal <span>modeled</span></div>
+  <div class="capacity-band">
+    <div><b class="num">{{ resource.telemetry.peak_weekly_utilization_pct if resource.telemetry.peak_weekly_utilization_pct is not none else 'n/a' }}{% if resource.telemetry.peak_weekly_utilization_pct is not none %}%{% endif %}</b><span>peak utilization</span></div>
+    <div><b class="num">{{ resource.telemetry.scheduled_labor_hours_7d }}</b><span>scheduled h / 7d</span></div>
+    <div><b class="num">{{ resource.telemetry.modeled_weekly_capacity_hours if resource.telemetry.modeled_weekly_capacity_hours is not none else 'n/a' }}</b><span>configured h / wk</span></div>
+  </div>
+  <div class="risk-strip">
+    <span><b class="num">{{ resource.telemetry.active_unit_count }}</b> active</span>
+    <span><b class="num">{{ resource.telemetry.queued_unit_count }}</b> queued</span>
+    <span class="{{ 'risk-hot' if resource.telemetry.late_unit_count else '' }}"><b class="num">{{ resource.telemetry.late_unit_count }}</b> likely late</span>
+    <span class="{{ 'risk-warn' if resource.telemetry.at_risk_unit_count else '' }}"><b class="num">{{ resource.telemetry.at_risk_unit_count }}</b> at risk</span>
+  </div>
+
+  <div class="inspector-section-title">Affected units <span class="num">{{ resource.affected_units|length }}</span></div>
+  <div class="unit-list">
+    {% for unit in resource.affected_units %}
+    <article class="unit-row {{ 'unit-stalled' if unit.stalled else '' }}">
+      <div>
+        <a href="/forecast/{{ unit.program }}?view=matrix&serial={{ unit.serial|urlencode }}" class="unit-id">{{ unit.serial }}</a>
+        <span class="unit-program">{{ unit.program }}</span>
+        <div class="unit-operation">{% if unit.current_operation %}{{ unit.current_operation.opno }} &middot; {{ unit.current_operation.description }}{% else %}No remaining routed operation{% endif %}</div>
+      </div>
+      <div class="unit-risk">
+        {% if unit.stalled %}<span class="risk-chip critical">stalled</span>
+        {% elif unit.delta_days is not none %}<span class="risk-chip {{ 'critical' if unit.delta_days > 0 else ('warning' if unit.p80 and unit.target and unit.p80 > unit.target else 'ok') }} num">{{ '+' if unit.delta_days > 0 else '' }}{{ unit.delta_days }}d</span>
+        {% else %}<span class="risk-chip quiet">no target</span>{% endif %}
+      </div>
+    </article>
+    {% else %}
+    <div class="empty-units">No selected-program WIP is currently routed here.</div>
+    {% endfor %}
+  </div>
+
+  <a class="lever-link" href="/levers?wc={{ resource.wc|urlencode }}">View capacity levers for {{ resource.wc }}</a>
+  <p class="source-note">Sources: {{ resource.telemetry.sources|join(' / ') }}. Capacity is modeled configuration, not real-time availability.</p>
+</section>

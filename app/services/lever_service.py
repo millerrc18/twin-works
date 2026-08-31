@@ -1,7 +1,6 @@
 """Lever service — wraps lever_engine for the web layer."""
 from app.data.source import DataSource
 from app.engines.lever_engine import run_lever, bottleneck_load, back_solve, LeverSpec
-from app.engines.router_registry import registry
 from ml.model.registry import registry_model
 from ml.model.features import FeatureBuilder
 from app.services import program_service as PSVC
@@ -20,20 +19,21 @@ PRESETS = {
 }
 
 
-def _units_by_prog(ds: DataSource):
+def _units_by_prog(ds: DataSource, programs=None):
+    programs = list(programs or PSVC.program_order())
     return {p: [u.as_sim_unit() for u in ds.get_wip_units(p) if not u.stalled]
-            for p in PSVC.program_order()}
+            for p in programs}
 
 
-def get_bottlenecks(ds: DataSource):
-    return bottleneck_load(_units_by_prog(ds), ds.as_of())
+def get_bottlenecks(ds: DataSource, programs=None):
+    return bottleneck_load(_units_by_prog(ds, programs), ds.as_of())
 
 
-def run_preset(ds: DataSource, preset_key: str):
+def run_preset(ds: DataSource, preset_key: str, programs=None):
     if preset_key not in PRESETS:
         return None
     _label, factory = PRESETS[preset_key]
-    return run_lever(_units_by_prog(ds), ds.as_of(), factory())
+    return run_lever(_units_by_prog(ds, programs), ds.as_of(), factory())
 
 
 def back_solve_program(ds: DataSource, program: str):

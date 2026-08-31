@@ -5,6 +5,7 @@
 {% block cmdright %}
   <span class="asof">data: {{ data_source|default('snapshot') }}</span>
   {% include "partials/view_toggle.html" %}
+  <a href="/admin/resources" class="badge" title="Resource assumptions governing this program">Resources: {{ resource_health.readiness|title }}</a>
 {% endblock %}
 
 {% block head %}
@@ -16,18 +17,20 @@
 .ftable td:first-child{text-align:left;color:var(--text);font-weight:600;}
 .ftable tr:hover td{background:color-mix(in srgb,var(--brand) 4%,transparent);}
 .ftable tr.stalled td{background:color-mix(in srgb,var(--alert) 7%,transparent);}
+.ftable tr.selected-row td{background:color-mix(in srgb,var(--brand) 11%,transparent);box-shadow:inset 3px 0 0 var(--brand);}
 .dpill{display:inline-block;min-width:42px;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:600;}
 .dpill.late{background:var(--late-bg);color:var(--late-tx);}
 .dpill.latemild{background:transparent;border:1px solid var(--late-tx);color:var(--late-tx);}
 .dpill.early{background:transparent;border:1px solid var(--early-tx);color:var(--early-tx);}
 .dpill.on{background:transparent;color:var(--ontime-tx);}
+.whybtn{font-size:10px;color:var(--brand);border:1px solid var(--border);background:var(--panel);border-radius:4px;padding:2px 5px;cursor:pointer;margin-left:5px;}.why-panel{margin:12px 0;border:1px solid var(--border);background:var(--panel);padding:12px;border-radius:8px}.why-kicker{font-size:9px;text-transform:uppercase;color:var(--faint)}.why-panel h3{font-size:13px;margin:3px 0}.why-panel header p,.why-meta,.why-ops{font-size:10px;color:var(--faint)}.why-state{font-size:9px;padding:2px 4px;border-radius:3px;background:var(--panel2);margin-left:4px}.why-resources{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px;margin-top:8px}.why-resources article{border-top:2px solid var(--text);padding:7px;background:var(--panel2)}.why-resources article>div:first-child{display:flex;justify-content:space-between;gap:6px}.why-cap{font-size:11px;margin:5px 0}.why-issues{color:var(--late-tx);font-size:10px}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="card" style="padding:12px 12px 6px;margin-bottom:16px;">
   <div style="font-size:11px;color:var(--faint);margin:0 2px 6px;">
-    Forecast vs RTG target — <span style="color:var(--early-tx);font-weight:600">■</span> on-time (P80 ≤ target) ·
+    Forecast vs {{ planning.target_label }} target — <span style="color:var(--early-tx);font-weight:600">■</span> on-time (P80 ≤ target) ·
     <span style="color:var(--wip-bg);font-weight:600">■</span> at risk (P50 ≤ target &lt; P80) ·
     <span style="color:var(--late-tx);font-weight:600">■</span> likely late (P50 &gt; target). Worst slip on top.
   </div>
@@ -36,27 +39,27 @@
 
 <table class="ftable">
   <thead><tr>
-    <th>Unit</th><th>Pos</th><th>Phase</th><th>Target (RTG)</th><th>Sim floor</th><th>P50</th><th>P80</th><th>Δ vs target</th>
+    <th>Unit</th><th>Pos</th><th>Phase</th><th>{{ planning.target_label }} target</th><th>Sim floor</th><th>P50</th><th>P80</th><th>Δ vs target</th>
   </tr></thead>
   <tbody>
     {% for f in forecasts %}
-    <tr class="{{ 'stalled' if f.stalled else '' }}">
-      <td>{{ f.serial }} <span class="num" style="color:var(--faint);font-weight:400">({{ f.so }})</span></td>
+    <tr class="{{ 'stalled' if f.stalled else '' }} {{ 'selected-row' if selected_serial==f.serial else '' }}">
+      <td>{{ f.serial }} <span class="num" style="color:var(--faint);font-weight:400">({{ f.so }})</span><button class="whybtn" hx-get="/forecast/{{ program }}/{{ f.serial|urlencode }}/why" hx-target="#why-{{ loop.index }}" hx-swap="innerHTML">Why</button><div id="why-{{ loop.index }}"></div></td>
       <td class="num">{{ f.maxop if f.maxop is not none else '—' }}</td>
       <td>{{ f.milestone }}</td>
-      <td class="num">{{ f.commit|fmt_date }}</td>
+      <td class="num">{{ f.comparison_target_date|fmt_date }}</td>
       {% if f.stalled %}
       <td colspan="3" style="color:var(--alert);font-weight:600">STALLED — suppressed</td>
       <td>—</td>
       {% else %}
-      <td class="num" style="color:var(--faint)">{{ f.sim_finish|fmt_date }}</td>
-      <td class="num" style="color:var(--text);font-weight:600">{{ f.p50|fmt_date }}</td>
-      <td class="num">{{ f.p80|fmt_date }}</td>
+      <td class="num" style="color:var(--faint)">{{ f.sim_finish_date|fmt_date }}</td>
+      <td class="num" style="color:var(--text);font-weight:600">{{ f.p50_date|fmt_date }}</td>
+      <td class="num">{{ f.p80_date|fmt_date }}</td>
       <td>
-        {% if f.delta_contract is none %}<span style="color:var(--faint)">—</span>
-        {% elif f.delta_contract > 2 %}<span class="dpill late num">▲ +{{ f.delta_contract }}</span>
-        {% elif f.delta_contract > 0 %}<span class="dpill latemild num">▲ +{{ f.delta_contract }}</span>
-        {% elif f.delta_contract < 0 %}<span class="dpill early num">▼ {{ f.delta_contract }}</span>
+        {% if f.delta_to_target is none %}<span style="color:var(--faint)">—</span>
+        {% elif f.delta_to_target > 2 %}<span class="dpill late num">▲ +{{ f.delta_to_target }}</span>
+        {% elif f.delta_to_target > 0 %}<span class="dpill latemild num">▲ +{{ f.delta_to_target }}</span>
+        {% elif f.delta_to_target < 0 %}<span class="dpill early num">▼ {{ f.delta_to_target }}</span>
         {% else %}<span class="dpill on num">— 0</span>{% endif %}
       </td>
       {% endif %}

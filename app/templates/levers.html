@@ -15,6 +15,7 @@
 .btable td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border2);color:var(--muted);}
 .btable td:first-child{text-align:left;color:var(--text);font-weight:600;}
 .btable tr.over td{background:color-mix(in srgb,var(--alert) 7%,transparent);}
+.btable tr.focus td{background:color-mix(in srgb,var(--brand) 11%,transparent);box-shadow:inset 3px 0 0 var(--brand);}
 .over-txt{color:var(--alert);font-weight:600;}
 .shared{font-size:10px;color:var(--brand);}
 .runbtn{background:var(--brand);color:#fff;font-size:13px;padding:6px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:500;}
@@ -26,12 +27,13 @@
 <div class="lgrid">
   <div class="card">
     <div class="h2">Bottleneck load — peak weekly utilization</div>
+    {% if selected_wc %}<div class="note" style="margin-top:-5px">Focused work center: <b class="num" style="color:var(--text)">{{ selected_wc }}</b></div>{% endif %}
     <div id="bottleneck" style="height:250px"></div>
     <table class="btable">
       <thead><tr><th>WC</th><th>Avail/wk</th><th>Peak</th><th>Util</th><th>Over</th></tr></thead>
       <tbody>
         {% for b in bottlenecks %}
-        <tr class="{{ 'over' if b.util_pct and b.util_pct>100 else '' }}">
+        <tr class="{{ 'over' if b.util_pct and b.util_pct>100 else '' }} {{ 'focus' if selected_wc==b.wc else '' }}">
           <td>{{ b.wc }}{% if b.shared %} <span class="shared">shared</span>{% endif %}</td>
           <td class="num">{{ b.avail_per_wk }}</td>
           <td class="num">{{ b.peak_demand }}</td>

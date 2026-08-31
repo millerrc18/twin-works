@@ -1,6 +1,6 @@
 """Golden-master regression harness for the forecast engine.
 
-Captures a deterministic snapshot of forecast output for every program (sim/P50/P80/Δ per unit)
+Captures a deterministic snapshot of forecast output for the three seed programs (sim/P50/P80/Δ per unit)
 so refactors can be proven not to move a single date. Run in SNAPSHOT data mode against a fixed
 program config + PositionState so results are reproducible.
 
@@ -16,10 +16,11 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 GOLDEN = HERE / "golden_forecast.json"
+SEED_PROGRAMS = ("ELEV", "RAD", "AEGIS")
 
 
 def _forecast_snapshot() -> dict:
-    """Deterministic forecast output for all programs. Forces snapshot mode + baseline positions
+    """Deterministic forecast output for the three seed programs. Forces snapshot mode + baseline positions
     (empty PositionState -> wip_tables baseline) so the golden master is stable across runs."""
     # ensure snapshot mode + a fixed as-of by using the wip_tables baseline (PositionState empty)
     from app.services import position_state as PS
@@ -31,19 +32,19 @@ def _forecast_snapshot() -> dict:
     PS.invalidate_cache()
     PSVC.invalidate_cache()
     RR.rebuild()
-    ds = SnapshotDataSource()
+    ds = SnapshotDataSource(use_position_state=False)
 
-    order = PSVC.program_order() or ["ELEV", "RAD", "AEGIS"]
+    order = SEED_PROGRAMS
     out = {}
     for p in order:
         rows = []
-        for f in FS.forecast_program(ds, p):
+        for f in FS.forecast_program(ds, p, programs=SEED_PROGRAMS):
             rows.append(dict(
                 serial=f.serial, so=f.so, maxop=f.maxop,
-                sim=f.sim_finish.isoformat() if f.sim_finish else None,
-                p50=f.p50.isoformat() if f.p50 else None,
-                p80=f.p80.isoformat() if f.p80 else None,
-                delta=f.delta_contract, stalled=f.stalled))
+                sim=f.sim_finish_date.isoformat() if f.sim_finish_date else None,
+                p50=f.p50_date.isoformat() if f.p50_date else None,
+                p80=f.p80_date.isoformat() if f.p80_date else None,
+                delta=f.delta_to_target, stalled=f.stalled))
         rows.sort(key=lambda r: (r["so"] or ""))
         out[p] = rows
     return out

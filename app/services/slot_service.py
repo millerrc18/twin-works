@@ -29,6 +29,10 @@ def _rtg_plan():
     return json.load(open(RTG_JSON)) if RTG_JSON.exists() else {}
 
 
+def _default_serial(slot_id: str) -> str:
+    return slot_id.rsplit(":", 1)[-1]
+
+
 def default_slots(program: str, wip_serials: set):
     """Slots for the CURRENTLY-TRACKED units only (intersection of RTG plan + live WIP).
     One slot per assigned serial, keyed by serial so same-date same-hand units don't collide.
@@ -49,7 +53,8 @@ def default_slots(program: str, wip_serials: set):
     return slots
 
 
-async def seed_slots(db: AsyncSession, program: str, wip_serials: set):
+async def seed_slots(db: AsyncSession, program: str, wip_serials: set,
+                     *, commit: bool = True):
     """Insert any missing default slots (idempotent). Does not overwrite existing assignments."""
     existing = {r.slot_id for r in (await db.execute(
         select(SlotAssignment).where(SlotAssignment.program == program))).scalars()}
@@ -57,15 +62,26 @@ async def seed_slots(db: AsyncSession, program: str, wip_serials: set):
         if sid not in existing:
             db.add(SlotAssignment(slot_id=sid, program=program, hand=hand,
                                   target_date=tdate, serial=serial))
-    await db.commit()
+    if commit:
+        await db.commit()
+    else:
+        await db.flush()
 
 
-async def get_slots(db: AsyncSession, program: str, wip_serials: set):
+async def get_slots(db: AsyncSession, program: str, wip_serials: set,
+                    *, commit: bool = True):
     """Return the program's slots (seeding first). List of SlotAssignment ORM rows,
     sorted by target then hand."""
-    await seed_slots(db, program, wip_serials)
+    await seed_slots(db, program, wip_serials, commit=commit)
     rows = (await db.execute(
         select(SlotAssignment).where(SlotAssignment.program == program))).scalars().all()
+    # Slot rows are retained as assignment history, but the operation tracker is a current-WIP
+    # surface. A slot remains visible when either its original plan serial or its reassigned serial
+    # is still WIP. Completed-unit slots therefore disappear without destroying swap history.
+    rows = [row for row in rows if (
+        row.serial in wip_serials
+        or (row.serial is None and _default_serial(row.slot_id) in wip_serials)
+    )]
     rows.sort(key=lambda r: (r.target_date or date.max, r.hand))
     return rows
 
@@ -91,6 +107,6 @@ async def reassign(db: AsyncSession, slot_id: str, serial: str | None):
     return target
 
 
-async def assigned_serials(db: AsyncSession, program: str) -> set:
-    rows = await get_slots(db, program)
+async def assigned_serials(db: AsyncSession, program: str, wip_serials: set) -> set:
+    rows = await get_slots(db, program, wip_serials)
     return {r.serial for r in rows if r.serial}

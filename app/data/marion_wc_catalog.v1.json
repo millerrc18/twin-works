@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "facility": "Marion",
+  "site": "59",
+  "metadata_status": "Active IFS work-center facts captured 2026-08-26; fixed coordinates remain a reviewed floor-plan overlay",
+  "work_centers": [
+    {
+      "wc": "221",
+      "description": "P2 PAINT",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "27",
+      "production_line": "M700"
+    },
+    {
+      "wc": "234",
+      "description": "P3 MM",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "29-CN",
+      "production_line": "M700"
+    },
+    {
+      "wc": "235",
+      "description": "P3 PACK",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "27",
+      "production_line": "M700"
+    },
+    {
+      "wc": "236",
+      "description": "P3 PAINT",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "27",
+      "production_line": "M700"
+    },
+    {
+      "wc": "238",
+      "description": "P3 OVEN",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "28-A",
+      "production_line": "M700"
+    },
+    {
+      "wc": "244",
+      "description": "P2 LAM  AEGIS",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "28",
+      "production_line": "M700"
+    },
+    {
+      "wc": "248",
+      "description": "P2 TOOL",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "61",
+      "production_line": "M710"
+    },
+    {
+      "wc": "298",
+      "description": "P4 RANGE",
+      "building": "P4",
+      "source": "reviewed-floor-plan"
+    },
+    {
+      "wc": "313",
+      "description": "P2 OVEN",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "28-A",
+      "production_line": "M700"
+    },
+    {
+      "wc": "2 NDI",
+      "description": "P2 NDI",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": null,
+      "production_line": "SAL"
+    },
+    {
+      "wc": "32677",
+      "description": "P2 LAM  G500",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "28",
+      "production_line": "M700"
+    },
+    {
+      "wc": "32678",
+      "description": "P2 AUTO",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "28-A",
+      "production_line": "M700"
+    },
+    {
+      "wc": "32684",
+      "description": "P2 ASSY G500",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "29",
+      "production_line": "M700"
+    },
+    {
+      "wc": "32687",
+      "description": "P2 INSP",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "26",
+      "production_line": "M620"
+    },
+    {
+      "wc": "3FINL",
+      "description": "P3 FINAL",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "26",
+      "production_line": "M620"
+    },
+    {
+      "wc": "42676",
+      "description": "P2 ASSY AEGIS",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "29",
+      "production_line": "M700"
+    },
+    {
+      "wc": "AEROA",
+      "description": "P3 ASSY AERO",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "29",
+      "production_line": "M700"
+    },
+    {
+      "wc": "AEROL",
+      "description": "P3 LAM  AERO",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "28",
+      "production_line": "M700"
+    },
+    {
+      "wc": "ATUP",
+      "description": "P3 AUTO",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "28-A",
+      "production_line": "M700"
+    },
+    {
+      "wc": "P2PCK",
+      "description": "P2 PACK",
+      "building": "P2",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "27",
+      "production_line": "M700"
+    },
+    {
+      "wc": "P3 QA",
+      "description": "P3 INSP",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "26",
+      "production_line": "M620"
+    },
+    {
+      "wc": "P3NDI",
+      "description": "P3 NDI",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": null,
+      "production_line": "SAL"
+    },
+    {
+      "wc": "P3TRI",
+      "description": "P3 TRIM",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "29",
+      "production_line": "M700"
+    },
+    {
+      "wc": "PRNG",
+      "description": "P3 RANGE",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "24",
+      "production_line": "M420"
+    },
+    {
+      "wc": "TRI A",
+      "description": "P3 ASSY TRI",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "29",
+      "production_line": "M700"
+    },
+    {
+      "wc": "TRI L",
+      "description": "P3 LAM  TRI",
+      "building": "P3",
+      "source": "IFS WORK_CENTER_CFV 2026-08-26",
+      "department": "28",
+      "production_line": "M700"
+    }
+  ]
+}

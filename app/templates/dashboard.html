@@ -45,8 +45,11 @@
   <a href="/forecast/{{ p.program }}" class="pcard">
     <div class="top">
       <div><h3>{{ p.name }}</h3><div class="num" style="font-size:11px;color:var(--faint);margin-top:2px">{{ p.program }}</div></div>
+      {% if p.forecast_visibility == 'PUBLISHED' %}
       <span class="badge2 {{ 'trained' if p.model_status=='TRAINED' else '' }}">{{ p.model_status }}{% if p.model_status=='EMPIRICAL' %} · n=<span class="num">{{ p.n_scored }}</span>{% endif %}</span>
+      {% else %}<span class="badge2">{{ p.lifecycle_state|replace('_',' ')|title }}</span>{% endif %}
     </div>
+    {% if p.forecast_visibility == 'PUBLISHED' %}
     <div class="stats">
       <div class="stat"><div class="n num">{{ p.wip }}</div><div class="l">WIP</div></div>
       <div class="stat {{ 'behind' if p.behind else 'zero' }}"><div class="n num">{{ p.behind }}</div><div class="l">behind</div></div>
@@ -54,6 +57,14 @@
     </div>
     <div class="pnote">Model runs <b><span class="num">{{ p.bias_days }}d</span></b> optimistic — P50 de-biases, P80 adds slack.</div>
     <div class="spark"></div>
+    {% else %}
+    <div class="stats">
+      <div class="stat"><div class="n num">{{ p.wip }}</div><div class="l">WIP observed</div></div>
+      <div class="stat {{ 'stall' if p.stalled else 'zero' }}"><div class="n num">{{ p.stalled }}</div><div class="l">stalled</div></div>
+      <div class="stat"><div class="n" style="font-size:14px">{{ p.resource_health.readiness|title }}</div><div class="l">readiness</div></div>
+    </div>
+    <div class="pnote"><b>{{ p.plan_label or p.planning_basis|replace('_',' ')|title }}</b> is configured but not in force. Operational evidence only; no forecast or delivery KPI is published.</div>
+    {% endif %}
   </a>
   {% endfor %}
 </div>

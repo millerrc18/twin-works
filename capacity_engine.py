@@ -3,13 +3,14 @@
 Replaces the naive per-unit projection (which assumed every WIP unit gets full
 labor every day in parallel). Instead: all WIP units advance simultaneously but
 COMPETE for a shared per-work-center daily hour budget, drawn in commit-date
-priority order. Cures run 24/7 wall-clock and do NOT consume WC labor hours
-(but oven WCs have a concurrent-slot cap).
+priority order. Cures run 24/7 wall-clock and do NOT consume WC labor hours. Selected paint and
+cure-station dwells reserve discrete physical slots before they can begin.
 
 Measured WC daily budgets (Aug 4-19 actuals, 11 working days) — real sustained
 throughput, which is the right bottleneck constraint given current staffing.
 """
 import datetime
+from heapq import heapify, heappop, heappush
 from datetime import datetime as DT, date, timedelta
 
 # Per-WC daily labor-hour budget (measured sustained utilization). Floors applied
@@ -26,9 +27,6 @@ WC_DAILY = {
 }
 DEFAULT_WC = 12.0  # any WC not listed
 
-# Oven / fixture concurrent-slot caps (units that can cure at once)
-OVEN_SLOTS = {'ATUP':2,'238':2,'221':2,'236':1}  # radome autoclave + paint booths
-
 SHIFT_START = 6
 
 def wc_budget(wc):
@@ -43,16 +41,44 @@ def day_factor(dd):
     if wd==5: return 0.5
     return 0.25
 
-def simulate(units, ops_map, cures_map, as_of):
+def simulate(units, ops_map, cures_map, as_of, profile=None):
     """units: list of dicts {serial, so, maxop, commit, program}
        ops_map: program -> ops list; cures_map: program -> cures list
     Returns: per-serial {finish, op_dt{opno:start_dt}, cure_dt{label:start_dt}, stalled}
     Day-stepped finite-capacity sim: each working day, distribute each WC's hour
     budget to units in commit-date order; a unit advances through labor ops until
     it hits a cure (24/7 dwell) or runs out of that day's WC hours."""
-    from routers import crew, PARALLEL_CURE_GATES
+    from routers import (
+        crew as legacy_crew,
+        PARALLEL_CURE_GATES,
+        CURE_STATION_CAPACITIES,
+        CURE_STATION_RULES,
+    )
+    profile = profile or {}
+    crew_by_program = profile.get("crew_by_program", {})
+    cure_station_rules = profile.get("cure_station_rules", CURE_STATION_RULES)
+    cure_station_capacities = profile.get("cure_station_capacities", CURE_STATION_CAPACITIES)
+    parallel_cure_gates = profile.get("parallel_cure_gates", PARALLEL_CURE_GATES)
+    cure_station_slots = {}
+    for station, capacity in cure_station_capacities.items():
+        if int(capacity) > 0:
+            slots = [as_of] * int(capacity)
+            heapify(slots)
+            cure_station_slots[station] = slots
+    def crew_for(program, wc, opno):
+        return float(crew_by_program.get(program, {}).get(opno, legacy_crew(wc, opno)))
+
+    def reserve_cure_station(station, requested_start, dwell_hours):
+        if not station or station not in cure_station_slots:
+            return requested_start
+        slots = cure_station_slots[station]
+        available_at = heappop(slots)
+        start_at = max(requested_start, available_at)
+        heappush(slots, start_at + timedelta(hours=dwell_hours))
+        return start_at
+
     def gate_op_for(label):
-        for sub,gop in PARALLEL_CURE_GATES.items():
+        for sub,gop in parallel_cure_gates.items():
             if sub in label: return gop
         return None
     # Build per-unit remaining op queue. Labor hrs divided by crew factor (floor runs
@@ -67,14 +93,16 @@ def simulate(units, ops_map, cures_map, as_of):
         for (opno,desc,wc,hrs,ms) in ops:
             if maxop is not None and opno<=maxop:
                 continue
-            eff_hrs=float(hrs)/crew(wc, opno)   # crew parallelism (tail/finishing ops only)
+            eff_hrs=float(hrs)/max(1.0, crew_for(program, wc, opno))
             q.append(['op',opno,wc,eff_hrs,desc])
             for (_,clabel,dwell,cnote) in cby.get(opno,[]):
-                gop=gate_op_for(clabel)
+                gop = gate_op_for(clabel)
+                station = cure_station_rules.get((program, opno, clabel))
                 if gop is not None:
-                    q.append(['pgate',clabel,gop,float(dwell),clabel])  # parallel gate
+                    # Parallel gates are not cure-station reservations.
+                    q.append(['pgate', clabel, gop, float(dwell), clabel, None])
                 else:
-                    q.append(['cure',clabel,'',float(dwell),clabel])
+                    q.append(['cure', clabel, '', float(dwell), clabel, station])
         return q
 
     state={}
@@ -89,11 +117,12 @@ def simulate(units, ops_map, cures_map, as_of):
     # capacity (e.g. Aegis shares paint booth WC221 + ovens with elevator and is DPAS-rated).
     # Then earliest commit first (None commit last).
     from routers import DPAS_PROGRAMS
+    dpas_programs = set(profile.get("dpas_programs", DPAS_PROGRAMS))
     as_of_d = as_of.date()
     def prio(u):
         commit = u['commit'] or date(2099,1,1)
         behind = 1 if (u['commit'] and u['commit'] < as_of_d) else 0
-        dpas_behind = (u.get('program') in DPAS_PROGRAMS) and behind
+        dpas_behind = (u.get('program') in dpas_programs) and behind
         # sort key: DPAS-behind units first (0), then by commit date, then serial
         return (0 if dpas_behind else 1, commit, u['serial'])
     order=sorted(units, key=prio)
@@ -104,6 +133,10 @@ def simulate(units, ops_map, cures_map, as_of):
     # own per-(program,wc,shift) hour budget (WC_SHIFT). Elevator weekends follow the
     # 2-on/1-off OT rotation (elevator_weekend_factor); radome/Aegis weekends at reduced rate.
     from routers import wc_shift_budget, elevator_weekend_factor, SHARED_WC
+    shared_wcs = set(profile.get("shared_wcs", SHARED_WC))
+    shift_budgets = profile.get("shift_budgets", {})
+    budget_programs = list(profile.get("budget_programs") or
+                           sorted({u.get("program") for u in units if u.get("program")}))
     SHIFTS=[(1,6,8),(2,14,8),(3,22,8)]  # (shift#, start_hour, span_hours)
     unit_prog={s: state[s]['u'].get('program') for s in state}
     def day_fac(prog, dd):
@@ -124,21 +157,35 @@ def simulate(units, ops_map, cures_map, as_of):
             sh_close=sh_open+timedelta(hours=sh_span)
             if sh_close <= as_of:
                 continue  # shift already past
-            # per-shift WC budget bucket, keyed by (program,wc); shared WCs summed across programs
+            # Per-shift WC budget buckets. The profile keeps legacy router budgets as the
+            # fallback, but shared resources are derived from the active registry rather than
+            # the seed-only SHARED_WC list.
             budget={}
+
+            def raw_budget(prog, wc):
+                shifts = shift_budgets.get((prog, wc))
+                if shifts is not None:
+                    return shifts.get(shn, 0)
+                return wc_shift_budget(prog, wc, shn)
+
             def getb(prog, wc):
                 key=(prog, wc)
                 if key not in budget:
-                    if wc in SHARED_WC:
-                        # shared booth/oven: one pooled bucket across all programs, keyed by wc only
+                    if wc in shared_wcs:
                         pk=('_SHARED_', wc)
                         if pk not in budget:
-                            tot=sum(wc_shift_budget(p, wc, shn)*day_fac(p,dd)
-                                    for p in ('ELEV','RAD','AEGIS'))
+                            contributors = [p for p in budget_programs
+                                            if (p, wc) in shift_budgets]
+                            if contributors:
+                                tot=sum(raw_budget(p, wc)*day_fac(p,dd) for p in contributors)
+                            else:
+                                # No existing resource profile: one default WC pool, not one
+                                # default pool per program, so newly shared WCs really contend.
+                                tot=raw_budget(prog, wc)*day_fac(prog,dd)
                             budget[pk]=tot
-                        budget[key]=pk  # point program key at shared pool
+                        budget[key]=pk
                         return budget[pk]
-                    budget[key]=wc_shift_budget(prog, wc, shn)*day_fac(prog,dd)
+                    budget[key]=raw_budget(prog, wc)*day_fac(prog,dd)
                 b=budget[key]
                 return budget[b] if isinstance(b,tuple) else b
             def useb(prog, wc, amt):
@@ -189,14 +236,15 @@ def simulate(units, ops_map, cures_map, as_of):
                         else:
                             break
                     elif item[0]=='pgate':
-                        _,clabel,gop,dwell,_=item
+                        _,clabel,gop,dwell,_,_station=item
                         cs=st['clock']; st['cure_dt'][clabel]=cs
                         st['gate_nb'][gop]=cs+timedelta(hours=dwell)
                         st['idx']+=1
                     else:  # serial cure
-                        _,clabel,_,dwell,_=item
-                        cs=st['clock']; st['cure_dt'][clabel]=cs
-                        st['cure_until']=cs+timedelta(hours=dwell)
+                        _,clabel,_,dwell,_,station=item
+                        cs = reserve_cure_station(station, st['clock'], dwell)
+                        st['cure_dt'][clabel] = cs
+                        st['cure_until'] = cs + timedelta(hours=dwell)
                         st['idx']+=1
                         break
                 if st['idx']>=len(st['queue']) and st['cure_until'] is None:

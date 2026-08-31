@@ -65,7 +65,7 @@ def discover() -> OAuthMeta:
 def register_client(meta: OAuthMeta) -> str:
     """Dynamic client registration -> client_id (public client, PKCE)."""
     body = json.dumps({
-        "client_name": "RTG Forecast App",
+        "client_name": "TwinWorks",
         "redirect_uris": [REDIRECT_URI],
         "grant_types": ["authorization_code", "refresh_token"],
         "response_types": ["code"],
@@ -174,7 +174,7 @@ class IfsMcpClient:
             "jsonrpc": "2.0", "id": self._rpc_id, "method": "initialize",
             "params": {"protocolVersion": self.PROTOCOL_VERSION,
                        "capabilities": {},
-                       "clientInfo": {"name": "RTG Forecast", "version": "1.0"}}})
+                       "clientInfo": {"name": "TwinWorks", "version": "1.0"}}})
         if init and "error" in init:
             raise RuntimeError(init["error"])
         # notify server we're initialized (no response expected)

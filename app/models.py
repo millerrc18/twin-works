@@ -1,13 +1,24 @@
-"""ORM models — the 5 persisted tables. Reference JSON files stay on disk (read-only)."""
+"""ORM models for TwinWorks persistence and append-only governance."""
 from datetime import datetime, timezone, date
 from typing import Optional
-from sqlalchemy import String, Integer, Float, Date, DateTime, Boolean, Text, LargeBinary
+from sqlalchemy import (
+    String, Integer, Float, Date, DateTime, Boolean, Text, LargeBinary,
+    ForeignKey, UniqueConstraint, CheckConstraint, DDL, event, inspect as sa_inspect,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
 
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+class ApprovedRecordImmutable(ValueError):
+    """Approved governance records may only be closed through supersession."""
+
+
+class ImmutableEpochRecord(ValueError):
+    """Model epoch definitions and their audit events are append-only."""
 
 
 class ForecastLog(Base):
@@ -24,9 +35,16 @@ class ForecastLog(Base):
     p50_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     p80_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     contract_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    plan_target_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    comparison_target_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    planning_basis: Mapped[Optional[str]] = mapped_column(String(24), nullable=True)
+    plan_label: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    model_epoch_key: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     actual_close: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     error_days: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     model_status: Mapped[str] = mapped_column(String(12), default="EMPIRICAL")
+    simulation_snapshot_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("simulation_snapshot.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
@@ -84,7 +102,7 @@ class WIConstraint(Base):
 class SlotAssignment(Base):
     """RTG delivery slot -> currently-assigned serial. Seeded from the RTG plan; edited
     inline on the matrix when a swap happens (a stalled unit gets passed by another).
-    slot_id = '{program}:{hand}:{target_iso}' (hand='' for radome/aegis)."""
+    slot_id = '{program}:{hand}:{original_serial}' (hand='' for radome)."""
     __tablename__ = "slot_assignment"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     slot_id: Mapped[str] = mapped_column(String(48), unique=True, index=True)
@@ -150,6 +168,10 @@ class Program(Base):
     Big structural data lives in JSON columns (single source of truth); a timestamped snapshot is
     also exported to program_snapshots/ on save for diffable history (this app has no git)."""
     __tablename__ = "program"
+    __table_args__ = (
+        CheckConstraint(
+            "configured_planning_basis IN ('PLAN_SLOTS','CONTRACT_DATES','NONE')"),
+    )
     code: Mapped[str] = mapped_column(String(8), primary_key=True)   # ELEV | RAD | AEGIS | new
     name: Mapped[str] = mapped_column(String(64))
     plant: Mapped[str] = mapped_column(String(16), default="")       # physical plant (pooling boundary)
@@ -166,11 +188,630 @@ class Program(Base):
     dpas: Mapped[bool] = mapped_column(Boolean, default=False)
     train_threshold: Mapped[int] = mapped_column(Integer, default=25)
     rtg_source: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    configured_planning_basis: Mapped[str] = mapped_column(String(24), default="NONE")
+    plan_label: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    plan_version: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     hand_split: Mapped[bool] = mapped_column(Boolean, default=False)
     hand_map_json: Mapped[str] = mapped_column(Text, default="{}")   # JSON {part_no: 'LH'|'RH'}
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+
+class ModelEpoch(Base):
+    """Immutable definition of one program model generation."""
+    __tablename__ = "model_epoch"
+    __table_args__ = (
+        UniqueConstraint("program", "definition_hash"),
+        CheckConstraint("epoch_kind IN ('LEGACY_BASELINE','CANDIDATE')"),
+        CheckConstraint("resource_mode IN ('LEGACY','DB_SHADOW','DB_ACTIVE')"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    epoch_key: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    program: Mapped[str] = mapped_column(String(8), index=True)
+    epoch_kind: Mapped[str] = mapped_column(String(24))
+    predecessor_epoch_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("model_epoch.id"), nullable=True)
+    label: Mapped[str] = mapped_column(String(128))
+    resource_mode: Mapped[str] = mapped_column(String(16))
+    definition_json: Mapped[str] = mapped_column(Text)
+    definition_hash: Mapped[str] = mapped_column(String(64), index=True)
+    created_by: Mapped[str] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class ModelEpochTransition(Base):
+    """Append-only lifecycle decision for a model epoch."""
+    __tablename__ = "model_epoch_transition"
+    __table_args__ = (
+        UniqueConstraint("epoch_id", "sequence"),
+        CheckConstraint(
+            "to_state IN ('DRAFT','OBSERVE','PROVISIONAL','COMMITMENT_READY',"
+            "'PAUSED','ARCHIVED','DEPRECATED')"),
+        CheckConstraint(
+            "from_state IS NULL OR from_state IN ('DRAFT','OBSERVE','PROVISIONAL',"
+            "'COMMITMENT_READY','PAUSED','ARCHIVED','DEPRECATED')"),
+        CheckConstraint(
+            "authority_role IN ('DATA_ADMIN','IE_FLOOR','PROGRAM_SCHEDULING')"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    epoch_id: Mapped[int] = mapped_column(ForeignKey("model_epoch.id"), index=True)
+    sequence: Mapped[int] = mapped_column(Integer)
+    from_state: Mapped[Optional[str]] = mapped_column(String(24), nullable=True)
+    to_state: Mapped[str] = mapped_column(String(24), index=True)
+    authority_role: Mapped[str] = mapped_column(String(24))
+    actor: Mapped[str] = mapped_column(String(128))
+    rationale: Mapped[str] = mapped_column(Text)
+    evidence_json: Mapped[str] = mapped_column(Text, default="{}")
+    transitioned_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class ProgramEpochActivation(Base):
+    """Append-only selection of the epoch allowed to publish for a program."""
+    __tablename__ = "program_epoch_activation"
+    __table_args__ = (
+        CheckConstraint("action IN ('PUBLISH','ROLLBACK')"),
+        CheckConstraint("authority_role = 'PROGRAM_SCHEDULING'"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    program: Mapped[str] = mapped_column(String(8), index=True)
+    epoch_id: Mapped[int] = mapped_column(ForeignKey("model_epoch.id"), index=True)
+    transition_id: Mapped[int] = mapped_column(
+        ForeignKey("model_epoch_transition.id"), index=True)
+    action: Mapped[str] = mapped_column(String(16))
+    authority_role: Mapped[str] = mapped_column(String(24))
+    actor: Mapped[str] = mapped_column(String(128))
+    rationale: Mapped[str] = mapped_column(Text)
+    activated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class ResourcePool(Base):
+    """Stable identity of one physical labor, machine, tooling, cure, or space resource."""
+    __tablename__ = "resource_pool"
+    __table_args__ = (
+        CheckConstraint("resource_type IN ('LABOR','MACHINE','TOOL','CURE_STATION','SPACE')"),
+        CheckConstraint("capacity_unit IN ('HOURS','SLOTS')"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    site: Mapped[str] = mapped_column(String(8), index=True)
+    name: Mapped[str] = mapped_column(String(128))
+    resource_type: Mapped[str] = mapped_column(String(16))
+    capacity_unit: Mapped[str] = mapped_column(String(8))
+    work_center_no: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, index=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    retired_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+
+class ResourceInstance(Base):
+    """Optional named instance for a non-fungible discrete resource."""
+    __tablename__ = "resource_instance"
+    __table_args__ = (UniqueConstraint("pool_id", "instance_code"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    pool_id: Mapped[int] = mapped_column(ForeignKey("resource_pool.id"), index=True)
+    instance_code: Mapped[str] = mapped_column(String(64))
+    name: Mapped[str] = mapped_column(String(128))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    retired_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class ModelAssumption(Base):
+    """Immutable, effective-dated model input with evidence and approval provenance."""
+    __tablename__ = "model_assumption"
+    __table_args__ = (
+        CheckConstraint("basis IN ('IFS_FACT','MEASURED_ACTUAL','DERIVED_ESTIMATE','OWNER_CONFIRMED','PROVISIONAL_GUESS')"),
+        CheckConstraint("approval_status IN ('DRAFT','APPROVED','UNDER_REVIEW','SUPERSEDED')"),
+        CheckConstraint("commitment_grade IN ('COMMITMENT_READY','INTERNAL_ONLY')"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    subject_type: Mapped[str] = mapped_column(String(24), index=True)
+    subject_key: Mapped[str] = mapped_column(String(128), index=True)
+    parameter: Mapped[str] = mapped_column(String(64), index=True)
+    value_json: Mapped[str] = mapped_column(Text)
+    unit: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    basis: Mapped[str] = mapped_column(String(24))
+    approval_status: Mapped[str] = mapped_column(String(16), default="DRAFT")
+    commitment_grade: Mapped[str] = mapped_column(String(24), default="INTERNAL_ONLY")
+    evidence_source: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    evidence_schema_version: Mapped[int] = mapped_column(Integer, default=1)
+    evidence_json: Mapped[str] = mapped_column(Text, default="{}")
+    evidence_start: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    evidence_end: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    calculation_method: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    evidence_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    minimum_evidence_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    owner: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    approver: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    review_due_at: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    effective_from: Mapped[date] = mapped_column(Date, index=True)
+    effective_to: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    supersedes_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("model_assumption.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class ResourceCapacityVersion(Base):
+    """Append-only effective capacity or slot-count version for a physical pool."""
+    __tablename__ = "resource_capacity_version"
+    __table_args__ = (
+        UniqueConstraint("pool_id", "effective_from"),
+        CheckConstraint("status IN ('DRAFT','APPROVED','SUPERSEDED')"),
+        CheckConstraint("capacity_scope IN ('GROSS_SITE','NET_TRACKED')"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    pool_id: Mapped[int] = mapped_column(ForeignKey("resource_pool.id"), index=True)
+    effective_from: Mapped[date] = mapped_column(Date, index=True)
+    effective_to: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    status: Mapped[str] = mapped_column(String(16), default="DRAFT")
+    capacity_scope: Mapped[str] = mapped_column(String(16))
+    capacity_schedule_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    slot_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    calendar_policy_json: Mapped[str] = mapped_column(Text, default="{}")
+    external_policy_json: Mapped[str] = mapped_column(Text, default="{}")
+    assumption_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("model_assumption.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class OperationResourceBinding(Base):
+    """Effort or occupancy requirement on a program routing operation/span."""
+    __tablename__ = "operation_resource_binding"
+    __table_args__ = (
+        CheckConstraint("requirement_mode IN ('EFFORT','OCCUPANCY')"),
+        CheckConstraint("demand_source IN ('LABOR','MACHINE','FIXED')"),
+        CheckConstraint("release_event IN ('OP_START','OP_COMPLETE','CURE_COMPLETE','ROUTE_COMPLETE')"),
+        CheckConstraint("status IN ('DRAFT','APPROVED','SUPERSEDED')"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    program: Mapped[str] = mapped_column(String(8), index=True)
+    part_no: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    routing_revision: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
+    routing_alternative: Mapped[str] = mapped_column(String(16), default="*")
+    pool_id: Mapped[int] = mapped_column(ForeignKey("resource_pool.id"), index=True)
+    acquire_op: Mapped[int] = mapped_column(Integer)
+    release_op: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    requirement_mode: Mapped[str] = mapped_column(String(16))
+    quantity: Mapped[float] = mapped_column(Float, default=1.0)
+    demand_source: Mapped[str] = mapped_column(String(16))
+    release_event: Mapped[str] = mapped_column(String(20))
+    min_hold_hours: Mapped[float] = mapped_column(Float, default=0.0)
+    lag_hours: Mapped[float] = mapped_column(Float, default=0.0)
+    instance_code: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    assumption_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("model_assumption.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(16), default="DRAFT")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class ExternalLoadSnapshot(Base):
+    __tablename__ = "external_load_snapshot"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    captured_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    source: Mapped[str] = mapped_column(String(64))
+    schema_version: Mapped[str] = mapped_column(String(16))
+    coverage_start: Mapped[date] = mapped_column(Date)
+    coverage_end: Mapped[date] = mapped_column(Date)
+    tracked_programs_json: Mapped[str] = mapped_column(Text)
+    quality_policy_json: Mapped[str] = mapped_column(Text)
+    assumption_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    content_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+
+
+class ExternalLoadRow(Base):
+    __tablename__ = "external_load_row"
+    __table_args__ = (
+        CheckConstraint("quality IN ('OK','SUSPECT','EXCLUDED')"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    snapshot_id: Mapped[int] = mapped_column(ForeignKey("external_load_snapshot.id"), index=True)
+    pool_id: Mapped[int] = mapped_column(ForeignKey("resource_pool.id"), index=True)
+    work_date: Mapped[date] = mapped_column(Date, index=True)
+    shift: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    project_id: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    order_no: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    part_no: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    source_type: Mapped[str] = mapped_column(String(32))
+    load_type: Mapped[str] = mapped_column(String(16))
+    hours: Mapped[float] = mapped_column(Float, default=0.0)
+    units: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    quality: Mapped[str] = mapped_column(String(12))
+    weight: Mapped[float] = mapped_column(Float, default=1.0)
+    exclusion_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+
+class SimulationSnapshot(Base):
+    """Immutable inputs observed for one run, not a global publication lock."""
+    __tablename__ = "simulation_snapshot"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    as_of: Mapped[datetime] = mapped_column(DateTime)
+    horizon_end: Mapped[date] = mapped_column(Date)
+    mode: Mapped[str] = mapped_column(String(16))
+    profile_json: Mapped[str] = mapped_column(Text)
+    assumption_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    external_snapshot_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("external_load_snapshot.id"), nullable=True)
+    readiness: Mapped[str] = mapped_column(String(16))
+    unresolved_json: Mapped[str] = mapped_column(Text, default="[]")
+    content_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+
+
+class SimulationSnapshotEpoch(Base):
+    """Queryable epoch references materialized inside a simulation snapshot."""
+    __tablename__ = "simulation_snapshot_epoch"
+    simulation_snapshot_id: Mapped[int] = mapped_column(
+        ForeignKey("simulation_snapshot.id"), primary_key=True)
+    program: Mapped[str] = mapped_column(String(8), primary_key=True)
+    model_epoch_id: Mapped[int] = mapped_column(ForeignKey("model_epoch.id"), index=True)
+
+
+class ForecastConstraintEvent(Base):
+    __tablename__ = "forecast_constraint_event"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    simulation_snapshot_id: Mapped[int] = mapped_column(
+        ForeignKey("simulation_snapshot.id"), index=True)
+    serial: Mapped[str] = mapped_column(String(32), index=True)
+    program: Mapped[str] = mapped_column(String(8), index=True)
+    pool_id: Mapped[int] = mapped_column(ForeignKey("resource_pool.id"), index=True)
+    event_type: Mapped[str] = mapped_column(String(32))
+    wait_start: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    wait_end: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    wait_hours: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    reason: Mapped[str] = mapped_column(Text)
+    gross_capacity: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    external_load: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    schedulable_capacity: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    assumption_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
+class AssumptionReview(Base):
+    __tablename__ = "assumption_review"
+    __table_args__ = (
+        CheckConstraint("status IN ('OPEN','RESOLVED','DISMISSED')"),
+        CheckConstraint(
+            "review_type IN ('EXPIRY','MISSING_REVIEW_DATE','MISSING_DRIFT_POLICY',"
+            "'BACKFILL_ATTESTATION','DRIFT','SPARSE_EVIDENCE','MANUAL')"),
+        CheckConstraint(
+            "(status = 'OPEN' AND resolution IS NULL AND successor_assumption_id IS NULL) OR "
+            "(status = 'DISMISSED' AND resolution = 'DISMISSED' "
+            "AND successor_assumption_id IS NULL) OR "
+            "(status = 'RESOLVED' AND resolution IN ('RECERTIFIED','SUPERSEDED') "
+            "AND successor_assumption_id IS NOT NULL)"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    assumption_id: Mapped[int] = mapped_column(ForeignKey("model_assumption.id"), index=True)
+    review_key: Mapped[str] = mapped_column(String(160), unique=True, index=True)
+    review_type: Mapped[str] = mapped_column(String(24))
+    status: Mapped[str] = mapped_column(String(16), default="OPEN")
+    reason: Mapped[str] = mapped_column(Text)
+    evidence_json: Mapped[str] = mapped_column(Text, default="{}")
+    owner: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    opened_by: Mapped[str] = mapped_column(String(128), default="TwinWorks")
+    opened_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    resolved_by: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    resolution: Mapped[Optional[str]] = mapped_column(String(24), nullable=True)
+    successor_assumption_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("model_assumption.id"), nullable=True)
+    resolution_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+
+APPROVED_ASSUMPTION_EVIDENCE_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_model_assumption_evidence_immutable
+BEFORE UPDATE ON model_assumption
+WHEN OLD.approval_status = 'APPROVED' AND (
+    NEW.evidence_schema_version IS NOT OLD.evidence_schema_version
+    OR NEW.evidence_json IS NOT OLD.evidence_json
+)
+BEGIN
+    SELECT RAISE(ABORT, 'approved assumption evidence immutable');
+END
+"""
+
+ASSUMPTION_REVIEW_RESOLUTION_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_assumption_review_resolution_immutable
+BEFORE UPDATE ON assumption_review
+WHEN OLD.status != 'OPEN' OR NOT (
+    NEW.status IN ('RESOLVED','DISMISSED')
+    AND NEW.resolved_at IS NOT NULL
+    AND NEW.resolved_by IS NOT NULL
+    AND (
+        (NEW.status = 'DISMISSED' AND NEW.resolution = 'DISMISSED'
+            AND NEW.successor_assumption_id IS NULL)
+        OR (NEW.status = 'RESOLVED'
+            AND NEW.resolution IN ('RECERTIFIED','SUPERSEDED')
+            AND NEW.successor_assumption_id IS NOT NULL)
+    )
+    AND NEW.assumption_id IS OLD.assumption_id
+    AND NEW.review_key IS OLD.review_key
+    AND NEW.review_type IS OLD.review_type
+    AND NEW.reason IS OLD.reason
+    AND NEW.evidence_json IS OLD.evidence_json
+    AND NEW.owner IS OLD.owner
+    AND NEW.opened_by IS OLD.opened_by
+    AND NEW.opened_at IS OLD.opened_at
+)
+BEGIN
+    SELECT RAISE(ABORT, 'assumption review resolution immutable');
+END
+"""
+
+ASSUMPTION_REVIEW_DELETE_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_assumption_review_delete_immutable
+BEFORE DELETE ON assumption_review
+BEGIN
+    SELECT RAISE(ABORT, 'assumption reviews cannot be deleted');
+END
+"""
+
+
+def _guard_approved_update(target, status_field: str) -> None:
+    state = sa_inspect(target)
+    status_attr = state.attrs[status_field]
+    was_approved = (getattr(target, status_field) == "APPROVED" or
+                    "APPROVED" in status_attr.history.deleted)
+    if not was_approved:
+        return
+    changed = {attr.key for attr in state.attrs if attr.history.has_changes()}
+    allowed = {status_field, "effective_to"}
+    if not (changed <= allowed and getattr(target, status_field) == "SUPERSEDED"
+            and getattr(target, "effective_to", None) is not None):
+        raise ApprovedRecordImmutable("Approved records must be superseded, not edited")
+
+
+@event.listens_for(ModelAssumption, "before_update")
+def _protect_approved_assumption(_mapper, _connection, target) -> None:
+    _guard_approved_update(target, "approval_status")
+
+
+@event.listens_for(ResourceCapacityVersion, "before_update")
+def _protect_approved_capacity(_mapper, _connection, target) -> None:
+    _guard_approved_update(target, "status")
+
+
+@event.listens_for(AssumptionReview, "before_update")
+def _protect_resolved_review(_mapper, _connection, target) -> None:
+    state = sa_inspect(target)
+    if target.status == "OPEN" and "OPEN" not in state.attrs.status.history.deleted:
+        return
+    if "OPEN" not in state.attrs.status.history.deleted:
+        raise ApprovedRecordImmutable("Resolved assumption reviews are immutable")
+    changed = {attr.key for attr in state.attrs if attr.history.has_changes()}
+    allowed = {
+        "status", "resolved_at", "resolved_by", "resolution",
+        "successor_assumption_id", "resolution_notes",
+    }
+    if not changed <= allowed or target.status not in {"RESOLVED", "DISMISSED"}:
+        raise ApprovedRecordImmutable("Assumption reviews may only be resolved once")
+
+
+@event.listens_for(AssumptionReview, "before_delete")
+def _protect_review_delete(_mapper, _connection, _target) -> None:
+    raise ApprovedRecordImmutable("Assumption reviews cannot be deleted")
+
+
+APPROVED_ASSUMPTION_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_model_assumption_approved_immutable
+BEFORE UPDATE ON model_assumption
+WHEN OLD.approval_status = 'APPROVED' AND NOT (
+    NEW.approval_status = 'SUPERSEDED' AND NEW.effective_to IS NOT NULL
+    AND NEW.subject_type IS OLD.subject_type AND NEW.subject_key IS OLD.subject_key
+    AND NEW.parameter IS OLD.parameter AND NEW.value_json IS OLD.value_json
+    AND NEW.unit IS OLD.unit AND NEW.basis IS OLD.basis
+    AND NEW.commitment_grade IS OLD.commitment_grade
+    AND NEW.evidence_source IS OLD.evidence_source
+    AND NEW.evidence_start IS OLD.evidence_start AND NEW.evidence_end IS OLD.evidence_end
+    AND NEW.calculation_method IS OLD.calculation_method
+    AND NEW.evidence_count IS OLD.evidence_count
+    AND NEW.minimum_evidence_count IS OLD.minimum_evidence_count
+    AND NEW.owner IS OLD.owner AND NEW.approver IS OLD.approver
+    AND NEW.approved_at IS OLD.approved_at AND NEW.review_due_at IS OLD.review_due_at
+    AND NEW.effective_from IS OLD.effective_from
+    AND NEW.supersedes_id IS OLD.supersedes_id AND NEW.created_at IS OLD.created_at
+)
+BEGIN
+    SELECT RAISE(ABORT, 'approved assumption immutable');
+END
+"""
+
+APPROVED_CAPACITY_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_resource_capacity_approved_immutable
+BEFORE UPDATE ON resource_capacity_version
+WHEN OLD.status = 'APPROVED' AND NOT (
+    NEW.status = 'SUPERSEDED' AND NEW.effective_to IS NOT NULL
+    AND NEW.pool_id IS OLD.pool_id AND NEW.effective_from IS OLD.effective_from
+    AND NEW.capacity_scope IS OLD.capacity_scope
+    AND NEW.capacity_schedule_json IS OLD.capacity_schedule_json
+    AND NEW.slot_count IS OLD.slot_count
+    AND NEW.calendar_policy_json IS OLD.calendar_policy_json
+    AND NEW.external_policy_json IS OLD.external_policy_json
+    AND NEW.assumption_id IS OLD.assumption_id AND NEW.created_at IS OLD.created_at
+)
+BEGIN
+    SELECT RAISE(ABORT, 'approved capacity immutable');
+END
+"""
+
+event.listen(ModelAssumption.__table__, "after_create", DDL(APPROVED_ASSUMPTION_TRIGGER))
+event.listen(ModelAssumption.__table__, "after_create",
+             DDL(APPROVED_ASSUMPTION_EVIDENCE_TRIGGER))
+event.listen(ResourceCapacityVersion.__table__, "after_create", DDL(APPROVED_CAPACITY_TRIGGER))
+event.listen(AssumptionReview.__table__, "after_create",
+             DDL(ASSUMPTION_REVIEW_RESOLUTION_TRIGGER))
+event.listen(AssumptionReview.__table__, "after_create",
+             DDL(ASSUMPTION_REVIEW_DELETE_TRIGGER))
+
+
+MODEL_EPOCH_TRANSITION_VALIDATE_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_model_epoch_transition_validate
+BEFORE INSERT ON model_epoch_transition
+WHEN
+    NOT EXISTS (SELECT 1 FROM model_epoch WHERE id = NEW.epoch_id)
+    OR NEW.sequence != COALESCE((
+        SELECT MAX(sequence) + 1 FROM model_epoch_transition WHERE epoch_id = NEW.epoch_id
+    ), 1)
+    OR (
+        NEW.sequence = 1 AND NOT (
+            NEW.from_state IS NULL AND NEW.to_state = 'DRAFT'
+            AND NEW.authority_role = 'DATA_ADMIN'
+        )
+    )
+    OR (
+        NEW.sequence > 1 AND NOT (
+            NEW.from_state = (
+                SELECT to_state FROM model_epoch_transition
+                WHERE epoch_id = NEW.epoch_id ORDER BY sequence DESC LIMIT 1
+            )
+            AND (
+                (NEW.from_state = 'DRAFT' AND NEW.to_state = 'OBSERVE'
+                    AND NEW.authority_role = 'DATA_ADMIN')
+                OR (NEW.from_state = 'DRAFT' AND NEW.to_state = 'ARCHIVED'
+                    AND NEW.authority_role = 'DATA_ADMIN')
+                OR (NEW.from_state = 'OBSERVE' AND NEW.to_state = 'PROVISIONAL'
+                    AND NEW.authority_role = 'IE_FLOOR')
+                OR (NEW.from_state = 'OBSERVE' AND NEW.to_state = 'PAUSED'
+                    AND NEW.authority_role = 'IE_FLOOR')
+                OR (NEW.from_state = 'OBSERVE' AND NEW.to_state = 'ARCHIVED'
+                    AND NEW.authority_role = 'DATA_ADMIN')
+                OR (NEW.from_state = 'PROVISIONAL' AND NEW.to_state = 'COMMITMENT_READY'
+                    AND NEW.authority_role = 'PROGRAM_SCHEDULING')
+                OR (NEW.from_state = 'PROVISIONAL' AND NEW.to_state = 'OBSERVE'
+                    AND NEW.authority_role = 'IE_FLOOR')
+                OR (NEW.from_state = 'PROVISIONAL' AND NEW.to_state = 'PAUSED'
+                    AND NEW.authority_role = 'IE_FLOOR')
+                OR (NEW.from_state = 'COMMITMENT_READY' AND NEW.to_state = 'PAUSED'
+                    AND NEW.authority_role = 'PROGRAM_SCHEDULING')
+                OR (NEW.from_state = 'COMMITMENT_READY' AND NEW.to_state = 'DEPRECATED'
+                    AND NEW.authority_role = 'PROGRAM_SCHEDULING')
+                OR (NEW.from_state = 'PAUSED' AND NEW.to_state = 'OBSERVE'
+                    AND NEW.authority_role = 'IE_FLOOR')
+                OR (NEW.from_state = 'PAUSED' AND NEW.to_state = 'ARCHIVED'
+                    AND NEW.authority_role = 'DATA_ADMIN')
+            )
+        )
+    )
+BEGIN
+    SELECT RAISE(ABORT, 'invalid model epoch transition');
+END
+"""
+
+MODEL_EPOCH_ACTIVATION_VALIDATE_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_program_epoch_activation_validate
+BEFORE INSERT ON program_epoch_activation
+WHEN
+    NEW.authority_role != 'PROGRAM_SCHEDULING'
+    OR NOT EXISTS (
+        SELECT 1 FROM model_epoch
+        WHERE id = NEW.epoch_id AND program = NEW.program
+    )
+    OR NOT EXISTS (
+        SELECT 1 FROM model_epoch_transition
+        WHERE id = NEW.transition_id AND epoch_id = NEW.epoch_id
+            AND to_state = 'COMMITMENT_READY'
+    )
+    OR NEW.transition_id != (
+        SELECT id FROM model_epoch_transition
+        WHERE epoch_id = NEW.epoch_id ORDER BY sequence DESC LIMIT 1
+    )
+BEGIN
+    SELECT RAISE(ABORT, 'invalid model epoch activation');
+END
+"""
+
+
+def _append_only_update(_mapper, _connection, _target) -> None:
+    raise ImmutableEpochRecord("Model epoch governance records are append-only")
+
+
+def _append_only_delete(_mapper, _connection, _target) -> None:
+    raise ImmutableEpochRecord("Model epoch governance records cannot be deleted")
+
+
+_EPOCH_RECORDS = (
+    ModelEpoch,
+    ModelEpochTransition,
+    ProgramEpochActivation,
+    ExternalLoadSnapshot,
+    ExternalLoadRow,
+    SimulationSnapshot,
+    SimulationSnapshotEpoch,
+    ForecastConstraintEvent,
+)
+for _epoch_record in _EPOCH_RECORDS:
+    event.listen(_epoch_record, "before_update", _append_only_update)
+    event.listen(_epoch_record, "before_delete", _append_only_delete)
+
+
+def _append_only_triggers(table_name: str) -> tuple[str, str]:
+    return (
+        f"""
+        CREATE TRIGGER IF NOT EXISTS trg_{table_name}_append_only_update
+        BEFORE UPDATE ON {table_name}
+        BEGIN
+            SELECT RAISE(ABORT, 'append-only epoch record');
+        END
+        """,
+        f"""
+        CREATE TRIGGER IF NOT EXISTS trg_{table_name}_append_only_delete
+        BEFORE DELETE ON {table_name}
+        BEGIN
+            SELECT RAISE(ABORT, 'append-only epoch record');
+        END
+        """,
+    )
+
+
+def _append_only_insert_guard(table_name: str, identity_predicate: str) -> str:
+    return f"""
+    CREATE TRIGGER IF NOT EXISTS trg_{table_name}_append_only_insert
+    BEFORE INSERT ON {table_name}
+    WHEN EXISTS (SELECT 1 FROM {table_name} WHERE {identity_predicate})
+    BEGIN
+        SELECT RAISE(ABORT, 'append-only epoch record');
+    END
+    """
+
+
+event.listen(ModelEpochTransition.__table__, "after_create",
+             DDL(MODEL_EPOCH_TRANSITION_VALIDATE_TRIGGER))
+event.listen(ProgramEpochActivation.__table__, "after_create",
+             DDL(MODEL_EPOCH_ACTIVATION_VALIDATE_TRIGGER))
+for _epoch_table in (
+    ModelEpoch.__table__,
+    ModelEpochTransition.__table__,
+    ProgramEpochActivation.__table__,
+    ExternalLoadSnapshot.__table__,
+    ExternalLoadRow.__table__,
+    SimulationSnapshot.__table__,
+    SimulationSnapshotEpoch.__table__,
+    ForecastConstraintEvent.__table__,
+):
+    for _trigger_sql in _append_only_triggers(_epoch_table.name):
+        event.listen(_epoch_table, "after_create", DDL(_trigger_sql))
+
+_EPOCH_INSERT_IDENTITIES = {
+    ModelEpoch.__table__: (
+        "id = NEW.id OR epoch_key = NEW.epoch_key "
+        "OR (program = NEW.program AND definition_hash = NEW.definition_hash)"),
+    ModelEpochTransition.__table__: (
+        "id = NEW.id OR (epoch_id = NEW.epoch_id AND sequence = NEW.sequence)"),
+    ProgramEpochActivation.__table__: "id = NEW.id",
+    ExternalLoadSnapshot.__table__: "id = NEW.id OR content_hash = NEW.content_hash",
+    ExternalLoadRow.__table__: "id = NEW.id",
+    SimulationSnapshot.__table__: "id = NEW.id OR content_hash = NEW.content_hash",
+    SimulationSnapshotEpoch.__table__: (
+        "simulation_snapshot_id = NEW.simulation_snapshot_id AND program = NEW.program"),
+    ForecastConstraintEvent.__table__: "id = NEW.id",
+}
+for _epoch_table, _identity_predicate in _EPOCH_INSERT_IDENTITIES.items():
+    event.listen(
+        _epoch_table, "after_create",
+        DDL(_append_only_insert_guard(_epoch_table.name, _identity_predicate)),
+    )
 
 
 class OAuthToken(Base):

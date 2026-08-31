@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% set active_page = 'resources' %}
+{% block cmdtitle %}<h1>Resource Registry<span class="sub">capacity &amp; assumption provenance</span></h1>{% endblock %}
+{% block cmdright %}<span class="asof">legacy-equivalent shadow registry</span>{% endblock %}
+{% block head %}
+<style>
+.rsummary{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));border:1px solid var(--border);border-radius:8px;background:var(--panel);margin-bottom:14px;}.rsummary div{padding:12px;border-right:1px solid var(--border2);}.rsummary div:last-child{border-right:none;}.rsummary b{display:block;font-size:18px;}.rsummary span{font-size:10px;color:var(--faint);}
+.rtable{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border);font-size:12px;}.rtable th{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);padding:7px 8px;text-align:left;background:var(--panel2);border-bottom:1px solid var(--border);}.rtable td{padding:7px 8px;border-bottom:1px solid var(--border2);color:var(--muted);}.rtable a{font-weight:600;color:var(--text);}.rtable a:hover{color:var(--brand);}.state{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 5px;border-radius:4px;}.state.complete{background:var(--early-bg);color:var(--early-tx);}.state.provisional{background:color-mix(in srgb,var(--wip-bg) 18%,transparent);color:var(--wip-tx);}.state.missing{background:var(--late-bg);color:var(--late-tx);}.basis{font-size:10px;text-transform:capitalize;}.empty{padding:24px;border:1px dashed var(--border);color:var(--faint);background:var(--panel);}
+@media(max-width:800px){.rsummary{grid-template-columns:1fr 1fr;}.rtable-wrap{overflow:auto}.rtable{min-width:850px;}}
+</style>
+{% endblock %}
+{% block content %}
+{% set complete = resources|selectattr('readiness','equalto','COMPLETE')|list|length %}
+{% set provisional = resources|selectattr('readiness','equalto','PROVISIONAL')|list|length %}
+{% set missing = resources|selectattr('readiness','equalto','MISSING')|list|length %}
+{% set review_count = namespace(value=0) %}{% for r in resources %}{% set review_count.value = review_count.value + r.open_reviews|length %}{% endfor %}
+<div class="rsummary"><div><b class="num">{{ resources|length }}</b><span>physical pools</span></div><div><b class="num">{{ complete }}</b><span>commitment ready</span></div><div><b class="num">{{ provisional }}</b><span>provisional</span></div><div><b class="num">{{ review_count.value }}</b><span>open reviews</span></div></div>
+{% if resources %}<div class="rtable-wrap"><table class="rtable"><thead><tr><th>Resource</th><th>Type</th><th>WC</th><th>Capacity</th><th>Consumers</th><th>Basis</th><th>Owner</th><th>Review</th><th>Readiness</th></tr></thead><tbody>
+{% for r in resources %}<tr><td><a href="/admin/resources/{{ r.code|urlencode }}">{{ r.name }}</a><div class="num" style="font-size:9px;color:var(--faint)">{{ r.code }}</div></td><td>{{ r.resource_type|replace('_',' ')|title }}</td><td class="num">{{ r.work_center_no or '-' }}</td><td class="num">{% if r.capacity_schedule %}{% for shift,value in r.capacity_schedule.items() %}S{{ shift }} {{ value }}h{% if not loop.last %} / {% endif %}{% endfor %}{% elif r.slot_count %}{{ r.slot_count }} slots{% else %}-{% endif %}</td><td>{{ r.consumers|join(', ') or '-' }}</td><td class="basis">{{ (r.basis or 'missing')|replace('_',' ')|capitalize }}</td><td>{{ r.owner or '-' }}</td><td class="num">{% if r.open_reviews %}<a href="/admin/resources/{{ r.code|urlencode }}">{{ r.open_reviews|length }} open</a>{% else %}{{ r.review_due_at or '-' }}{% endif %}</td><td><span class="state {{ r.readiness|lower }}">{{ r.readiness }}</span></td></tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="empty">No resource pools are registered yet. <button class="btn" hx-post="/admin/resources/seed-legacy" hx-swap="none" hx-on::after-request="location.reload()">Seed legacy resources</button></div>{% endif %}
+{% endblock %}

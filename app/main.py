@@ -1,4 +1,4 @@
-"""RTG Forecast App — FastAPI entry point."""
+"""TwinWorks FastAPI entry point."""
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
@@ -21,6 +21,8 @@ async def lifespan(app: FastAPI):
     from app.database import async_session
     from ml.model.loader import refresh_registry
     async with async_session() as db:
+        from app.services.model_epoch_service import assert_governance_integrity
+        await assert_governance_integrity(db)
         try:
             await refresh_registry(db)
         except Exception:
@@ -42,7 +44,11 @@ from app.routers.dashboard import router as dashboard_router
 from app.routers.admin import router as admin_router
 from app.routers.levers import router as levers_router
 from app.routers.auth import router as auth_router
+from app.routers.factory_map import router as factory_map_router
+from app.routers.resources import router as resources_router
 app.include_router(dashboard_router)
 app.include_router(admin_router)
 app.include_router(levers_router)
 app.include_router(auth_router)
+app.include_router(factory_map_router)
+app.include_router(resources_router)

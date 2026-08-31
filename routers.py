@@ -288,6 +288,22 @@ AEGIS_CURES = [
     (300, "GATE — Topcoat 24hr cure (QI)",       24,  "topcoat cure before finish insp/paint-adhesion (est per elevator topcoat gate)"),
 ]
 
+# Discrete cure-station capacity. Ovens remain unconstrained: the floor-confirmed
+# bottlenecks are two Plant 2 paint booths and one conservative Plant 3 electrical-seal station.
+# The topcoat tape-test is deliberately absent because it runs in parallel after the unit leaves
+# the booth; it gates final inspection but does not reserve a booth for 24 hours.
+CURE_STATION_CAPACITIES = {
+    "P2_PAINT_BOOTH": 2,
+    "P3_ELECTRICAL_SEAL": 1,
+}
+CURE_STATION_RULES = {
+    ("ELEV", 3800, next(label for after_op, label, *_ in ELEVATOR_CURES
+                         if after_op == 3800 and "dry-to-handle" in label)): "P2_PAINT_BOOTH",
+    ("ELEV", 4010, next(label for after_op, label, *_ in ELEVATOR_CURES
+                         if after_op == 4010 and "Cor Ban" in label)): "P2_PAINT_BOOTH",
+    ("RAD", 775, next(label for after_op, label, *_ in RADOME_CURES
+                       if after_op == 775 and "Electrical Sealing" in label)): "P3_ELECTRICAL_SEAL",
+}
 # DPAS-rated programs take shared-capacity priority when behind contract.
 DPAS_PROGRAMS = {"AEGIS"}
 # Work centers SHARED across programs (must be pooled, not private budgets):

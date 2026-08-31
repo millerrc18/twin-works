@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% set active_page = 'factory-map' %}
+
+{% block cmdtitle %}<h1>Marion Virtual Factory<span class="sub">spatial capacity signal</span></h1>{% endblock %}
+{% block cmdright %}<span class="asof">{{ model.generated_at.strftime('%b %d, %H:%M') }} &middot; {{ data_source }}</span>{% endblock %}
+
+{% block subbar %}
+<div class="factory-subbar">
+  <span class="factory-subbar-full"><b>Decision support</b> &middot; WIP position, modeled schedule, and configured capacity</span>
+  <span class="factory-subbar-short"><b>Decision support</b> &middot; modeled schedule + WIP</span>
+  <span class="factory-subbar-note">Map interactions do not alter the forecast.</span>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+.factory-subbar{display:flex;justify-content:space-between;gap:16px;padding:8px 22px;border-bottom:1px solid var(--border2);background:var(--panel2);font-size:11px;color:var(--muted);}
+.factory-subbar b{color:var(--text);font-weight:600;}
+.factory-subbar-short{display:none;}
+.factory-heading-short{display:none;}
+.factory-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap;}.factory-toolbar>div{min-width:0;}
+.factory-eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--faint);margin-bottom:5px;}
+.factory-heading{font-size:18px;font-weight:650;margin:0;letter-spacing:0;overflow-wrap:anywhere;}
+.program-filter{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--faint);}
+.program-filter select{padding:6px 28px 6px 8px;font-size:12px;min-width:175px;}
+.floor-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.floor-tab{font-size:12px;color:var(--muted);border:1px solid var(--border);padding:6px 10px;border-radius:5px;background:var(--panel);}
+.floor-tab:hover{border-color:var(--brand);color:var(--text);}.floor-tab.on{background:var(--text);border-color:var(--text);color:var(--panel);}
+.factory-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(315px,.72fr);gap:14px;align-items:start;}
+.factory-stage{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;min-width:0;}
+.stage-topline{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 13px;border-bottom:1px solid var(--border);background:var(--panel2);}
+.stage-title{font-size:12px;font-weight:650;}.stage-meta{font-size:10px;color:var(--faint);white-space:nowrap;}
+.map-viewport{overflow:auto;background:#edf1f4;}
+.factory-map{position:relative;aspect-ratio:1224 / 792;min-width:700px;background:#f6f7f8;isolation:isolate;}
+.factory-map-image{display:block;width:100%;height:100%;object-fit:contain;position:absolute;inset:0;z-index:0;}
+.factory-map::after{content:"";position:absolute;inset:0;border:10px solid rgba(40,56,68,.11);pointer-events:none;z-index:1;}
+.map-node{position:absolute;z-index:2;transform:translate(-50%,-50%);width:22px;height:22px;border:2px solid #fff;border-radius:50%;padding:0;cursor:pointer;background:var(--node);box-shadow:0 0 0 1px rgba(17,24,39,.22),0 2px 5px rgba(17,24,39,.28);transition:transform .15s ease,box-shadow .15s ease;}
+.map-node:hover,.map-node:focus-visible,.map-node.selected{transform:translate(-50%,-50%) scale(1.25);box-shadow:0 0 0 4px color-mix(in srgb,var(--node) 25%,transparent),0 2px 7px rgba(17,24,39,.35);}
+.map-node::after{content:attr(data-label);position:absolute;left:50%;top:calc(100% + 7px);transform:translateX(-50%);white-space:nowrap;opacity:0;pointer-events:none;font-size:10px;font-weight:650;letter-spacing:0;background:rgba(17,24,39,.88);color:#fff;padding:3px 5px;border-radius:3px;transition:opacity .12s ease;}
+.map-node:hover::after,.map-node:focus-visible::after,.map-node.selected::after,.map-node.critical::after,.map-node.warning::after{opacity:1;}
+.map-node.critical{--node:#c43b3b;}.map-node.warning{--node:#c7811c;}.map-node.working{--node:#18768a;}.map-node.neutral{--node:#64748b;}.map-node.quiet{--node:#aeb7c1;opacity:.55;}
+.stage-footer{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);}.stage-stat{padding:10px 12px;border-right:1px solid var(--border2);}.stage-stat:last-child{border-right:none;}.stage-stat b{display:block;font-size:14px;color:var(--text);}.stage-stat span{font-size:10px;color:var(--faint);}
+.factory-inspector{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;min-height:530px;}.inspector-head{padding:15px 15px 12px;border-bottom:1px solid var(--border2);background:var(--panel2);}.inspector-kicker{font-size:9px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:var(--faint);}.inspector-titleline{display:flex;justify-content:space-between;gap:8px;align-items:start;margin-top:4px;}.inspector-titleline h2{font-size:16px;margin:0;font-weight:650;}.inspector-wc{margin:3px 0 0;color:var(--faint);font-size:11px;}.inspector-state{font-size:9px;text-transform:uppercase;letter-spacing:.08em;padding:3px 5px;border-radius:3px;font-weight:700;white-space:nowrap;}.inspector-state.critical{background:var(--late-bg);color:var(--late-tx);}.inspector-state.warning{background:color-mix(in srgb,var(--wip-bg) 20%,transparent);color:var(--wip-tx);}.inspector-state.working{background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);}.inspector-state.neutral,.inspector-state.quiet{background:var(--panel);border:1px solid var(--border);color:var(--faint);}
+.inspector-note{margin:12px 14px 0;padding:8px 9px;border-left:3px solid var(--faint);background:var(--panel2);font-size:11px;color:var(--muted);}.inspector-facts{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:12px 14px;border:1px solid var(--border2);}.inspector-facts div{padding:7px 8px;border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);min-width:0;}.inspector-facts div:nth-child(2n){border-right:none;}.inspector-facts div:nth-last-child(-n+2){border-bottom:none;}.inspector-facts dt{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);}.inspector-facts dd{margin:2px 0 0;font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.signal-label{display:flex;justify-content:space-between;margin:15px 14px 7px;font-size:10px;font-weight:650;color:var(--text);}.signal-label span{font-weight:500;color:var(--faint);}.capacity-band{display:grid;grid-template-columns:repeat(3,1fr);margin:0 14px;border-top:2px solid var(--text);border-bottom:1px solid var(--border);}.capacity-band div{padding:8px 5px 9px;border-right:1px solid var(--border2);}.capacity-band div:last-child{border-right:none;}.capacity-band b{font-size:14px;display:block;color:var(--text);}.capacity-band span{font-size:9px;color:var(--faint);line-height:1.25;display:block;margin-top:2px;}.risk-strip{display:flex;gap:8px;flex-wrap:wrap;margin:10px 14px;font-size:10px;color:var(--muted);}.risk-strip span{border-left:2px solid var(--border);padding-left:5px;}.risk-strip .risk-hot{border-color:var(--alert);color:var(--late-tx);}.risk-strip .risk-warn{border-color:var(--wip-bg);color:var(--wip-tx);}.inspector-section-title{padding:10px 14px 7px;border-top:1px solid var(--border2);font-size:11px;font-weight:650;color:var(--text);}.inspector-section-title span{color:var(--faint);font-weight:500;}.unit-list{max-height:240px;overflow:auto;border-top:1px solid var(--border2);}.unit-row{display:flex;justify-content:space-between;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border2);}.unit-row:hover{background:var(--panel2);}.unit-id{font-size:12px;font-weight:650;color:var(--text);}.unit-id:hover{color:var(--brand);}.unit-program{font-size:9px;color:var(--faint);margin-left:4px;}.unit-operation{font-size:10px;color:var(--muted);margin-top:2px;max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.unit-stalled{background:color-mix(in srgb,var(--alert) 6%,transparent);}.risk-chip{font-size:10px;padding:2px 5px;border-radius:3px;white-space:nowrap;}.risk-chip.critical{background:var(--late-bg);color:var(--late-tx);}.risk-chip.warning{background:color-mix(in srgb,var(--wip-bg) 20%,transparent);color:var(--wip-tx);}.risk-chip.ok{color:var(--early-tx);border:1px solid var(--early-tx);}.risk-chip.quiet{color:var(--faint);border:1px solid var(--border);}.empty-units{padding:14px;color:var(--faint);font-size:11px;}.lever-link{display:block;margin:12px 14px;color:var(--brand);font-size:11px;font-weight:600;}.lever-link:hover{text-decoration:underline;}.source-note{margin:0 14px 14px;color:var(--faint);font-size:10px;line-height:1.35;}
+.resource-rail{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}.resource-panel{border-top:1px solid var(--border);padding-top:10px;}.resource-panel h3{margin:0 0 7px;font-size:11px;font-weight:650;}.resource-panel p{font-size:10px;color:var(--faint);margin:0 0 7px;}.resource-list{display:flex;gap:6px;flex-wrap:wrap;}.resource-button{border:1px solid var(--border);background:var(--panel);color:var(--text);font-size:11px;padding:5px 7px;border-radius:4px;cursor:pointer;}.resource-button:hover{border-color:var(--brand);color:var(--brand);}.resource-button .state-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--dot);margin-right:4px;}.resource-button.critical{--dot:#c43b3b;}.resource-button.warning{--dot:#c7811c;}.resource-button.working{--dot:#18768a;}.resource-button.neutral,.resource-button.quiet{--dot:#aeb7c1;}
+@media(max-width:1100px){.factory-grid{grid-template-columns:1fr;}.factory-inspector{min-height:0;}.unit-list{max-height:180px;}}@media(max-width:700px){.factory-subbar{display:none;}.content{padding:14px;}.factory-toolbar{display:block;}.program-filter{margin-top:10px;}.stage-footer{grid-template-columns:repeat(2,1fr);}.stage-stat:nth-child(2){border-right:none;}.stage-stat:nth-child(-n+2){border-bottom:1px solid var(--border2);}.resource-rail{grid-template-columns:1fr;}.factory-map{min-width:680px;}}
+@media(max-width:700px){
+  html,body{width:100%;max-width:100vw;overflow-x:hidden;}
+  .layout{display:block;width:100%;max-width:100vw;height:auto;overflow:visible;}
+  .side{width:100%;border-right:none;border-bottom:1px solid var(--border);display:block;}
+  .brand{height:50px;padding:0 14px;}
+  .nav{padding:6px 10px;display:grid;grid-template-columns:repeat(3,max-content);gap:2px;overflow:visible;}
+  .nlabel{display:none;}
+  .nlink{padding:6px 8px;margin:0;font-size:11px;}
+  .sfoot{padding:8px 12px;border-top:1px solid var(--border2);}
+  .main,.content,.factory-grid,.factory-stage,.factory-inspector{display:block;width:100%;min-width:0;max-width:100vw;overflow-x:hidden;}
+  .map-viewport{overflow-x:auto;overflow-y:hidden;}
+  .cmd{min-height:58px;padding:8px 14px;align-items:flex-start;}
+  .cmd h1{font-size:15px;line-height:1.25;}
+  .cmd .sub{display:block;margin:2px 0 0;font-size:10px;}
+  .cmd .right{display:none;}
+  .stage-meta{display:none;}
+  .factory-subbar-full,.factory-subbar-note,.factory-heading-long{display:none!important;}
+  .factory-subbar-short,.factory-heading-short{display:block;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="factory-toolbar">
+  <div><div class="factory-eyebrow">Marion, site 59</div><p class="factory-heading factory-heading-long">Spatial view of capacity pressure and WIP flow</p><p class="factory-heading factory-heading-short">Capacity and WIP flow</p></div>
+  <form class="program-filter" method="get" action="/factory-map"><input type="hidden" name="floor" value="{{ model.selected_floor }}"><label for="map-program">Program</label><select id="map-program" name="program" onchange="this.form.submit()"><option value="all" {{ 'selected' if model.program=='all' else '' }}>All active programs</option>{% for code, name in model.programs %}<option value="{{ code }}" {{ 'selected' if model.program==code else '' }}>{{ name }}</option>{% endfor %}</select></form>
+</div>
+
+<nav class="floor-tabs" aria-label="Factory floors">{% for floor in model.floors %}<a class="floor-tab {{ 'on' if floor.id==model.selected_floor else '' }}" href="/factory-map?program={{ model.program }}&floor={{ floor.id }}">{{ floor.label }}</a>{% endfor %}</nav>
+
+<div class="factory-grid">
+  <section class="factory-stage" aria-label="{{ selected_floor.label }} interactive floor map">
+    <div class="stage-topline"><span class="stage-title">{{ selected_floor.label }}</span><span class="stage-meta">current work-center signal layer</span></div>
+    <div class="map-viewport"><div class="factory-map">
+      <img class="factory-map-image" src="{{ selected_floor.asset }}" alt="Annotated {{ selected_floor.label }} manufacturing floor plan">
+      {% for marker in selected_floor.markers %}
+      <button type="button" class="map-node {{ marker.telemetry.status }} {{ 'selected' if marker.wc==initial_resource.wc else '' }}" data-label="{{ marker.label }}" data-wc="{{ marker.wc }}" aria-label="{{ marker.label }}: {{ marker.telemetry.status }}" style="left:{{ 100 * marker.x / selected_floor.view_box[2] }}%;top:{{ 100 * marker.y / selected_floor.view_box[3] }}%;" hx-get="/factory-map/wc/{{ marker.wc|urlencode }}?program={{ model.program }}" hx-target="#factory-inspector" hx-swap="outerHTML"></button>
+      {% endfor %}
+    </div></div>
+    <div class="stage-footer"><div class="stage-stat"><b class="num">{{ selected_floor.markers|selectattr('telemetry.status','equalto','critical')|list|length }}</b><span>critical signals</span></div><div class="stage-stat"><b class="num">{{ selected_floor.markers|map(attribute='telemetry.active_unit_count')|sum }}</b><span>active WIP at mapped WCs</span></div><div class="stage-stat"><b class="num">{{ selected_floor.markers|map(attribute='telemetry.scheduled_labor_hours_7d')|sum|round(1) }}</b><span>modeled h in next 7d</span></div><div class="stage-stat"><b>IFS + model</b><span>traceable source layer</span></div></div>
+  </section>
+
+  {% set resource = initial_resource %}
+  {% include "partials/factory_map_inspector.html" with context %}
+</div>
+
+<div class="resource-rail">
+  <section class="resource-panel"><h3>Mobile resources</h3><p>Shown without a point location because the resource moves to the work.</p><div class="resource-list">{% for resource in model.mobile_resources %}<button class="resource-button {{ resource.telemetry.status }}" type="button" hx-get="/factory-map/wc/{{ resource.wc|urlencode }}?program={{ model.program }}" hx-target="#factory-inspector" hx-swap="outerHTML"><span class="state-dot"></span>{{ resource.label }}</button>{% endfor %}</div></section>
+  <section class="resource-panel"><h3>Unplaced or deferred</h3><p>Cataloged for routing context; coordinate placement is intentionally withheld.</p><div class="resource-list">{% for resource in model.unplaced_resources %}<button class="resource-button {{ resource.telemetry.status }}" type="button" hx-get="/factory-map/wc/{{ resource.wc|urlencode }}?program={{ model.program }}" hx-target="#factory-inspector" hx-swap="outerHTML"><span class="state-dot"></span>{{ resource.label }}</button>{% endfor %}</div></section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('click', event => {
+  const node = event.target.closest('.map-node');
+  if (!node) return;
+  document.querySelectorAll('.map-node.selected').forEach(item => item.classList.remove('selected'));
+  node.classList.add('selected');
+});
+</script>
+{% endblock %}

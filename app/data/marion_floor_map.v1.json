@@ -1,0 +1,316 @@
+{
+  "schema_version": 1,
+  "facility": "Marion",
+  "site": "59",
+  "floors": [
+    {
+      "id": "VAMA02-F01",
+      "building": "P2",
+      "label": "VAMA02 / Plant 2 / Floor 01",
+      "asset": "/static/floorplans/marion-vama02-floor01.png",
+      "view_box": [
+        0,
+        0,
+        1224,
+        792
+      ]
+    },
+    {
+      "id": "VAMA03-F01",
+      "building": "P3",
+      "label": "VAMA03 / Plant 3 / Floor 01",
+      "asset": "/static/floorplans/marion-vama03-floor01.png",
+      "view_box": [
+        0,
+        0,
+        1224,
+        792
+      ]
+    }
+  ],
+  "placements": [
+    {
+      "wc": "32684",
+      "floor_id": "VAMA02-F01",
+      "zone": "assembly",
+      "x": 506,
+      "y": 108,
+      "label": "P2 ASSY G500",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "32678",
+      "floor_id": "VAMA02-F01",
+      "zone": "autoclave",
+      "x": 949,
+      "y": 204,
+      "label": "P2 AUTO",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "42676",
+      "floor_id": "VAMA02-F01",
+      "zone": "assembly",
+      "x": 777,
+      "y": 232,
+      "label": "P2 ASSY AEGIS",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "32687",
+      "floor_id": "VAMA02-F01",
+      "zone": "inspection",
+      "x": 644,
+      "y": 218,
+      "label": "P2 INSP",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "2 NDI",
+      "floor_id": "VAMA02-F01",
+      "zone": "inspection",
+      "x": 679,
+      "y": 180,
+      "label": "P2 NDI",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "244",
+      "floor_id": "VAMA02-F01",
+      "zone": "lamination",
+      "x": 757,
+      "y": 325,
+      "label": "P2 LAM AEGIS",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "32677",
+      "floor_id": "VAMA02-F01",
+      "zone": "lamination",
+      "x": 668,
+      "y": 324,
+      "label": "P2 LAM G500",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "221",
+      "floor_id": "VAMA02-F01",
+      "zone": "paint",
+      "x": 521,
+      "y": 328,
+      "label": "P2 PAINT",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "shared_resource_group": "p2-paint",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "313",
+      "floor_id": "VAMA02-F01",
+      "zone": "oven",
+      "x": 579,
+      "y": 281,
+      "label": "P2 OVEN",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "P2PCK",
+      "floor_id": "VAMA02-F01",
+      "zone": "pack",
+      "x": 579,
+      "y": 306,
+      "label": "P2 PACK",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "248",
+      "floor_id": "VAMA02-F01",
+      "zone": "tooling",
+      "x": 367,
+      "y": 333,
+      "label": "P2 TOOL",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 3"
+    },
+    {
+      "wc": "235",
+      "floor_id": "VAMA03-F01",
+      "zone": "pack",
+      "x": 269,
+      "y": 190,
+      "label": "P3 PACK",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    },
+    {
+      "wc": "236",
+      "floor_id": "VAMA03-F01",
+      "zone": "paint",
+      "x": 331,
+      "y": 240,
+      "label": "P3 PAINT",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    },
+    {
+      "wc": "234",
+      "floor_id": "VAMA03-F01",
+      "zone": "machining",
+      "x": 237,
+      "y": 350,
+      "label": "P3 MM",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5; reviewed correction"
+    },
+    {
+      "wc": "TRI A",
+      "floor_id": "VAMA03-F01",
+      "zone": "assembly",
+      "x": 587,
+      "y": 165,
+      "label": "P3 ASSY TRI",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    },
+    {
+      "wc": "3FINL",
+      "floor_id": "VAMA03-F01",
+      "zone": "final",
+      "x": 472,
+      "y": 180,
+      "label": "P3 FINAL",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    },
+    {
+      "wc": "238",
+      "floor_id": "VAMA03-F01",
+      "zone": "oven",
+      "x": 717,
+      "y": 166,
+      "label": "P3 OVEN",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    },
+    {
+      "wc": "AEROA",
+      "floor_id": "VAMA03-F01",
+      "zone": "assembly",
+      "x": 790,
+      "y": 154,
+      "label": "P3 ASSY AERO",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    },
+    {
+      "wc": "AEROL",
+      "floor_id": "VAMA03-F01",
+      "zone": "lamination",
+      "x": 812,
+      "y": 269,
+      "label": "P3 LAM AERO",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5; reviewed correction"
+    },
+    {
+      "wc": "ATUP",
+      "floor_id": "VAMA03-F01",
+      "zone": "autoclave",
+      "x": 792,
+      "y": 446,
+      "label": "P3 AUTO",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    },
+    {
+      "wc": "P3TRI",
+      "floor_id": "VAMA03-F01",
+      "zone": "trim",
+      "x": 936,
+      "y": 461,
+      "label": "P3 TRIM",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    },
+    {
+      "wc": "P3NDI",
+      "floor_id": "VAMA03-F01",
+      "zone": "inspection",
+      "x": 943,
+      "y": 157,
+      "label": "P3 NDI",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    },
+    {
+      "wc": "TRI L",
+      "floor_id": "VAMA03-F01",
+      "zone": "lamination",
+      "x": 337,
+      "y": 471,
+      "label": "P3 LAM TRI",
+      "resource_kind": "fixed",
+      "status": "confirmed",
+      "annotation_source": "Marion-FloorPlan.pdf page 5"
+    }
+  ],
+  "resources": [
+    {
+      "wc": "P3 QA",
+      "building": "P3",
+      "resource_kind": "mobile",
+      "label": "P3 QA",
+      "status": "confirmed-mobile",
+      "operating_area": [
+        "VAMA03-F01"
+      ],
+      "annotation_source": "user confirmed 2026-08-26"
+    },
+    {
+      "wc": "PRNG",
+      "building": "P3",
+      "resource_kind": "unplaced",
+      "label": "P3 RANGE",
+      "status": "deferred",
+      "annotation_source": "awaiting reviewed annotation"
+    },
+    {
+      "wc": "298",
+      "building": "P4",
+      "resource_kind": "unplaced",
+      "label": "P4 RANGE",
+      "status": "out-of-scope",
+      "annotation_source": "Marion-FloorPlan.pdf page 5; reviewed correction"
+    }
+  ]
+}

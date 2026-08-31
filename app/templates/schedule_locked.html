@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% set active_page = 'dashboard' %}
+
+{% block cmdtitle %}<h1>{{ program_name }}<span class="sub num">{{ program }} · Schedule</span></h1>{% endblock %}
+{% block cmdright %}
+  <span class="badge">{{ planning.lifecycle_state|replace('_',' ')|title }}</span>
+  <span class="badge">{{ planning.target_label }} · not in force</span>
+{% endblock %}
+
+{% block head %}<style>
+.locked{max-width:760px;margin:32px auto;border-left:4px solid var(--brand);padding:8px 0 8px 22px;}
+.locked h2{font-size:20px;margin:0 0 8px;}.locked p{color:var(--muted);line-height:1.55;max-width:660px;}
+.facts{display:grid;grid-template-columns:160px 1fr;gap:8px 16px;margin:20px 0;font-size:12px;}
+.facts dt{color:var(--faint);text-transform:uppercase;font-size:10px;font-weight:600;}.facts dd{margin:0;}
+.actions{display:flex;gap:10px;margin-top:20px}.actions a{padding:7px 11px;border:1px solid var(--border);border-radius:6px;color:var(--brand);font-weight:600;}
+</style>{% endblock %}
+
+{% block content %}
+<section class="locked" aria-labelledby="locked-title">
+  <h2 id="locked-title">Schedule is not published</h2>
+  <p>TwinWorks is collecting operational evidence for this program, but its current model epoch is not authorized to publish forecast dates or delivery-risk metrics.</p>
+  <dl class="facts">
+    <dt>Lifecycle</dt><dd>{{ planning.lifecycle_state|replace('_',' ')|title }}</dd>
+    <dt>Configured basis</dt><dd>{{ planning.target_label }} (not yet in force)</dd>
+    <dt>Epoch</dt><dd class="num">{{ planning.epoch_key or 'not created' }}</dd>
+    <dt>Resource readiness</dt><dd>{{ resource_health.readiness|title }}</dd>
+    <dt>Next gate</dt><dd>Close the outstanding evidence and approval requirements for the next lifecycle transition.</dd>
+  </dl>
+  <div class="actions"><a href="/admin/resources">Review assumptions</a><a href="/admin/programs">Program configuration</a></div>
+</section>
+{% endblock %}

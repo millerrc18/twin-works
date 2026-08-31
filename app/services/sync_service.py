@@ -20,7 +20,6 @@ from app.models import SyncRun, PositionState
 from app.data import token_store
 from app.data.ifs_mcp_client import IfsMcpClient
 from app.data.live_source import SQL_WIP, SQL_POSITION, SQL_LASTCLK
-from app.data import wip_tables as W
 from app.services import position_state as PS
 from app.services import forecast_log_service as FL
 from app.services import program_service as PSVC
@@ -145,9 +144,6 @@ def _pull_program(client: IfsMcpClient, program: str) -> dict:
     return out
 
 
-import re as _re
-
-
 def _serials_from_notes(client, program: str, so_in: str) -> dict:
     """Build {SO: serial} by parsing SHOP_ORD_CFV.NOTE_TEXT ('S/N nnn') + PART_NO (hand).
     Source of truth for head serials — IFS has no serial column, but the note carries it.
@@ -158,27 +154,15 @@ def _serials_from_notes(client, program: str, so_in: str) -> dict:
         recs = rows(client.execute_query(SQL_SERIALNOTE.format(sos=so_in)))
     except Exception:
         return {}
-    out = {}
-    for r in recs:
-        note = (r.get("NOTE_TEXT") or "")
-        m = _re.search(r"S/?N\s*([0-9]+)", note, _re.I)
-        if not m:
-            continue
-        num = m.group(1).lstrip("0") or "0"      # 'S/N 0515' -> 515 (strip zero-pad)
-        if program == "ELEV":
-            pn = r.get("PART_NO") or ""
-            hand = "LH" if "501" in pn else ("RH" if "502" in pn else "")
-            out[r["SO"]] = (f"{hand} {num}").strip()
-        else:
-            out[r["SO"]] = num
-    return out
+    from app.data.serial_resolver import serials_from_note_rows
+    return serials_from_note_rows(program, recs)
 
 
 def _serial_for(program: str, so: str) -> str:
-    tbl = {"ELEV": W.ELEV, "RAD": W.RAD, "AEGIS": W.AEGIS}[program]
-    for row in tbl:
-        if row[1] == so:
-            return row[0]
+    from app.data.serial_resolver import baseline_serial
+    serial = baseline_serial(program, so)
+    if serial:
+        return serial
     return so  # unknown SO -> label by SO (flagged "needs serial" in UI); never guessed
 
 

@@ -6,6 +6,7 @@ Create Date: 2026-08-22
 
 """
 from typing import Sequence, Union
+import logging
 
 from alembic import op
 import sqlalchemy as sa
@@ -18,6 +19,27 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    inspector = sa.inspect(op.get_bind())
+    existing = set(inspector.get_table_names())
+    expected = {"position_state", "model_history", "sync_run"}
+    if expected <= existing:
+        required = {
+            "position_state": {"id", "so", "program", "serial", "maxop", "last_clock",
+                               "due", "closed", "pack", "source", "synced_at"},
+            "model_history": {"id", "at", "program", "mode", "n_scored", "threshold",
+                              "bias", "mae", "source"},
+            "sync_run": {"id", "kind", "active", "stage", "result_json", "error",
+                         "started_at", "finished_at"},
+        }
+        for table, columns in required.items():
+            actual = {column["name"] for column in inspector.get_columns(table)}
+            if not columns <= actual:
+                raise RuntimeError(f"Pre-created {table} schema is incomplete: {columns - actual}")
+        logging.getLogger("alembic.runtime.migration").warning(
+            "Reconciling create_all-precreated refresh-loop tables")
+        return
+    if expected & existing:
+        raise RuntimeError("Partial refresh-loop schema exists; reconcile before migration")
     op.create_table(
         "position_state",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),

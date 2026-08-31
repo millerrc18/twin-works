@@ -1,15 +1,12 @@
 """DataSource factory + LiveMcpDataSource (OAuth IFS MCP).
 
 Live source queries IFS through the authenticated MCP client. SQL templates are module
-strings so they're auditable/testable. Serial labels are NOT in IFS (verified) — the live
-source pulls SO-side truth (positions, dates, closes) and overlays serial labels from the
-snapshot/statusline mapping in wip_tables. Falls back to snapshot if not authenticated.
+strings so they're auditable/testable. Head serials are parsed from SHOP_ORD_CFV.NOTE_TEXT,
+with the persisted sync mapping and bootstrap table as guarded fallbacks.
 """
 from datetime import datetime, date
 from app.data.source import DataSource, UnitRecord, ShippedRecord
 from app.data.snapshot_source import SnapshotDataSource
-from app.data import wip_tables as W
-from app.engines.router_registry import registry
 
 # program -> (project_id, part_no)
 PROG_IFS = {
@@ -43,6 +40,12 @@ WHERE c.ORDER_NO IN ({sos}) AND c.OPERATION_NO < 9000 AND c.FINISH_TIME IS NOT N
 GROUP BY c.ORDER_NO
 """
 
+SQL_SERIALNOTE = """
+SELECT s.ORDER_NO AS SO, s.PART_NO AS PART_NO, s.NOTE_TEXT AS NOTE_TEXT
+FROM SHOP_ORD_CFV s
+WHERE s.ORDER_NO IN ({sos})
+"""
+
 
 def get_data_source(kind: str = "snapshot", tokens: dict | None = None) -> DataSource:
     if kind == "live" and tokens and tokens.get("access_token"):
@@ -56,7 +59,7 @@ def get_data_source(kind: str = "snapshot", tokens: dict | None = None) -> DataS
 
 
 class LiveMcpDataSource(DataSource):
-    """OAuth IFS-MCP-backed source. Serial labels overlaid from wip_tables (not in IFS)."""
+    """OAuth IFS-MCP-backed source with NOTE_TEXT head-serial resolution."""
 
     def __init__(self, tokens: dict):
         from app.data.ifs_mcp_client import IfsMcpClient
@@ -77,13 +80,16 @@ class LiveMcpDataSource(DataSource):
             return res.get("data", [])
         return res or []
 
-    def _serial_for(self, program, so):
-        """Overlay serial from the wip_tables mapping (statusline/DPM truth)."""
-        tbl = {"ELEV": W.ELEV, "RAD": W.RAD, "AEGIS": W.AEGIS}[program]
-        for row in tbl:
-            if row[1] == so:
-                return row[0]
-        return so  # fall back to SO if no known serial
+    def _serial_for(self, program, so, note_serials, persisted):
+        """Resolve NOTE_TEXT first, then the last successful sync, then the bootstrap map."""
+        from app.data.serial_resolver import baseline_serial
+
+        if so in note_serials:
+            return note_serials[so]
+        prior = persisted.get(so)
+        if prior and prior.get("program") == program and prior.get("serial"):
+            return prior["serial"]
+        return baseline_serial(program, so) or so
 
     def get_wip_units(self, program: str) -> list[UnitRecord]:
         if program in self._cache:
@@ -109,13 +115,22 @@ class LiveMcpDataSource(DataSource):
         so_in = ",".join(f"'{s}'" for s in sos)
         pos = {r["SO"]: r["MAX_CLOSED"] for r in self._q(SQL_POSITION.format(sos=so_in))}
         clk = {r["SO"]: r["LAST_CLK"] for r in self._q(SQL_LASTCLK.format(sos=so_in))}
+        from app.data.serial_resolver import serials_from_note_rows
+        from app.services.position_state import load_state
+        try:
+            note_serials = serials_from_note_rows(
+                program, self._q(SQL_SERIALNOTE.format(sos=so_in)))
+        except Exception:
+            note_serials = {}
+        persisted = load_state()
         out = []
         for r in wip:
             so = r["SO"]
             due = datetime.strptime(r["DUE"], "%Y-%m-%d").date() if r.get("DUE") else None
             lc = clk.get(so)
             stalled = bool(lc) and (self._as_of.date() - datetime.strptime(lc, "%Y-%m-%d").date()).days > 7
-            out.append(UnitRecord(serial=self._serial_for(program, so), so=so,
+            out.append(UnitRecord(serial=self._serial_for(
+                                      program, so, note_serials, persisted), so=so,
                                   maxop=pos.get(so), commit=due, program=program,
                                   stalled=stalled))
         self._cache[program] = out

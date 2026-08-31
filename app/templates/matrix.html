@@ -5,12 +5,13 @@
 {% block cmdright %}
   <span class="asof">data: {{ data_source|default('snapshot') }}</span>
   {% include "partials/view_toggle.html" %}
+  <a href="/admin/resources" class="badge" title="Resource assumptions governing this program">Resources: {{ resource_health.readiness|title }}</a>
   <span class="badge {{ 'trained' if m.model_status=='TRAINED' else '' }}">{{ m.model_status }}</span>
 {% endblock %}
 
 {% block subbar %}
 <div class="caveat"><b>PRELIMINARY</b> —
-  {% if m.slotted %}columns = RTG delivery slots (fixed target); assigned serial fills each slot — reassign on a swap.{% else %}columns = units by contract.{% endif %}
+  {% if m.slotted %}columns = {{ planning.target_label }} delivery slots (fixed target); assigned serial fills each slot — reassign on a swap.{% else %}columns = units by contract date.{% endif %}
   Forecast = best-case floor + measured slip. Cure floor ≈ <span class="num">{{ m.cure_floor_days }}d</span>. Δ vs target.</div>
 {% endblock %}
 
@@ -31,6 +32,7 @@
 .uhead{padding:8px 4px;border-bottom:1px solid var(--border);border-left:1px solid var(--border2);}
 .uhead .ser{font-weight:600;font-size:13px;} .uhead .so{font-size:10px;color:var(--faint);}
 .uhead.bumped .ser{color:var(--alert);}
+.uhead.selected{background:color-mix(in srgb,var(--brand) 12%,var(--panel));box-shadow:inset 0 3px 0 var(--brand);}
 .grpsep{border-left:2px solid var(--border)!important;}
 .mrow th.rowhead{font-size:11px;font-weight:500;color:var(--muted);text-align:left;padding:3px 8px;}
 .mrow td{font-size:11px;text-align:center;padding:3px 4px;color:var(--muted);border-left:1px solid var(--border2);}
@@ -81,6 +83,7 @@
 .mxlegend span{display:inline-flex;align-items:center;gap:4px;}
 .slip{font-size:9.5px;font-weight:700;margin-left:3px;vertical-align:middle;}
 .slip.late{color:var(--late-tx);} .slip.early{color:var(--early-tx);}
+.why-mini{font-size:9px;color:var(--brand);border:1px solid var(--border);background:var(--panel);padding:1px 4px;border-radius:3px;cursor:pointer;margin-top:3px;}.why-panel{margin:8px 0;border:1px solid var(--border);background:var(--panel);padding:10px;border-radius:7px}.why-kicker{font-size:9px;text-transform:uppercase;color:var(--faint)}.why-panel h3{font-size:12px;margin:3px 0}.why-panel header p,.why-meta,.why-ops{font-size:10px;color:var(--faint)}.why-state{font-size:9px;padding:2px 4px;border-radius:3px;background:var(--panel2);margin-left:4px}.why-resources{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px;margin-top:8px}.why-resources article{border-top:2px solid var(--text);padding:7px;background:var(--panel2)}.why-resources article>div:first-child{display:flex;justify-content:space-between;gap:6px}.why-cap{font-size:11px;margin:5px 0}.why-issues{color:var(--late-tx);font-size:10px}
 @media print{.mxtoolbar{display:none;}}
 </style>
 {% endblock %}
@@ -107,6 +110,7 @@
     <span>◇ gate</span>
   </span>
 </div>
+<div id="matrix-why"></div>
 <div class="mx-wrap">
   <div class="mx-frame">
   <table class="mx">
@@ -123,8 +127,8 @@
         {% for c in m.columns %}
         {% set u = c.unit %}
         {% set sep = 'grpsep' if (c.first_in_group) else '' %}
-        <th class="uhead ucol {{ 'bumped' if u and u.stalled else '' }} {{ sep }}">
-          {% if c.serial %}<div class="ser">{{ c.serial }}</div>{% if u %}<div class="so num">{{ u.so }}</div>{% endif %}
+        <th class="uhead ucol {{ 'bumped' if u and u.stalled else '' }} {{ 'selected' if selected_serial==c.serial else '' }} {{ sep }}">
+          {% if c.serial %}<div class="ser">{{ c.serial }}</div>{% if u %}<div class="so num">{{ u.so }}</div><button type="button" class="why-mini" hx-get="/forecast/{{ program }}/{{ c.serial|urlencode }}/why" hx-target="#matrix-why" hx-swap="innerHTML">Why</button>{% endif %}
           {% if u and u.stalled %}<div class="so" style="color:var(--alert)">STALLED</div>{% endif %}
           {% else %}<div class="so">(empty)</div>{% endif %}
           {% if c.kind=='slot' %}
@@ -139,26 +143,29 @@
         {% endfor %}
       </tr>
       <!-- metric rows -->
-      {% for label, attr in [('Contract','commit'),('RTG target','rtg'),('Forecast P50','forecast'),('Δ vs target','delta')] %}
-      <tr class="mrow {{ 'rtg' if attr=='rtg' else '' }}">
+      {% set metrics = [('Contract','commit')] %}
+      {% if planning.configured_planning_basis == 'PLAN_SLOTS' %}{% set metrics = metrics + [(planning.target_label ~ ' target','plan_target')] %}{% endif %}
+      {% set metrics = metrics + [('Forecast P50','forecast'),('Δ vs ' ~ planning.target_label,'delta')] %}
+      {% for label, attr in metrics %}
+      <tr class="mrow {{ 'rtg' if attr=='plan_target' else '' }}">
         <th class="rowhead">{{ label }}</th>
         {% for c in m.columns %}
         {% set u = c.unit %}
         {% set sep = 'grpsep' if c.first_in_group else '' %}
         {% if not u %}
-          <td class="{{ sep }}">{% if attr=='rtg' and c.target %}<span class="num">{{ c.target|fmt_date }}</span>{% else %}<span style="color:var(--faint)">—</span>{% endif %}</td>
+          <td class="{{ sep }}">{% if attr=='plan_target' and c.target %}<span class="num">{{ c.target|fmt_date }}</span>{% else %}<span style="color:var(--faint)">—</span>{% endif %}</td>
         {% elif u.stalled %}
-          <td class="{{ sep }}" style="color:var(--alert)">{% if attr=='forecast' %}idle <span class="num">{{ u.idle_days }}d</span>{% elif attr=='rtg' and u.rtg %}<span class="num">{{ u.rtg|fmt_date }}</span>{% else %}—{% endif %}</td>
+          <td class="{{ sep }}" style="color:var(--alert)">{% if attr=='forecast' %}idle <span class="num">{{ u.idle_days }}d</span>{% elif attr=='plan_target' and u.plan_target %}<span class="num">{{ u.plan_target|fmt_date }}</span>{% else %}—{% endif %}</td>
         {% elif attr=='delta' %}
-          {% set tip = 'Forecast ' ~ (u.forecast|fmt_date) ~ ' vs ' ~ u.target_kind ~ ' target ' ~ (u.target|fmt_date) ~ ' (' ~ ('+' if u.delta and u.delta>0 else '') ~ u.delta ~ 'd)' if u.delta is not none else '' %}
+          {% set tip = 'Forecast ' ~ (u.forecast|fmt_date) ~ ' vs ' ~ u.target_label ~ ' target ' ~ (u.comparison_target|fmt_date) ~ ' (' ~ ('+' if u.delta and u.delta>0 else '') ~ u.delta ~ 'd)' if u.delta is not none else '' %}
           {% set slip %}{% if u.slip and u.slip>0 %} <span class="slip late" title="slipped {{ u.slip }}d since last review">↑{{ u.slip }}</span>{% elif u.slip and u.slip<0 %} <span class="slip early" title="pulled in {{ -u.slip }}d since last review">↓{{ -u.slip }}</span>{% endif %}{% endset %}
           {% if u.delta is none %}<td class="{{ sep }}"><span style="color:var(--faint)">—</span></td>
           {% elif u.delta > 2 %}<td class="{{ sep }}" title="{{ tip }}"><span class="dpill late num">▲ +{{ u.delta }}</span>{{ slip }}</td>
           {% elif u.delta > 0 %}<td class="{{ sep }}" title="{{ tip }}"><span class="dpill latemild num">▲ +{{ u.delta }}</span>{{ slip }}</td>
           {% elif u.delta < 0 %}<td class="{{ sep }}" title="{{ tip }}"><span class="dpill early num">▼ {{ u.delta }}</span>{{ slip }}</td>
           {% else %}<td class="{{ sep }}" title="{{ tip }}"><span class="dpill on num">— 0</span>{{ slip }}</td>{% endif %}
-        {% elif attr=='rtg' %}
-          <td class="{{ sep }}">{% if u.rtg %}<span class="num">{{ u.rtg|fmt_date }}</span>{% else %}<span style="color:var(--faint);font-weight:400">no RTG</span>{% endif %}</td>
+        {% elif attr=='plan_target' %}
+          <td class="{{ sep }}">{% if u.plan_target %}<span class="num">{{ u.plan_target|fmt_date }}</span>{% else %}<span style="color:var(--late-tx);font-weight:500">missing {{ planning.target_label }}</span>{% endif %}</td>
         {% else %}
           <td class="{{ sep }}"><span class="num">{{ u[attr]|fmt_date }}</span></td>
         {% endif %}

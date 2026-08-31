@@ -11,8 +11,8 @@ STALL_DAYS = 7
 
 
 class SnapshotDataSource(DataSource):
-    def __init__(self):
-        self._state = PS.load_state()          # {} when unseeded -> baseline fallback
+    def __init__(self, use_position_state: bool = True):
+        self._state = PS.load_state() if use_position_state else {}
 
     # --- as-of clock ---
     def as_of(self) -> datetime:
@@ -46,6 +46,8 @@ class SnapshotDataSource(DataSource):
             return out
         # baseline fallback
         out = []
+        if program not in {"ELEV", "RAD", "AEGIS"}:
+            return []
         for u in W.units_for(program):
             out.append(UnitRecord(serial=u["serial"], so=u["so"], maxop=u["maxop"],
                                   commit=u["commit"], program=program,

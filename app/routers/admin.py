@@ -106,13 +106,20 @@ async def programs_page(request: Request, db: AsyncSession = Depends(get_db)):
     """Onboarding page: list existing programs + the 'Add program' form."""
     specs = PSVC.load_specs()
     existing = []
+    from app.services import planning_basis_service as PLANNING
     for code in PSVC.program_order():
         s = specs.get(code, {})
+        planning = (await PLANNING.context_for_program(db, code)
+                    if db is not None else PLANNING.configured_context(code))
         existing.append(dict(code=code, name=PSVC.name(code), plant=s.get("plant", ""),
                              project_id=s.get("project_id", ""),
                              parts=", ".join(s.get("part_nos", [])),
                              ops=len(s.get("ops", [])), cures=len(s.get("cures", [])),
-                             dpas=s.get("dpas", False), threshold=PSVC.threshold(code)))
+                             dpas=s.get("dpas", False), threshold=PSVC.threshold(code),
+                             planning_basis=planning.configured_planning_basis,
+                             plan_label=planning.target_label,
+                             lifecycle_state=planning.lifecycle_state,
+                             basis_effective=planning.basis_effective))
     from app.data.ifs_routing import known_wcs
     return templates.TemplateResponse(request, "programs.html", {
         "app_name": settings.app_name, "data_source": settings.data_source,
@@ -124,26 +131,43 @@ async def programs_discover(request: Request, db: AsyncSession = Depends(get_db)
     """Pull a part's routing from IFS + flag unknown work centers. Read-only."""
     import asyncio
     body = await request.json()
+    project_id = (body.get("project_id") or "").strip()
     part_no = (body.get("part_no") or "").strip()
-    if not part_no:
-        return JSONResponse({"ok": False, "reason": "part_no required"}, status_code=400)
+    revision = (str(body.get("revision") or "").strip() or None)
+    alternative = (str(body.get("alternative") or "").strip() or None)
+    if not project_id or not part_no:
+        return JSONResponse({"ok": False, "reason": "project_id and part_no required"},
+                            status_code=400)
     try:
         client = await SYNC._client(db)          # raises NotConnected
     except SYNC.NotConnected:
         return JSONResponse({"ok": False, "reason": "Connect IFS first"}, status_code=400)
     from app.data import ifs_routing as IR
     try:
-        routing = await asyncio.to_thread(IR.discover_routing, client, part_no)
+        result = await asyncio.to_thread(
+            IR.discover_routing, client, project_id=project_id,
+            part_no=part_no, revision=revision, alternative=alternative,
+        )
+    except IR.RoutingRevisionRequired as exc:
+        return JSONResponse({
+            "ok": False, "reason": "Select a routing revision",
+            "requires_revision": True, "revisions": exc.revisions,
+            "active_counts": exc.active_counts,
+        }, status_code=409)
     except Exception as e:
         return JSONResponse({"ok": False, "reason": f"IFS query failed: {e}"[:200]}, status_code=502)
-    return {"ok": True, "routing": routing, "unknown_wcs": IR.unknown_wcs(routing),
+    routing = result["routing"]
+    return {"ok": True, **result, "unknown_wcs": IR.unknown_wcs(routing),
             "n_ops": len(routing)}
 
 
 @router.post("/programs/create")
 async def programs_create(request: Request, db: AsyncSession = Depends(get_db)):
-    """Create/replace a program from the onboarding form. Blocks on unknown WCs unless the PM
-    explicitly acknowledges (allow_unknown_wcs=true)."""
+    """Create a DRAFT program candidate from the onboarding form.
+
+    Unknown WCs require explicit acknowledgement. Reconfiguring a published program stages an
+    immutable candidate and leaves its active registry definition unchanged.
+    """
     body = await request.json()
     ops = body.get("ops") or []
     if not body.get("code") or not ops:
@@ -164,7 +188,10 @@ async def programs_create(request: Request, db: AsyncSession = Depends(get_db)):
             floor_op=body.get("floor_op") or 0, dpas=body.get("dpas", False),
             train_threshold=body.get("train_threshold") or 25,
             hand_split=body.get("hand_split", False), hand_map=body.get("hand_map"),
-            rtg_source=body.get("rtg_source"))
+            rtg_source=body.get("rtg_source"),
+            configured_planning_basis=body.get("configured_planning_basis") or "NONE",
+            plan_label=body.get("plan_label"), plan_version=body.get("plan_version"),
+            epoch_metadata=body.get("epoch_metadata"))
     except Exception as e:
         return JSONResponse({"ok": False, "reason": str(e)[:200]}, status_code=400)
     return {"ok": True, **res}

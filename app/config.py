@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent  # rtg-tracker-build/
 
 
 class Settings(BaseSettings):
-    app_name: str = "RTG Forecast"
+    app_name: str = "TwinWorks"
     # data source: 'snapshot' (offline JSON) or 'live' (IFS MCP over OAuth)
     data_source: str = "snapshot"
     ifs_mcp_url: str = "https://ifs-mcp-auth.prod.azure.gd-ms.us/mcp"
@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     # program config source: 'db' (program table, default) or 'routers' (hardcoded fallback).
     # Rollback lever during the add-program migration — flip to 'routers' to ignore the DB.
     program_source: str = "db"
+    # Resource model: legacy remains authoritative until shadow parity and owner gates pass.
+    resource_source: str = "legacy"  # legacy | db-shadow | db-active
     # Fernet key for encrypting OAuth tokens at rest (generate one for prod)
     token_encryption_key: str = ""
     log_level: str = "INFO"

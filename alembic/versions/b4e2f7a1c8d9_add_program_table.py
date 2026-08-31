@@ -6,6 +6,7 @@ Create Date: 2026-08-24
 
 """
 from typing import Sequence, Union
+import logging
 
 from alembic import op
 import sqlalchemy as sa
@@ -18,6 +19,19 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    inspector = sa.inspect(op.get_bind())
+    if "program" in set(inspector.get_table_names()):
+        required = {"code", "name", "plant", "project_id", "part_nos", "pack_op",
+                    "ship_op", "floor_op", "ops_json", "cures_json", "milestones_json",
+                    "ceilings_json", "crew_by_op_json", "dpas", "train_threshold",
+                    "rtg_source", "hand_split", "hand_map_json", "active", "created_at",
+                    "updated_at"}
+        actual = {column["name"] for column in inspector.get_columns("program")}
+        if not required <= actual:
+            raise RuntimeError(f"Pre-created program schema is incomplete: {required - actual}")
+        logging.getLogger("alembic.runtime.migration").warning(
+            "Reconciling create_all-precreated program table")
+        return
     op.create_table(
         "program",
         sa.Column("code", sa.String(length=8), primary_key=True),

@@ -10,11 +10,15 @@ Milestone band rows separate the sections (LAM/ASSY/PAINT/SHIP, AJ/A1/A2/FS).
 from dataclasses import dataclass
 from datetime import date, timedelta
 from app.data.source import DataSource
-from app.data import rtg_targets
 from app.engines.rtg_wrapper import run_pooled
 from app.engines.router_registry import registry
 from ml.model.registry import registry_model
 from ml.model.features import FeatureBuilder
+from app.services.planning_basis_service import (
+    PlanningContext,
+    comparison_target,
+    configured_context,
+)
 
 _fb = FeatureBuilder()
 
@@ -45,9 +49,9 @@ class MatrixUnit:
     so: str
     maxop: int | None
     commit: date | None     # contract (IFS due) — reference
-    rtg: date | None        # RTG ship target (primary; None for Aegis/no-plan)
-    target: date | None     # the target Δ is measured against (rtg if present else commit)
-    target_kind: str        # "RTG" | "contract"
+    plan_target: date | None
+    comparison_target: date | None
+    target_label: str
     earliest: date | None
     forecast: date | None   # p50 (de-biased)
     p80: date | None
@@ -57,17 +61,20 @@ class MatrixUnit:
     slip: int | None = None  # week-over-week: forecast move since last build (+later/-earlier)
 
 
-def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all") -> dict:
+def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all",
+                 planning: PlanningContext | None = None, programs=None) -> dict:
     """Slot-anchored matrix. `slots` = list of SlotAssignment rows (from slot_service).
     Columns are arranged by delivery slot (fixed target, hand group), each showing the
     currently-assigned serial's live data + Δ vs the slot's fixed target. WIP serials not
     filling any slot go in an 'unassigned' group at the right. Aegis (no slots) is
     serial-anchored, sorted by contract."""
     spec = registry.spec(program)
+    planning = planning or configured_context(program)
     from app.services.program_service import program_order
+    programs = programs or program_order()
     units_by_program = {
         p: [u.as_sim_unit() for u in ds.get_wip_units(p) if not u.stalled]
-        for p in program_order()
+        for p in programs
     }
     sim = run_pooled(units_by_program, ds.as_of())
     ops, cures = spec.ops, spec.cures
@@ -82,14 +89,16 @@ def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all") -> 
         u = by_serial.get(serial)
         if u is None:
             return None
-        rtg = rtg_targets.rtg_ship(serial)
-        target = slot_target or rtg or u.commit
-        target_kind = "RTG" if (slot_target or rtg) else "contract"
+        plan_target = (slot_target if planning.configured_planning_basis == "PLAN_SLOTS"
+                       else None)
+        target = comparison_target(
+            planning, contract_date=u.commit, plan_target_date=plan_target)
         feats = _fb.build(serial, u.so, program, u.maxop).model_features()
         pred = registry_model.predict(program, feats)
         if u.stalled:
             unit_cells[serial] = dict(stalled=True, maxop=u.maxop, op_dt={}, cure_dt={})
-            return MatrixUnit(serial, u.so, u.maxop, u.commit, rtg, target, target_kind,
+            return MatrixUnit(serial, u.so, u.maxop, u.commit, plan_target, target,
+                              planning.target_label,
                               None, None, None, None, True, _idle(ds, u),
                               slip=slip_map.get(serial))
         r = sim.get(serial, {})
@@ -103,14 +112,15 @@ def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all") -> 
         earliest = _earliest_single(ops, cures, u.maxop, ds.as_of())
         unit_cells[serial] = dict(stalled=False, maxop=u.maxop,
                                   op_dt=r.get("op_dt", {}), cure_dt=r.get("cure_dt", {}))
-        return MatrixUnit(serial, u.so, u.maxop, u.commit, rtg, target, target_kind,
+        return MatrixUnit(serial, u.so, u.maxop, u.commit, plan_target, target,
+                          planning.target_label,
                           earliest, p50, p80, delta, False, None, slip=slip_map.get(serial))
 
     columns = []          # list of {kind:'slot'|'unit', hand, slot_id, target, unit(MatrixUnit|None)}
     groups = []           # list of {label, span} for the hand/section bands
     assigned = set()
 
-    if slots:
+    if planning.configured_planning_basis == "PLAN_SLOTS":
         # slot-anchored: group by hand (LH, RH, '') then by target
         from itertools import groupby
         slots_sorted = sorted(slots, key=lambda s: (s.hand, s.target_date or date.max))
@@ -128,7 +138,8 @@ def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all") -> 
                     assigned.add(s.serial)
                 columns.append(dict(kind="slot", hand=hand, slot_id=s.slot_id,
                                     target=s.target_date, unit=mu, serial=s.serial))
-            label = (hand + " — RTG slots") if hand else "RTG slots"
+            label = ((hand + " - " + planning.target_label + " slots")
+                     if hand else planning.target_label + " slots")
             groups.append(dict(label=label, span=len(columns) - start))
         # unassigned WIP serials (not filling any slot)
         unassigned = [ser for ser in by_serial if ser not in assigned]
@@ -138,7 +149,8 @@ def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all") -> 
             for ser in unassigned:
                 mu = make_unit(ser)
                 columns.append(dict(kind="unit", hand="", slot_id=None,
-                                    target=(mu.target if mu else None), unit=mu, serial=ser))
+                                    target=(mu.comparison_target if mu else None),
+                                    unit=mu, serial=ser))
             groups.append(dict(label="Unassigned / bumped", span=len(columns) - start))
     else:
         # serial-anchored (Aegis): sort by contract date
@@ -146,7 +158,7 @@ def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all") -> 
         for ser in sers:
             mu = make_unit(ser)
             columns.append(dict(kind="unit", hand="", slot_id=None,
-                                target=(mu.target if mu else None), unit=mu, serial=ser))
+                                target=(mu.comparison_target if mu else None), unit=mu, serial=ser))
         groups.append(dict(label="Units (by contract)", span=len(columns)))
 
     # optional filter: behind (Δ>0) or active (not stalled). Rebuilds groups to match.
@@ -222,7 +234,8 @@ def build_matrix(ds: DataSource, program: str, slots=None, flt: str = "all") -> 
             g["complete"] = s["op_count"] > 0 and s["done_count"] == s["op_count"]
 
     return dict(program=program, columns=columns, groups=groups, grid=grid,
-                slotted=bool(slots),
+                slotted=(planning.configured_planning_basis == "PLAN_SLOTS"),
+                planning=planning,
                 today_iso=ds.as_of().date().isoformat(),
                 model_status=registry_model.predict(program).mode,
                 cure_floor_days=round(sum(c[2] for c in cures) / 24.0, 1))
