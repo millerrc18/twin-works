@@ -1,4 +1,80 @@
-# RTG Operation Tracker — Build & Update Skill Handoff
+# RTG Operation Tracker - Legacy Workbook Build & Update Handoff
+
+> **Historical workbook handoff:** this document preserves the original Excel tracker update
+> workflow. It is not the operating handoff for the current web application. For TwinWorks app
+> architecture and working rules, read `MASTER.md` and `AGENTS.md` first.
+
+## Current TwinWorks handoff (2026-08-31)
+
+**Completed:** Feature #81 is through its local safety gate. The database-backed program registry,
+IFS routing discovery, unknown-WC gate, and `/admin/programs` onboarding UI are implemented. The
+61-test suite includes isolated onboarding, governance, replay, parity, and serial/slot regressions
+that prove
+pooling, draft
+forecasting, exclusion from authoritative forecast stamping until publication, and no seed-forecast
+drift. The seed golden master is now
+40 static bootstrap WIP units for ELEV/RAD/AEGIS; it ignores mutable `PositionState` and extra
+configured programs.
+**Current capacity-model correction:** the app now derives shared WCs from active program routes and passes DB crew, DPAS, and shift-budget metadata into the scheduler. This intentionally replaces the old seed-only ELEV/Aegis `32678` shared-capacity assumption with the actual shared QA WC `32687`; the static 40-unit golden baseline was recaptured.
+
+**Cure-station correction:** two Plant 2 paint booths now constrain Elevator dry-to-handle and Cor Ban cures; one conservative Plant 3 electrical-seal station constrains the Radome 40-hour op775 cure. Ovens remain unconstrained, and the parallel topcoat tape-test does not hold a booth.
+
+**Marion virtual factory:** `GET /factory-map` now provides the visual-only Plant 2/Plant 3 capacity layer. It is backed by reviewed VAMA02/VAMA03 annotations, modeled capacity/WIP telemetry, and forecast/lever drill-through. It does not alter scheduling. `P3 QA` is mobile, and `PRNG` remains unplaced pending a reviewed annotation. See `docs/plans/82-marion-virtual-factory-capacity-map.md`.
+
+**BCA discovery:** BCA-01/02 are complete. `/admin/programs` selects routing revisions from active
+shop-order usage and retains operation economics/classification in the review draft. Live project
+`521938` evidence: A and C use revision 3 / alternative `*`, each has 32 rows and 25 included
+production ops; A = 69.603 labor / 104.303 machine hours, C = 69.603 / 104.603. Ops
+`1,2,6,7,8,9,9999` default excluded. Next gates are BCA-03 capacity and BCA-04 machine/dwell rules.
+
+**BCA observation registration:** BCA-05a is complete. `BCAFIN` tracks 73 live finishing orders
+from project `521938`, with all serials resolved from NOTE_TEXT. Its immutable revision-3 candidate
+is in OBSERVE, contract intent is not in force, Schedule is locked, forecast-log rows are zero, and
+all eight resource-binding gaps remain visibly incomplete. ELEV/RAD/AEGIS publication is unchanged.
+
+**Resource foundation:** BCA-03a originated at migration `d8ea03f5b7c9`; the local DB has since
+advanced to `dbe1f2a3b4c5`. It contains
+24 one-to-one legacy pools and immutable assumption/capacity/simulation-snapshot records. Resource
+Registry, readiness badges, and unit Why panels are available while legacy scheduling remains
+authoritative. Approved assumptions/capacity are protected from ORM and direct SQL edits except
+through supersession. DB-shadow forecasts match the golden baseline exactly. BCA-03b physical-pool
+activation remains blocked on owner-approved capacities.
+
+**Lifecycle and epoch foundation:** PLAT-01a was completed through migration `a8c3d4e5f6a7`.
+ELEV, RAD, and AEGIS each have an immutable published legacy epoch at
+`COMMITMENT_READY`. Epoch definitions, lifecycle transitions, publication selections, simulation
+snapshots, and snapshot links are append-only and protected by database triggers. Every new
+simulation snapshot materializes the selected epoch definitions and links them by program. Candidate
+epochs are explicit and cannot replace published output without authorized publication. Backup:
+`data/rtg_app_migrated.pre_model_epochs.bak`, SHA-256
+`1F63D0C88AD53DA0CAF0E0BE2852C68D0D7B656D4734EB52BCCA2FAF97D436FF`.
+
+**Virtual-factory follow-ons:** #82-1a adds a governed full active-WC catalog refresh and change
+report; #82-4 covers PRNG/VAMA01/Plant 4 only after reviewed annotations; #82-5 is the authenticated
+live-map and response-time acceptance check. These are recorded in `TASKS.md`.
+
+**Planning-basis and shadow-integrity gate:** UI-01a and PLAT-01b/01c are complete. Planning basis
+is independent from lifecycle; OBSERVE/PROVISIONAL programs publish no forecast dates or delivery
+KPIs. Approved resource inputs carry schema-versioned evidence and immutable recertification
+history. Forecast stamps now point to schema-v3 envelopes that freeze inputs, epoch routes,
+scheduler profiles, and expected results for exact replay. ELEV/RAD/AEGIS have isolated OBSERVE
+candidates with exact 29-unit legacy parity; published legacy epochs remain unchanged. The current
+review ledger contains 70 explicit inherited debts (24 review dates, 24 evidence attestations, 22
+drift policies), so shadow readiness is provisional rather than falsely green.
+External-load snapshots are now append-only and horizon-gated; BCA-03c still owns the live CRP
+capture and tracked-demand de-duplication.
+
+**Next implementation gate:** build UI-01b/UI-01c while BCA evidence accrues. The full
+critic-reviewed order, phase
+gates, and portfolio UI plan are in `TASKS.md` and
+`docs/superpowers/specs/2026-08-28-portfolio-dashboard-planning-basis-design.md`. Keep the
+`RTG_PROGRAM_SOURCE=routers` fallback until the integrated 2-4 week pilot and rollback gate pass.
+
+**Current data rule that supersedes this legacy document where they differ:** head serials are read
+from `SHOP_ORD_CFV.NOTE_TEXT` as `S/N nnn`; elevator hand is derived from PART_NO 501/502. Do not
+reintroduce the older assumption that serials are unavailable in IFS.
+
+---
 
 **Audience:** Codex (or any coding agent) tasked with turning the RTG Operation Tracker
 into a **repeatable skill** that regenerates the tracker workbook on demand from live IFS
@@ -216,15 +292,15 @@ it only bites when the tail is rushed.
 - Cor Ban (op 4010) empirically spans **2–3 calendar days** per unit (cure + install cycle);
   model it as a realistic 2–3d block, not just the 4hr tack-free.
 
-### 6e. Physical cure-station counts (user-confirmed; the `OVEN_SLOTS` cap)
+### 6e. Physical cure-station counts and configured constraints
 - **Elevator: 2 paint booths** (concurrent paint/prep/topcoat/CorBan cap = 2). 2 ovens ×
   2–3 units each = 4–6 slots → **ovens NOT a constraint.**
 - **Radome: ovens plentiful/unattended** (not a constraint); **op775 electrical-seal = 1–2
   stations** (the 40hr dwell is the hard bottleneck).
-- **Only elevator paint (2 booths) and radome op775 (1–2) need cure-space contention modeled.**
-  Oven cures stay per-unit. (Note: `OVEN_SLOTS` exists in `capacity_engine.py` but the
-  full booth-contention cap is a DEFERRED enhancement — see §12.)
-
+- **Configured allocator:** Elevator dry-to-handle after op3800 and Cor Ban after op4010 reserve
+  one of two Plant 2 paint booths. Radome op775 electrical sealing reserves one conservative Plant 3
+  seal station for its 40-hour cure. The 24-hour parallel topcoat tape-test does not reserve a booth.
+  Oven cures remain per-unit and unconstrained.
 ---
 
 ## 7. Router data model (`routers.py`)
@@ -405,10 +481,9 @@ sums), `trace227.py`/`trace227b.py` (single-unit trace for validation).
 1. **Bottleneck/paint-load view** (user: "that might be useful, just note it"): a view of units
    queued for the paint bottleneck (WC 221 / 236) by week — shows where the throttle bites and
    is the actionable lever for pulling units in (paint OT / resequence).
-2. **Full cure-station contention** (`OVEN_SLOTS` cap enforcement): currently cures block only
-   their own unit; the 2-booth / 1-2-seal-station cap is defined but not fully enforced in the
-   day loop. Enforce when booth contention becomes material.
-3. **Paint cross-program pooling:** WC 221 (elev) and WC 236 (rad) are modeled as private
+2. **Electrical-seal station calibration:** cure-station contention is implemented. Confirm whether
+   Radome op775 has one or two usable Plant 3 seal stations, then update the conservative seed
+   capacity if floor/process validation supports two.3. **Paint cross-program pooling:** WC 221 (elev) and WC 236 (rad) are modeled as private
    budgets but may be the *same* booths/painters. If shared, effective elevator paint drops to
    ~15–20 hr/day. Confirm with the shop; if shared, pool the budgets.
 4. **Weekend factors on cure-bound tails** are false precision (a red flag on a cure-dominated

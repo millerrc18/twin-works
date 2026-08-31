@@ -1,4 +1,4 @@
-# Start the RTG Forecast app (PowerShell).
+# Start TwinWorks (PowerShell).
 #   .\run.ps1                 -> live IFS data (falls back to snapshot until you Connect IFS)
 #   .\run.ps1 snapshot        -> offline snapshot data only
 #   .\run.ps1 live 8001       -> override the app port (default 8000)

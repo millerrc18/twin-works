@@ -1,20 +1,21 @@
-# RTG Tracker — Master Reference
+# TwinWorks - Master Reference
 
-Exhaustive documentation for the RTG (Return-to-Green) ship-date forecasting web app.
+Exhaustive documentation for TwinWorks, the RTG (Return-to-Green) ship-date forecasting web app.
 Audience: humans (PM, engineers, reviewers). For AI-agent working rules see **AGENTS.md**.
 
 ---
 
 ## 1. What it is
 
-A finite-capacity manufacturing **ship-date forecasting + decision tool** for three GD
-Mission Systems composite programs built at Marion:
+A finite-capacity manufacturing **ship-date forecasting + decision tool** for three published GD
+Mission Systems composite programs plus one observation-only program built at Marion:
 
 | Program | Project | Top assembly | Notes |
 |---|---|---|---|
 | G500 Elevator | 531335 | 72P5520501-029P01 (LH) / 72P5520502-029P01 (RH) | ships as LH/RH shipsets |
 | Aeronose Radome | C48178 | 3700ED0001-101 | |
 | Aegis Reflector | 530349 | 00999000563 | DPAS-rated; **no RTG plan** (contract-anchored) |
+| BCA Triband Finishing | 521938 | 3301ED0031-101A / -101C | `OBSERVE`; no published dates or KPIs |
 
 It replaces/augments the Excel "RTG Operation Tracker" with a live web app that:
 - forecasts each in-process unit's ship date from a finite-capacity shop simulation,
@@ -69,13 +70,13 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 ## 4. Module-by-module reference
 
 ### 4.1 Reused engine (repo root — pre-existing, imported, not rewritten)
-- **`capacity_engine.py`** — `simulate(units, ops_map, cures_map, as_of)`: day/shift-stepped
+- **`capacity_engine.py`** — `simulate(units, ops_map, cures_map, as_of, profile=None)`: day/shift-stepped
   finite-capacity scheduler. Units compete for per-(program,WC,shift) labor-hour budgets;
-  cures run 24/7 wall-clock; DPAS-behind units jump shared capacity; crew factor divides
+  cures run 24/7 wall-clock; discrete cure-station slots constrain validated booth/seal processes; DPAS-behind units jump shared capacity; crew factor divides
   labor on swarm ops. Returns `{serial: {finish, op_dt{opno:dt}, cure_dt{label:dt}}}`.
 - **`routers.py`** — the constants source of truth: `ELEVATOR_OPS/RADOME_OPS/AEGIS_OPS`
   (op tuple: opno,desc,wc,hr,ms), `*_CURES` (after_op,label,dwell_hr,note), `*_MILESTONES`,
-  `CREW_BY_OP`, `PARALLEL_CURE_GATES`, `DPAS_PROGRAMS`, `SHARED_WC`, `WC_SHIFT`, and helpers
+  `CREW_BY_OP`, `PARALLEL_CURE_GATES`, `CURE_STATION_CAPACITIES`, `CURE_STATION_RULES`, `DPAS_PROGRAMS`, `SHARED_WC`, `WC_SHIFT`, and helpers
   `crew()`, `wc_shift_budget()`, `elevator_weekend_factor()`.
 - **`schedule_engine.py`** — `forward_schedule()` (single-unit projection, no contention) +
   `add_labor_hours()`. Used for the "Earliest possible" column (side-effect-free).
@@ -92,23 +93,40 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
   `ifs_mcp_url`, `llm_provider`, `wis_dir`, `data_dir`, `database_url`
   (default → `data/rtg_app_migrated.db`), `app_port` (OAuth redirect must match),
   **`n_train_threshold`** (per-program DICT `{ELEV:25, RAD:25, AEGIS:12}`) +
-  **`n_train_threshold_default`** (25 fallback), `use_cleaned_dwell`, `token_encryption_key`.
+  **`n_train_threshold_default`** (25 fallback), **`program_source`** (`db`|`routers`, default db —
+  the add-program migration rollback flag), `use_cleaned_dwell`, `token_encryption_key`.
 - **`database.py`** — async engine, `async_session`, `get_db` dependency, `Base`.
-- **`models.py`** — **8 tables**: `forecast_log` (per-build forecast + backfilled actual/error),
+- **`models.py`** — core forecast/program tables plus the normalized Resource and Assumption
+  Registry. Resource tables cover pools/instances, capacity versions, operation bindings,
+  assumptions/reviews, external-load snapshots/rows, immutable simulation snapshots, and forecast
+  constraint events. Model-epoch tables hold immutable definitions, append-only lifecycle decisions,
+  append-only publication selections, and per-simulation epoch links.
+  `forecast_log.simulation_snapshot_id` records the resource and epoch basis for a build.
+  Existing core tables include `forecast_log` (per-build forecast + backfilled actual/error),
   `ml_training_row` (features + residual), `model_version` (trained blobs, audit trail),
   `wi_constraint` (LLM-extracted WI cures/gates), `oauth_token` (Fernet-encrypted),
-  `slot_assignment` (RTG slot ↔ serial), **`position_state`** (mutable WIP/shipped layer,
+  `slot_assignment` (RTG slot ↔ serial), `position_state` (mutable WIP/shipped layer,
   materialized from wip_tables then updated by IFS syncs; one row per SO, `closed`≠None = shipped),
-  **`model_history`** (append-only per-sync model-state trend for the admin chart),
-  **`sync_run`** (single-run lock + status/audit for each sync).
+  `model_history` (append-only per-sync model-state trend for the admin chart),
+  `sync_run` (single-run lock + status/audit for each sync), **`program`** (config-driven program
+  registry — code/name/plant/project/parts/pack-ship-floor ops/milestones/ceilings/ops/cures/
+  crew/dpas/threshold/hand-split, all JSON where structural; the DB replacement for hardcoded
+  routers.py/PROG_IFS/PACK_OP).
 - **`templating.py`** — Jinja env + filters (`fmt_date`, `delta_color`).
 
 ### 4.3 `app/engines/`
-- **`router_registry.py`** — wraps `routers.py` constants into a `ProgramRegistry`
-  (data-addressable per program: ops/cures/milestones/ceilings/pack_op/ship_op/floor_op +
-  `cure_floor_hours`, `milestone_of`). The ONLY shim; routers.py stays untouched.
-- **`rtg_wrapper.py`** — `run_sim` / `run_pooled` adapters over `simulate` (handles the
-  elevator+Aegis shared-capacity pooling).
+- **`router_registry.py`** — builds a `ProgramRegistry` of `ProgramSpec`s (per program:
+  ops/cures/milestones/ceilings/pack_op/ship_op/floor_op + `cure_floor_hours`, `milestone_of`).
+  `build_registry()` prefers DB-defined programs (via `program_service.load_specs`) and falls back
+  to `routers.py` when the `program` table is empty or `RTG_PROGRAM_SOURCE=routers`. `rebuild()`
+  re-reads after an add/edit. routers.py is the seed source of truth + fallback.
+- **`rtg_wrapper.py`** — `run_sim` + `run_pooled(units_by_program: dict, as_of)`. **Pooling is
+  data-driven**: `pool_groups()` = connected components of the Program↔WorkCenter graph over
+  `shared_wcs()` (WCs in ≥2 active programs), **guarded by plant** (`_plants`). ELEV+AEGIS pool
+  (Plant 2, share paint WC221/32687); RAD is separate (Plant 3). Site facts: WC names are globally
+  unique (a shared WC = same physical resource) AND plant is a hard boundary (a mis-entered WC
+  can't pool across plants). A new program auto-pools iff same plant + shared WC.
+  `_simulation_profile()` passes each active program's crew overrides, DPAS flag, shared WCs, and legacy shift budgets into `capacity_engine.simulate`; this intentionally activates the actual shared QA WC `32687` for ELEV and AEGIS instead of the old seed-only `32678` assumption.
 - **`lever_engine.py`** — counterfactual driver: `run_lever` (re-sim with modified WC
   budgets/crew/priority, diff finishes), `bottleneck_load` (per-WC weekly demand vs
   available, util %), `back_solve` (tactical: binary-search capacity to hold a contract date;
@@ -122,7 +140,12 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 - **`live_source.py`** — `LiveMcpDataSource` (auditable SQL templates → IFS MCP), + the
   `get_data_source(kind, tokens)` factory. Serial labels overlaid from `wip_tables` (not in
   IFS). Graceful fallback to snapshot on any live-query error. The SQL templates (`SQL_WIP`,
-  `SQL_POSITION`, `SQL_LASTCLK`) are reused by `sync_service` for the refresh loop.
+  `SQL_POSITION`, `SQL_LASTCLK`) are reused by `sync_service` for the refresh loop. IFS metadata
+  (project/parts) now comes from `program_service.ifs_meta()` so new programs are picked up.
+- **`ifs_routing.py`** — revision-aware add-program discovery. It uses active `SHOP_ORD_CFV`
+  revision counts to select one manufacturing `ROUTING_OPERATION_CFV` revision, then retains labor
+  and machine setup/run, crew, runtime/parallel flags, and reference-order status. Administrative,
+  waiting, and terminal rows default excluded; only included production WCs reach `unknown_wcs()`.
 - **`ifs_mcp_client.py`** — OAuth client: dynamic registration, PKCE S256 auth-code flow,
   localhost callback, token refresh, MCP Streamable-HTTP handshake
   (`initialize`→`notifications/initialized`→`tools/call execute_query`).
@@ -166,12 +189,33 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 - **`model_units.py`** — `backtest_units()` / `forward_units()`: which program·SN·SO feed each
   track (retrospective backtest vs real forward closes), for the admin "Units in the model" panel.
   Resolves clean serials via SO (guards against SO-fragment placeholders).
+- **`program_service.py`** — the DB-backed program config source (see §5.2). Sync cached
+  `load_specs()` (DB row or {} → routers fallback), `program_order`/`names`/`name`/`ifs_meta`/
+  `threshold`, `seed_from_routers` (one-time copy of the 3), `create_program` (validated write +
+  snapshot export + registry rebuild), `invalidate_cache`. Snapshots export to `program_snapshots/`.
+- **`resource_registry.py` / `resource_profile.py` / `resource_explain.py`** — immutable resource
+  and assumption governance, effective-dated capacity validation, canonical profile/snapshot
+  compilation, legacy parity seeding, exact schema-v3 replay, readiness aggregation, Resource
+  Registry rows, and unit Why explanations. Resource mode defaults to `legacy`; DB shadow does not
+  change published dates.
+- **`assumption_evidence.py` / `assumption_drift.py`** — versioned evidence validation, expiry/
+  drift/review-debt detection, race-safe review creation, successor-based recertification, and the
+  permanent append-only audit export.
+- **`model_epoch_service.py`** - creates immutable program model epochs, enforces the authorized
+  lifecycle graph, resolves the currently published epoch, records publish/rollback selections, and
+  bootstraps ELEV/RAD/AEGIS as commitment-ready legacy epochs. It also creates incumbent parity
+  candidates, rejects live resource mappings that drift from their frozen definitions, and runs
+  exact legacy-versus-shadow acceptance. Candidate epochs are runnable only when explicitly
+  selected and never replace published output implicitly.
 
 ### 4.5b Serial resolution + ship detection (IFS truth)
 - **Head serials live in `SHOP_ORD_CFV.NOTE_TEXT`** as `S/N nnn` (often zero-padded, e.g.
   `S/N 0515`). There is NO serial column in IFS. `sync_service._serials_from_notes` parses the
   note (strips leading zeros) + derives elevator hand from `PART_NO` (…501=LH, …502=RH). Source of
   truth — the old wip_tables SHIPPED elevator serials were SO fragments with wrong hands (fixed 8/24).
+  `app/data/serial_resolver.py` is the shared parser for direct live reads and sync. Resolution order
+  is live NOTE_TEXT, last persisted PositionState mapping, then curated bootstrap mapping. Current-
+  WIP slot queries hide completed slots without deleting their assignment history.
 - **Ship detection is pack-op-driven, not close-only.** A unit is "shipped" when its pack op
   (ELEV 4200 / RAD 790 / AEGIS 380) is clocked OR the SO is closed. `CLOSE_DATE` lags physical
   ship by days (S/N 0515 packed 8/21, SO still `Started`), so `SQL_CLOSED` LEFT JOINs the pack-op
@@ -210,9 +254,15 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 - **`matrix.html`** — the hero: slot-anchored ops×units grid (see §6).
 - **`forecast.html`** — summary view (Plotly **bullet/range chart** + P50/P80 table).
 - **`levers.html`** — bottleneck load + what-if scenario runner.
-- **`admin.html`** — model/WI status, ingest/rebuild/retrain buttons, **the IFS refresh loop
-  (Refresh positions / Process new ships w/ preview + status poll / seed / reset), and the
-  model-history table + bias-trend chart**. Alpine `syncPanel()` drives the sync UX.
+- **`admin.html`** (`/admin/model-status`) — model/WI status, ingest/rebuild/retrain buttons, the
+  IFS refresh loop (Refresh positions / Process new ships w/ preview + status poll / seed / reset),
+  the model-history table + bias-trend chart, the "Units in the model" panel, and a **"+ Manage /
+  add programs"** link to programs.html. Alpine `syncPanel()` drives the sync UX.
+- **`programs.html`** (`/admin/programs`) — add-program onboarding: existing-programs table +
+  identity, revision selection, all/included labor and machine totals, operation inclusion/class,
+  reference status, editable economics/crew/phase, unknown-production-WC gate, pooling preview,
+  and save. Alpine `addProgram()`. NOTE: this is a SEPARATE page from the
+  main admin page — the main admin page is unchanged.
 - **`partials/`** — `view_toggle.html` (Matrix/Summary), `lever_result.html` (HTMX fragment).
 - **`static/charts.js`** — theme-aware Plotly: **`renderForecastBullet`** (summary bullet/range,
   replaced the old scatter timeline), `renderBottleneckBar`, **`renderBiasTrend`** (admin
@@ -254,6 +304,82 @@ idempotent and the `sync_run` row records the failed stage.
 (mode/n/threshold/bias/mae). The admin page renders a history table + a **bias-over-time trend
 line** (`renderBiasTrend`) so the PM watches bias converge toward 0 and sees the EMPIRICAL→TRAINED
 flip. `seed baseline` / `reset to baseline` links manage the `position_state` layer.
+
+### 5.2 Config-driven program registry + add-program onboarding (feature #81)
+A program was previously hardcoded across router data, program metadata, pack operations, thresholds,
+and pooling callers. The `program` table and `program_service` now hold the configurable program
+shape, while `routers.py` remains the migration seed and rollback source.
+- **Source flip:** `RTG_PROGRAM_SOURCE=db` (default) reads active `program` rows; `=routers` forces
+the hardcoded fallback. Keep this rollback lever through the live stabilization period.
+- **Seed and registry:** `seed_from_routers` copies ELEV, RAD, and AEGIS once. `router_registry.rebuild()`
+refreshes the existing registry object in place, so imported consumers see a newly created program
+without a process restart.
+- **Pooling:** `rtg_wrapper.pool_groups()` derives connected components from same-plant shared WCs.
+New programs participate as soon as their DB routing is saved.
+- **Onboarding UI:** `/admin/programs` accepts identity and IFS part data, discovers
+`ROUTING_OPERATION_CFV`, exposes an editable operations grid, blocks unknown WCs until acknowledged,
+shows a pooling preview, saves the program row, exports a snapshot, and rebuilds the registry.
+- **Safety gate complete:** `tests/test_program_onboarding.py` creates `TEST4` in an isolated SQLite
+DB, verifies Plant 2/WC 221 pooling and draft forecasting, and confirms seed-program forecasts do
+not drift. Under PLAT-01a, new programs receive a DRAFT candidate epoch and are excluded from the
+authoritative `ForecastLog.stamp_build` path until explicitly published.
+- **Remaining:** BCA revision-aware discovery and operation economics are complete. Persisted
+  work-center budgets (BCA-03) and machine/dwell semantics (BCA-04) remain before the first real
+  BCA add. The live OAuth smoke test follows; retain the fallback for 2-4 weeks of clean runs before
+  a flag-gated routers fallback removal.
+- **Spatial capacity view (#82):** `/factory-map` is the delivered visual-only Marion capacity and
+  work-center layer. It consumes forecast and bottleneck telemetry through one pooled simulation
+  per request and never alters simulation inputs. See the as-built section below and `TASKS.md`.
+
+### 5.3 Governed lifecycle, planning basis, and shadow integrity (PLAT-01a through PLAT-01c)
+Program maturity and publication are append-only audit streams rather than mutable flags.
+`ModelEpoch` stores the immutable model definition and lineage. `ModelEpochTransition` records every
+authorized state change through `DRAFT`, `OBSERVE`, `PROVISIONAL`, `COMMITMENT_READY`, `PAUSED`, and
+terminal states. `ProgramEpochActivation` selects which commitment-ready epoch may publish; its
+authorization points to the exact transition that made the epoch ready.
+
+The latest publication becomes ineffective if its epoch later leaves `COMMITMENT_READY`, and it does
+not become active again without a new publication event. Every schema-v2 `SimulationSnapshot`
+materializes the selected epoch definitions and has queryable `SimulationSnapshotEpoch` links.
+Database triggers prevent direct edits/deletes and reject illegal transitions or publications.
+ELEV, RAD, and AEGIS retain `*:LEGACY` as their published production epochs. Explicit candidate
+selection is available for shadow runs; default runs continue resolving only published epochs.
+Every app and Alembic SQLite connection verifies foreign-key and recursive-trigger pragmas. App
+startup also audits the complete governance-trigger inventory and fails before serving traffic if a
+required protection is missing. A snapshot records the selected epochs observed for that run; it is
+not a global lock preventing later publication decisions.
+
+Planning basis is independent from lifecycle. `PLAN_SLOTS`, `CONTRACT_DATES`, and `NONE` describe
+the intended comparison target; `basis_effective` becomes true only for a published
+`COMMITMENT_READY` epoch. ELEV/RAD retain RTG slots, AEGIS uses contract dates, and an OBSERVE BCA
+configuration may carry contract intent without exposing forecast dates or delivery KPIs. Forecast
+DTOs and logs retain contract, plan, and effective comparison targets separately. There is no
+plan-to-contract fallback.
+
+Approved assumptions carry canonical schema-v1 evidence. Expiry, missing review dates, migrated
+evidence, missing drift policies, sparse evidence, and threshold drift create idempotent review
+items. Reviews do not mutate an active value. Recertification or replacement creates successor
+assumption and capacity versions, then permanently resolves the review. Resolved reviews and all
+historical evidence are protected by ORM guards and SQLite triggers. The audit export is available
+at `/admin/resources/audit.json`; retention policy is permanent append-only.
+
+External-load snapshots and rows are also append-only. Each snapshot declares its coverage window
+and one of `BLOCK`, `HOLD_LAST_COMPLETE_WEEK`, or `TRAILING_MEAN`. A run past source coverage is
+incomplete under `BLOCK`; extrapolation requires an approved, commitment-ready policy assumption.
+The live CRP capture and tracked-demand de-duplication remain BCA-03c work.
+
+Forecast stamps point to schema-v3 simulation snapshots containing the complete schema-v2 profile,
+frozen WIP inputs, epoch routing definitions, canonical expected results, engine/serializer version,
+and SHA-256 hashes. Replay does not consult the current program/resource registry. Older schema-v2
+snapshots remain integrity-verifiable but cannot claim result replay because their WIP inputs were
+not stored.
+
+PLAT-01c created one current `OBSERVE` DB-shadow candidate for each incumbent and archived replaced
+parity definitions. The 2026-08-31 29-unit run was exact with result hash
+`c12de821f4b095bbe0a8e719de486ec21ce98943b47b5d41bb736a676968381a`; published legacy epochs were
+unchanged. Candidate compilation fails when the live one-to-one mapping differs from its immutable
+definition. The 70 inherited review items keep shadow readiness provisional until owners recertify
+them. See `docs/validation/plat-01c-incumbent-parity.md`.
 
 ---
 
@@ -313,13 +439,22 @@ Applied app-wide via `base.html` tokens. Principle: **calm canvas, loud signal.*
 ---
 
 ## 9. Database (SQLite) & JSON files
-**DB (`data/rtg_app_migrated.db`, Alembic-managed) — 8 tables:** forecast_log, ml_training_row,
-model_version, wi_constraint, oauth_token, slot_assignment, **position_state** (mutable WIP layer),
-**model_history** (per-sync model-state trend), **sync_run** (sync lock + status).
+**DB (`data/rtg_app_migrated.db`, Alembic-managed) — 24 tables:** ten core forecast/runtime and
+program tables; ten resource/assumption/snapshot tables; and four epoch-governance tables:
+`model_epoch`, `model_epoch_transition`, `program_epoch_activation`, and
+`simulation_snapshot_epoch`.
 **JSON (repo root, reference/computed):** accuracy_results.json (retrospective backtest),
-**accuracy_forward.json** (real forward closes — separate on purpose), backtest_timeline.json,
+accuracy_forward.json (real forward closes — separate on purpose), backtest_timeline.json,
 forecast_log.json (legacy; the DB `forecast_log` table is authoritative), rtg_data.json,
 rtg_targets.json, wi_signals.json, _rad_std.json.
+**Program snapshots:** every `create_program` save also writes a timestamped JSON artifact to
+`program_snapshots/` (diffable history; export-only, never read back — the DB is the load source).
+**Alembic migrations:** `7068f2b7` initial · `e2d2104b` slot_assignment · `a3f1c9d4` refresh-loop
+(position_state/model_history/sync_run) · `b4e2f7a1` program table · `c7d9e2f4` resource registry ·
+`d8ea03f5` approved-record protection · `e6a1b2c3` model epochs · `f7b2c3d4` audit hardening ·
+`a8c3d4e5` clean-install slot schema reconciliation · `b9d4e5f6` planning basis ·
+`cad0e1f2` assumption evidence/recertification · `dbe1f2a3` review-integrity hardening ·
+`ecf2a3b4` external-snapshot integrity.
 Migration `a3f1c9d4e5b6_add_refresh_loop_tables` adds the three refresh-loop tables (also created
 idempotently by `create_all` at startup).
 
@@ -336,8 +471,37 @@ RTG_DATA_SOURCE=live ./run.sh              # then click "Connect IFS", browser l
   on it), run `alembic upgrade head` (idempotent), then uvicorn `--reload`.
 - Migrations: `.venv/Scripts/alembic.exe upgrade head`.
 - Admin actions on `/admin/model-status`: WI ingest, rebuild training rows, retrain, **Refresh
-  positions**, **Process new ships** (preview→confirm), **seed / reset** the position layer. The
-  sync buttons require a live "Connect IFS" session; in snapshot mode they say "Connect IFS first."
+  positions**, **Process new ships** (preview→confirm), **seed / reset** the position layer, and
+  **+ Manage / add programs** (→ `/admin/programs`). The sync buttons require a live "Connect IFS"
+  session; in snapshot mode they say "Connect IFS first."
+
+### 10.1 Tests (pytest — the regression safety net)
+```bash
+RTG_DATA_SOURCE=snapshot .venv/Scripts/python.exe -m pytest -q      # run all
+.venv/Scripts/python.exe -m tests.golden capture                    # re-baseline (INTENTIONAL only)
+```
+- `tests/golden.py` - deterministic golden-master forecast snapshot for the 3 seed programs and
+  40 static bootstrap WIP units. It explicitly ignores mutable `PositionState` and additional
+  configured programs. `capture` writes `tests/golden_forecast.json`; `check` diffs it.
+- `tests/test_regression.py` - seed golden match, golden-state isolation, golden seed scope, and
+  DB-vs-routers configuration parity.
+- `tests/test_pooling.py` - 4 tests for transitive shared-WC and plant-guard pooling.
+- `tests/test_cure_station_contention.py` - serial cure-slot allocation, concurrent-slot behavior,
+  validated seed rules, and wrapper profile propagation. The Radome electrical-seal station remains
+  conservatively configured at one until physical-process calibration confirms one or two stations.
+- `tests/test_program_onboarding.py` - isolated `TEST4` program creation, pooling, forecasting,
+  active-registry forecast stamping, and no ELEV/RAD/AEGIS forecast drift from adding TEST4.
+  It also verifies that dynamic shared capacity honors DB crew and DPAS metadata.
+- `tests/test_ifs_routing_discovery.py` - active-revision selection, tied-revision blocking,
+  explicit revision review, BCA economics/classification, excluded-WC behavior, and onboarding
+  API/page contracts.
+- **Discipline:** run `pytest` after every engine or registry change. Re-capture the golden master
+  only after an intentional static bootstrap/router forecast change, never after a live sync. The current baseline includes the intentional `32687` shared-capacity correction.
+
+### 10.2 Version control (git — NEW)
+Repo `git@github.com:millerrc18/twin-works.git` (pushed over **HTTPS** — GD blocks SSH port 22).
+`.gitignore` excludes DBs (encrypted tokens), `.venv`, `__pycache__`, and the large WI `.docx`
+(>100MB, keep the extracted `.txt`/JSON caches). Commit per step; each step is `pytest`-gated.
 
 ---
 
@@ -389,3 +553,26 @@ RTG_DATA_SOURCE=live ./run.sh              # then click "Connect IFS", browser l
 - IFS MCP OAuth is browser-only (local callback); GPT LLM endpoint currently broken (uses Claude).
 - Isolated tests must use a throwaway DB (real-DB pollution has bitten us).
 - `charts.js` is browser-cached — bump the `?v=` tag when editing or stale JS is served.
+
+---
+
+## 13. Marion Virtual Factory Capacity Map
+
+`GET /factory-map` is a visual-only decision surface for reviewed Marion Plant 2 and Plant 3
+Floor 01 layouts. It renders rasterized VAMA02/VAMA03 plans with accessible work-center markers,
+modeled capacity pressure, WIP and forecast-risk counts, and an HTMX inspector that drills through
+to the existing forecast matrix and Levers pages.
+
+- **Data contract:** `app/data/marion_wc_catalog.v1.json` contains the current TwinWorks and
+  BCA-ready work-center facts captured from IFS `WORK_CENTER_CFV`; building identity comes only
+  from P1/P2/P3 description prefixes. `marion_floor_map.v1.json` holds reviewed coordinates, not
+  scheduler inputs. The VAMA02/VAMA03 PNG assets live in `app/static/floorplans/`.
+- **Read-only telemetry:** `app/services/capacity_metrics.py` derives scheduled WC labor and
+  modeled capacity from the existing pooled simulation profile. `floor_map_service.py` turns that
+  into display data; it does not write WIP, alter the program registry, or change capacity budgets.
+- **Physical-location rules:** `P3 QA` is a mobile resource and appears outside the coordinate
+  canvas. `PRNG` is cataloged but unplaced until a reviewed annotation is supplied. VAMA01 and
+  Plant 4 are out of the initial visual scope.
+- **Open follow-ons:** the map covers current TwinWorks programs plus BCA-ready WCs. #82-1a is the
+  governed complete active P1/P2/P3 catalog refresh; #82-4 adds PRNG/VAMA01/Plant 4 only from
+  reviewed annotations; #82-5 completes authenticated live-map and response-time acceptance.

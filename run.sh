@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start the RTG Forecast app (bash / Git-Bash on Windows).
+# Start TwinWorks (bash / Git-Bash on Windows).
 #   ./run.sh              -> live IFS data (falls back to snapshot until you Connect IFS)
 #   ./run.sh snapshot     -> offline snapshot data only
 #   PORT=8001 ./run.sh    -> override the app port (default 8000)

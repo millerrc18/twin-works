@@ -29,6 +29,8 @@ wis/*.pdf
 
 # ---- generated / local artifacts ----
 program_snapshots/
+output/
+tmp_*.png
 *.log
 probe_*.html
 *.bak
@@ -41,3 +43,7 @@ app/templates_bak/
 Thumbs.db
 .vscode/
 .idea/
+
+# One-off WI extraction scratch artifacts
+_wi_extract_prompt.txt
+_wi_spans.txt
