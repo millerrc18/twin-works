@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set active_page = 'dashboard' %}
+{% set active_page = 'program' %}
 
 {% block cmdtitle %}<h1>{{ program_name }}<span class="sub num">{{ program }} · Operation Tracker</span></h1>{% endblock %}
 {% block cmdright %}
@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block subbar %}
+{% include "partials/program_tabs.html" %}
 <div class="caveat"><b>PRELIMINARY</b> —
   {% if m.slotted %}columns = {{ planning.target_label }} delivery slots (fixed target); assigned serial fills each slot — reassign on a swap.{% else %}columns = units by contract date.{% endif %}
   Forecast = best-case floor + measured slip. Cure floor ≈ <span class="num">{{ m.cure_floor_days }}d</span>. Δ vs target.</div>

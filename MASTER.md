@@ -381,6 +381,20 @@ unchanged. Candidate compilation fails when the live one-to-one mapping differs 
 definition. The 70 inherited review items keep shadow readiness provisional until owners recertify
 them. See `docs/validation/plat-01c-incumbent-parity.md`.
 
+### 5.4 Portfolio console and adaptive workspaces (UI-01b/UI-01c)
+The portfolio home uses `portfolio_service.build_portfolio` as one read-model boundary. It resolves
+all lifecycle/planning contexts, runs the published program set once, aggregates resource demand
+once, and produces separate RTG-plan and contract-risk denominators. OBSERVE and candidate work is
+shown in the maturity ledger and never enters published delivery metrics.
+
+Program navigation is generated from the registry. Each program exposes URL-addressable Overview,
+Schedule, Flow, Units, Resources, Assumptions, and History tabs. Schedule delegates to the existing
+RTG matrix or contract timeline only when publication is effective; otherwise the locked view names
+the lifecycle, configured basis, readiness, epoch, and next gate. Operational tabs remain usable in
+OBSERVE and expose source contract references without computing a target delta. The responsive
+sidebar becomes an inert off-canvas drawer on mobile, so hidden links are not keyboard- or screen-
+reader-accessible. Axe WCAG A/AA audits pass with zero violations.
+
 ---
 
 ## 6. The forecast matrix (the flagship view)

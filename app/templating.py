@@ -24,3 +24,15 @@ def delta_color(days):
 
 templates.env.filters["fmt_date"] = fmt_date
 templates.env.filters["delta_color"] = delta_color
+
+
+def program_navigation():
+    from app.services import program_service
+
+    return [
+        {"code": code, "name": program_service.name(code)}
+        for code in program_service.program_order()
+    ]
+
+
+templates.env.globals["program_navigation"] = program_navigation

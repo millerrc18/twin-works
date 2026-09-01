@@ -8,7 +8,8 @@
 
 **Completed:** Feature #81 is through its local safety gate. The database-backed program registry,
 IFS routing discovery, unknown-WC gate, and `/admin/programs` onboarding UI are implemented. The
-61-test suite includes isolated onboarding, governance, replay, parity, and serial/slot regressions
+62-test suite includes isolated onboarding, governance, replay, parity, serial/slot, and portfolio/
+workspace regressions
 that prove
 pooling, draft
 forecasting, exclusion from authoritative forecast stamping until publication, and no seed-forecast
@@ -31,6 +32,12 @@ production ops; A = 69.603 labor / 104.303 machine hours, C = 69.603 / 104.603. 
 from project `521938`, with all serials resolved from NOTE_TEXT. Its immutable revision-3 candidate
 is in OBSERVE, contract intent is not in force, Schedule is locked, forecast-log rows are zero, and
 all eight resource-binding gaps remain visibly incomplete. ELEV/RAD/AEGIS publication is unchanged.
+
+**Portfolio and program UI:** UI-01b/UI-01c are complete. The home page is a registry-driven
+portfolio console with separate RTG and contract denominators, maturity and source ledgers, and one
+simulation/capacity pass. Every program shares Overview, Schedule, Flow, Units, Resources,
+Assumptions, and History tabs. OBSERVE pages expose evidence but no forecast dates or delivery KPIs.
+Responsive navigation, dark mode, keyboard use, and WCAG A/AA audits passed.
 
 **Resource foundation:** BCA-03a originated at migration `d8ea03f5b7c9`; the local DB has since
 advanced to `dbe1f2a3b4c5`. It contains
@@ -64,8 +71,8 @@ drift policies), so shadow readiness is provisional rather than falsely green.
 External-load snapshots are now append-only and horizon-gated; BCA-03c still owns the live CRP
 capture and tracked-demand de-duplication.
 
-**Next implementation gate:** build UI-01b/UI-01c while BCA evidence accrues. The full
-critic-reviewed order, phase
+**Next implementation gate:** execute BCA-06 layup/autoclave cleanup while BCA finishing evidence
+accrues. The full critic-reviewed order, phase
 gates, and portfolio UI plan are in `TASKS.md` and
 `docs/superpowers/specs/2026-08-28-portfolio-dashboard-planning-basis-design.md`. Keep the
 `RTG_PROGRAM_SOURCE=routers` fallback until the integrated 2-4 week pilot and rollback gate pass.

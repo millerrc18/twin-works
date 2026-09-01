@@ -1,75 +1,74 @@
 {% extends "base.html" %}
 {% set active_page = 'dashboard' %}
 
-{% block cmdtitle %}<h1>Dashboard</h1>{% endblock %}
-{% block cmdright %}<span class="asof">data: {{ data_source|default('snapshot') }}</span>{% endblock %}
+{% block cmdtitle %}<h1>Portfolio operations<span class="sub">program health, evidence, and governing targets</span></h1>{% endblock %}
+{% block cmdright %}<span class="asof">as of <span class="num">{{ portfolio.as_of.strftime('%Y-%m-%d %H:%M') }}</span></span>{% endblock %}
 
 {% block head %}
 <style>
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
-.kpi{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
-.kpi .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
-.kpi .v{font-size:26px;font-weight:600;margin-top:6px;letter-spacing:-.02em;}
-.kpi .s{font-size:11px;color:var(--muted);margin-top:2px;}
-.kpi.alert .v{color:var(--alert);}
-.seclabel{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 12px;}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-.pcard{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:box-shadow .15s,transform .12s,border-color .15s;display:block;}
-.pcard:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);border-color:color-mix(in srgb,var(--brand) 40%,var(--border));}
-.pcard .top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
-.pcard h3{margin:0;font-size:16px;font-weight:600;}
-.pcard .badge2{font-size:10.5px;padding:3px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-weight:500;}
-.pcard .badge2.trained{background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);border-color:transparent;}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin:14px 0;}
-.stat .n{font-size:22px;font-weight:600;} .stat .l{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-top:1px;}
-.stat.behind .n{color:var(--alert);} .stat.stall .n{color:var(--wip-bg);} .stat.zero .n{color:var(--faint);}
-.pnote{font-size:11px;color:var(--muted);border-top:1px solid var(--border2);padding-top:10px;}
-.pnote b{color:var(--text);}
-.spark{height:2px;background:linear-gradient(90deg,var(--early-tx),var(--wip-bg),var(--late-tx));border-radius:2px;margin-top:12px;opacity:.5;}
-.discl{margin-top:18px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:11.5px;color:var(--muted);}
-.discl b{color:var(--text);}
+.portfolio{max-width:1500px;margin:0 auto;}
+.command-strip{display:grid;grid-template-columns:1.05fr 1fr 1fr 1fr 1fr 1.2fr;background:var(--panel);border:1px solid var(--border);border-radius:8px;margin-bottom:20px;overflow:hidden;}
+.command-cell{min-height:84px;padding:14px 16px;border-right:1px solid var(--border2);display:flex;flex-direction:column;justify-content:space-between;}.command-cell:last-child{border-right:0;}
+.command-label{display:flex;align-items:center;gap:7px;color:var(--faint);font-size:9px;text-transform:uppercase;font-weight:700;letter-spacing:.08em;}.command-label svg{width:14px;height:14px;}
+.command-value{font-size:22px;font-weight:650;line-height:1;}.command-value .denom{font-size:12px;color:var(--faint);font-weight:500;}.command-note{font-size:10px;color:var(--muted);}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 8px;}.section-head h2{font-size:13px;margin:0;font-weight:650;}.section-head p{font-size:10px;color:var(--muted);margin:0;}
+.ops-shell{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px;}.ops-scroll{overflow:auto;}
+.ops-table{width:100%;border-collapse:collapse;min-width:1040px;}.ops-table th{padding:8px 10px;background:var(--panel2);border-bottom:1px solid var(--border);font-size:9px;text-transform:uppercase;letter-spacing:.07em;text-align:left;color:var(--faint);font-weight:700;}.ops-table td{padding:10px;border-bottom:1px solid var(--border2);vertical-align:middle;color:var(--muted);font-size:11px;}.ops-table tr:last-child td{border-bottom:0;}.ops-table tbody tr:hover td{background:color-mix(in srgb,var(--brand) 4%,transparent);}.ops-table .program-cell{border-left:3px solid var(--done);}.ops-table tr.unpublished .program-cell{border-left-color:var(--wip-bg);}.program-link{color:var(--text);font-weight:650;font-size:12px;}.program-code{font-size:9px;color:var(--faint);margin-top:2px;}.quiet{color:var(--faint);}
+.state-pill,.basis-pill,.ready-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);border-radius:5px;padding:2px 6px;font-size:9px;font-weight:700;text-transform:uppercase;white-space:nowrap;}.state-pill::before,.ready-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--done);}.state-pill.observe::before,.state-pill.provisional::before,.ready-pill.provisional::before{background:var(--wip-bg);}.ready-pill.incomplete::before{background:var(--alert);}.basis-pill{font-weight:600;color:var(--muted);text-transform:none;}.basis-pill.inactive{border-style:dashed;color:var(--faint);}
+.risk{font-weight:650;color:var(--text);}.risk.late{color:var(--late-tx);}.risk-label{display:block;font-size:9px;color:var(--faint);margin-top:2px;}.pressure{min-width:110px;}.bar{height:4px;background:var(--border2);margin-top:5px;overflow:hidden;}.bar span{display:block;height:100%;background:var(--done);}.bar span.warn{background:var(--wip-bg);}.bar span.hot{background:var(--alert);}.fresh{display:flex;align-items:center;gap:5px;}.fresh::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--done);}.fresh.aging::before{background:var(--wip-bg);}.fresh.stale::before,.fresh.missing::before{background:var(--alert);}
+.maturity{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:18px;}.ledger{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;}.ledger-row{display:grid;grid-template-columns:minmax(150px,.8fr) 110px minmax(190px,1.25fr) 70px;gap:10px;align-items:center;padding:11px 12px;border-bottom:1px solid var(--border2);}.ledger-row:last-child{border-bottom:0;}.ledger-title{font-weight:650;color:var(--text);font-size:11px;}.ledger-next{font-size:10px;color:var(--muted);}.ledger-count{text-align:right;font-size:11px;}.ledger-empty{padding:18px;color:var(--faint);font-size:11px;}
+.source-ledger{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:13px 14px;}.source-ledger h3{font-size:11px;margin:0 0 10px;}.source-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--border2);font-size:10px;}.source-row:last-child{border-bottom:0;}.source-row span:first-child{color:var(--muted);}.source-row b{font-weight:600;color:var(--text);text-align:right;}
+@media(max-width:1050px){.command-strip{grid-template-columns:repeat(3,1fr)}.command-cell:nth-child(3){border-right:0}.command-cell:nth-child(-n+3){border-bottom:1px solid var(--border2)}.maturity{grid-template-columns:1fr;}}
+@media(max-width:620px){.command-strip{grid-template-columns:1fr 1fr}.command-cell{min-height:76px}.command-cell:nth-child(odd){border-right:1px solid var(--border2)}.command-cell:nth-child(even){border-right:0}.command-cell:nth-child(-n+4){border-bottom:1px solid var(--border2)}.section-head{align-items:flex-start;flex-direction:column;gap:3px}.ledger-row{grid-template-columns:1fr auto}.ledger-next{grid-column:1/-1}.ledger-row .basis-pill{justify-self:end}.ledger-count{text-align:left}.ops-shell{margin-left:-14px;margin-right:-14px;border-left:0;border-right:0;border-radius:0}}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="kpis">
-  <div class="kpi"><div class="k">Forecast accuracy</div><div class="v"><span class="num">7.1</span><span style="font-size:13px;color:var(--muted)">d MAE</span></div><div class="s">PRELIMINARY · n=8</div></div>
-  <div class="kpi"><div class="k">On-time delivery</div><div class="v num">↑</div><div class="s">tracked vs RTG target</div></div>
-  <div class="kpi"><div class="k">Throughput</div><div class="v"><span class="num">1.4</span><span style="font-size:13px;color:var(--muted)">/wk</span></div><div class="s">target cadence</div></div>
-  <div class="kpi alert"><div class="k">Binding constraint</div><div class="v num">118%</div><div class="s">WC221 paint · over capacity</div></div>
-</div>
+<div class="portfolio">
+  <section class="command-strip" aria-label="Portfolio command strip">
+    <div class="command-cell"><div class="command-label"><i data-lucide="boxes"></i>Active WIP</div><div class="command-value num">{{ portfolio.total_wip }}</div><div class="command-note">{{ portfolio.total_stalled }} stalled across {{ portfolio.program_count }} programs</div></div>
+    <div class="command-cell"><div class="command-label"><i data-lucide="calendar-range"></i>RTG-plan risk</div><div class="command-value num">{{ portfolio.rtg_late }}<span class="denom"> / {{ portfolio.rtg_denominator }}</span></div><div class="command-note">published plan-slot units only</div></div>
+    <div class="command-cell"><div class="command-label"><i data-lucide="file-clock"></i>Contract risk</div><div class="command-value num">{{ portfolio.contract_late }}<span class="denom"> / {{ portfolio.contract_denominator }}</span></div><div class="command-note">published contract-anchored units only</div></div>
+    <div class="command-cell"><div class="command-label"><i data-lucide="shield-check"></i>Publication</div><div class="command-value num">{{ portfolio.commitment_ready }}<span class="denom"> / {{ portfolio.program_count }}</span></div><div class="command-note">programs commitment-ready</div></div>
+    <div class="command-cell"><div class="command-label"><i data-lucide="activity"></i>Shared pressure</div><div class="command-value num">{{ portfolio.pressure_over }}<span class="denom"> over</span></div><div class="command-note">{{ portfolio.pressure_near }} near · published baseline</div></div>
+    <div class="command-cell"><div class="command-label"><i data-lucide="clipboard-check"></i>Governance debt</div><div class="command-value num">{{ portfolio.open_reviews + portfolio.coverage_debt }}</div><div class="command-note">{{ portfolio.open_reviews }} reviews · {{ portfolio.coverage_debt }} coverage gaps</div></div>
+  </section>
 
-<div class="seclabel">Programs</div>
-<div class="cards">
-  {% for p in programs %}
-  <a href="/forecast/{{ p.program }}" class="pcard">
-    <div class="top">
-      <div><h3>{{ p.name }}</h3><div class="num" style="font-size:11px;color:var(--faint);margin-top:2px">{{ p.program }}</div></div>
-      {% if p.forecast_visibility == 'PUBLISHED' %}
-      <span class="badge2 {{ 'trained' if p.model_status=='TRAINED' else '' }}">{{ p.model_status }}{% if p.model_status=='EMPIRICAL' %} · n=<span class="num">{{ p.n_scored }}</span>{% endif %}</span>
-      {% else %}<span class="badge2">{{ p.lifecycle_state|replace('_',' ')|title }}</span>{% endif %}
-    </div>
-    {% if p.forecast_visibility == 'PUBLISHED' %}
-    <div class="stats">
-      <div class="stat"><div class="n num">{{ p.wip }}</div><div class="l">WIP</div></div>
-      <div class="stat {{ 'behind' if p.behind else 'zero' }}"><div class="n num">{{ p.behind }}</div><div class="l">behind</div></div>
-      <div class="stat {{ 'stall' if p.stalled else 'zero' }}"><div class="n num">{{ p.stalled }}</div><div class="l">stalled</div></div>
-    </div>
-    <div class="pnote">Model runs <b><span class="num">{{ p.bias_days }}d</span></b> optimistic — P50 de-biases, P80 adds slack.</div>
-    <div class="spark"></div>
-    {% else %}
-    <div class="stats">
-      <div class="stat"><div class="n num">{{ p.wip }}</div><div class="l">WIP observed</div></div>
-      <div class="stat {{ 'stall' if p.stalled else 'zero' }}"><div class="n num">{{ p.stalled }}</div><div class="l">stalled</div></div>
-      <div class="stat"><div class="n" style="font-size:14px">{{ p.resource_health.readiness|title }}</div><div class="l">readiness</div></div>
-    </div>
-    <div class="pnote"><b>{{ p.plan_label or p.planning_basis|replace('_',' ')|title }}</b> is configured but not in force. Operational evidence only; no forecast or delivery KPI is published.</div>
-    {% endif %}
-  </a>
-  {% endfor %}
-</div>
+  <section aria-labelledby="program-ops-title">
+    <div class="section-head"><div><h2 id="program-ops-title">Program operating picture</h2><p>Risk measures remain separated by governing target and publication state.</p></div><p>{{ portfolio.commitment_ready }} of {{ portfolio.program_count }} programs publish delivery metrics</p></div>
+    <div class="ops-shell"><div class="ops-scroll"><table class="ops-table">
+      <thead><tr><th>Program</th><th>Lifecycle</th><th>Planning basis</th><th>WIP</th><th>Target risk</th><th>Current activity</th><th>Resource state</th><th>Freshness</th></tr></thead>
+      <tbody>
+      {% for p in portfolio.programs %}
+      <tr class="{{ 'unpublished' if not p.basis_effective else '' }}">
+        <td class="program-cell"><a class="program-link" href="/program/{{ p.code }}/overview">{{ p.name }}</a><div class="program-code num">{{ p.code }}{% if p.candidate_epoch %} · candidate {{ p.candidate_state|lower }}{% endif %}</div></td>
+        <td><span class="state-pill {{ p.lifecycle|lower }}">{{ p.lifecycle|replace('_',' ') }}</span></td>
+        <td><span class="basis-pill {{ 'inactive' if not p.basis_effective else '' }}">{{ p.basis_label }}{% if not p.basis_effective %} · not in force{% endif %}</span>{% if p.plan_source or p.plan_version %}<span class="risk-label">{{ p.plan_source or 'Registry' }}{% if p.plan_version %} · {{ p.plan_version }}{% endif %}</span>{% endif %}</td>
+        <td><span class="num risk">{{ p.wip }}</span>{% if p.stalled %}<span class="risk-label">{{ p.stalled }} stalled</span>{% endif %}</td>
+        <td>{% if p.risk is not none %}<span class="num risk {{ 'late' if p.risk else '' }}">{{ p.risk }} / {{ p.risk_denominator }}</span><span class="risk-label">vs {{ p.basis_label }}</span>{% else %}<span class="quiet">Not published</span>{% endif %}</td>
+        <td>{% if p.dominant_wc %}<span class="num">{{ p.dominant_wc }}</span><span class="risk-label">{{ p.dominant_wc_units }} active units</span>{% else %}<span class="quiet">No active operation</span>{% endif %}</td>
+        <td><span class="ready-pill {{ p.readiness|lower }}">{{ p.readiness }}</span>{% if p.issue_count %}<span class="risk-label">{{ p.issue_count }} open gaps</span>{% elif p.pressure_pct is not none %}<div class="pressure"><span class="risk-label">{{ p.pressure_wc }} · {{ p.pressure_pct }}%</span><div class="bar"><span class="{{ 'hot' if p.pressure_pct>100 else ('warn' if p.pressure_pct>=85 else '') }}" style="width:{{ [p.pressure_pct,100]|min }}%"></span></div></div>{% endif %}</td>
+        <td><span class="fresh {{ p.freshness_state }}">{{ p.freshness }}</span></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table></div></div>
+  </section>
 
-<div class="discl"><b>PRELIMINARY.</b> Accuracy is EMPIRICAL (backtest n=8 recent-production ships, directional).
-Forecasts show a de-biased P50 + conservative P80 — best-case floor plus measured slip, not a guaranteed
-delivery date. The forward log accrues honest accuracy as units ship.</div>
+  <section class="maturity" aria-labelledby="maturity-title">
+    <div><div class="section-head"><div><h2 id="maturity-title">Maturity and review ledger</h2><p>Candidate work remains separate from published delivery commitments.</p></div></div>
+      <div class="ledger">
+      {% for p in portfolio.maturity %}
+        <a class="ledger-row" href="/program/{{ p.code }}/assumptions"><div><div class="ledger-title">{{ p.name }}</div><div class="program-code num">{{ p.candidate_epoch or p.epoch_key }}</div></div><span class="state-pill {{ p.candidate_state|lower }}">{{ p.candidate_state|replace('_',' ') }}</span><div class="ledger-next">{{ p.next_gate }}</div><div class="ledger-count num">{{ p.issue_count }} gaps</div></a>
+      {% else %}<div class="ledger-empty">No candidate epochs require review.</div>{% endfor %}
+      </div>
+    </div>
+    <aside><div class="section-head"><div><h2>Source ledger</h2><p>Freshness is stated by source, never implied.</p></div></div><div class="source-ledger">
+      <div class="source-row"><span>Position and WIP state</span><b>{{ portfolio.as_of.strftime('%Y-%m-%d %H:%M') }}</b></div>
+      <div class="source-row"><span>Latest successful refresh</span><b>{% if portfolio.latest_sync %}{{ portfolio.latest_sync.strftime('%Y-%m-%d %H:%M') }}{% else %}No completed sync{% endif %}</b></div>
+      <div class="source-row"><span>Governed assumptions</span><b>{{ portfolio.open_reviews }} reviews open</b></div>
+      <div class="source-row"><span>Shared capacity</span><b>Pressure board deferred to UI-01d</b></div>
+    </div></aside>
+  </section>
+</div>
 {% endblock %}

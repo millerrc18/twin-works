@@ -10,6 +10,7 @@
   <script src="https://unpkg.com/htmx.org@2.0.0"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
   :root{
@@ -32,6 +33,8 @@
   body{margin:0;background:var(--canvas);color:var(--text);font-size:13px;transition:background .15s,color .15s;}
   a{color:inherit;text-decoration:none;}
   :focus-visible{outline:2px solid var(--focus);outline-offset:1px;border-radius:4px;}
+  .skip{position:fixed;left:12px;top:-48px;z-index:100;background:var(--text);color:var(--panel);padding:8px 12px;border-radius:6px;}
+  .skip:focus{top:10px;}
   .layout{display:flex;height:100vh;overflow:hidden;}
   /* sidebar */
   .side{width:224px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;}
@@ -40,13 +43,18 @@
   .brand b{font-size:14px;font-weight:600;letter-spacing:-.01em;}
   .nav{flex:1;padding:14px 10px;overflow:auto;}
   .nlabel{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:6px 8px;margin-top:8px;}
-  .nlink{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;color:var(--muted);font-size:13px;margin-bottom:1px;cursor:pointer;}
+  .nlink{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;color:var(--muted);font-size:13px;margin-bottom:1px;cursor:pointer;}
+  .nlink svg{width:15px;height:15px;flex:0 0 auto;stroke-width:1.7;}
+  .nlink .navtext{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .nlink .cnt{margin-left:auto;}
   .nlink:hover{background:var(--panel2);color:var(--text);}
-  .nlink.active{background:color-mix(in srgb,var(--brand) 12%,transparent);color:var(--brand);font-weight:500;}
+  .nlink.active{background:color-mix(in srgb,var(--brand) 12%,transparent);color:#245fbd;font-weight:500;}
+  .dark .nlink.active{color:var(--brand);}
   .nlink .cnt{font-size:11px;}
   .sfoot{padding:12px;border-top:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;gap:6px;}
   .pill{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:500;}
-  .pill.live{background:color-mix(in srgb,var(--done) 14%,transparent);color:var(--done);}
+  .pill.live{background:color-mix(in srgb,var(--done) 14%,transparent);color:#176b3b;}
+  .dark .pill.live{color:var(--done);}
   .pill.snap{background:var(--panel2);color:var(--muted);border:1px solid var(--border);}
   .connect{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--brand);color:#fff;font-weight:500;}
   .tgl{width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
@@ -63,6 +71,11 @@
   .badge{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-weight:500;}
   .badge.trained{background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);border-color:transparent;}
   .content{flex:1;overflow:auto;padding:22px;}
+  .mobilebar{display:none;height:48px;align-items:center;gap:10px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--border);}
+  .iconbtn{width:32px;height:32px;border:1px solid var(--border);border-radius:7px;background:var(--panel);color:var(--text);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+  .iconbtn svg{width:17px;height:17px;}
+  .mobilebrand{font-size:13px;font-weight:600;}
+  .navshade{display:none;}
   /* shared components */
   .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;}
   .seg{display:inline-flex;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:2px;font-size:12px;}
@@ -70,30 +83,42 @@
   .seg a.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08);}
   .caveat{padding:7px 22px;font-size:11.5px;color:var(--muted);border-bottom:1px solid var(--border2);background:var(--panel2);}
   .caveat b{color:var(--text);}
+  .workspace-nav{display:flex;align-items:center;gap:2px;padding:6px 18px;background:var(--panel);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:thin;}
+  .workspace-nav a{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:5px 9px;border-radius:5px;color:var(--muted);font-size:10px;font-weight:600;white-space:nowrap;border:1px solid transparent;}
+  .workspace-nav a:hover{background:var(--panel2);color:var(--text);}.workspace-nav a.on{background:color-mix(in srgb,var(--brand) 9%,transparent);color:#245fbd;border-color:color-mix(in srgb,var(--brand) 18%,var(--border));}.dark .workspace-nav a.on{color:var(--brand);}
+  .workspace-nav svg{width:13px;height:13px;}
   select{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:6px;}
-  @media print{.side,.tgl{display:none;}.main{overflow:visible;}.content{overflow:visible;padding:0;}}
+  @media(max-width:760px){
+    .layout{height:100dvh;}.side{position:fixed;inset:0 auto 0 0;z-index:70;width:min(286px,84vw);transform:translateX(-102%);transition:transform .18s ease;box-shadow:10px 0 28px rgba(0,0,0,.18);}.side.open{transform:translateX(0);}
+    .navshade{display:block;position:fixed;inset:0;z-index:60;background:rgba(8,12,20,.42);border:0;}
+    .main{width:100%;}.mobilebar{display:flex;}.cmd{min-height:58px;padding:8px 14px;align-items:flex-start;}.cmd .right{justify-content:flex-end;gap:7px;}.cmd h1{font-size:15px;}.cmd .sub{display:block;margin:2px 0 0;font-size:10px;}.content{padding:14px;}.caveat{padding:7px 14px;}.workspace-nav{padding:6px 10px;}
+  }
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;}}
+  @media print{.side,.tgl,.mobilebar,.navshade{display:none;}.main{overflow:visible;}.content{overflow:visible;padding:0;}}
   </style>
   {% block head %}{% endblock %}
 </head>
-<body>
+<body x-data="{navOpen:false,mobile:window.matchMedia('(max-width:760px)').matches}" @resize.window="mobile=window.matchMedia('(max-width:760px)').matches;if(!mobile)navOpen=false">
+<a class="skip" href="#main-content">Skip to content</a>
 <div class="layout">
-  <aside class="side">
+  <button x-cloak x-show="navOpen" class="navshade" @click="navOpen=false" aria-label="Close navigation"></button>
+  <aside class="side" :class="{'open':navOpen}" :inert="mobile && !navOpen" :aria-hidden="(mobile && !navOpen).toString()" aria-label="Primary navigation">
     <div class="brand">
       <div class="logo"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 13L8 3l5 10" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.2 10h5.6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg></div>
       <b>TwinWorks</b>
     </div>
     <nav class="nav">
       <div class="nlabel">Workspace</div>
-      <a href="/" class="nlink {{ 'active' if active_page=='dashboard' else '' }}">Dashboard</a>
+      <a href="/" @click="navOpen=false" class="nlink {{ 'active' if active_page=='dashboard' else '' }}"><i data-lucide="layout-dashboard"></i><span class="navtext">Portfolio</span></a>
       <div class="nlabel">Programs</div>
-      <a href="/forecast/ELEV" class="nlink {{ 'active' if program=='ELEV' else '' }}"><span>G500 Elevator</span></a>
-      <a href="/forecast/RAD" class="nlink {{ 'active' if program=='RAD' else '' }}"><span>Aeronose Radome</span></a>
-      <a href="/forecast/AEGIS" class="nlink {{ 'active' if program=='AEGIS' else '' }}"><span>Aegis Reflector</span></a>
+      {% for item in program_navigation() %}
+      <a href="/program/{{ item.code }}/overview" @click="navOpen=false" class="nlink {{ 'active' if program==item.code else '' }}"><i data-lucide="box"></i><span class="navtext">{{ item.name }}</span></a>
+      {% endfor %}
       <div class="nlabel">Tools</div>
-      <a href="/factory-map" class="nlink {{ 'active' if active_page=='factory-map' else '' }}">Factory map</a>
-      <a href="/admin/resources" class="nlink {{ 'active' if active_page=='resources' else '' }}">Resources</a>
-      <a href="/levers" class="nlink {{ 'active' if active_page=='levers' else '' }}">Levers</a>
-      <a href="/admin/model-status" class="nlink {{ 'active' if active_page=='admin' else '' }}">Admin</a>
+      <a href="/factory-map" @click="navOpen=false" class="nlink {{ 'active' if active_page=='factory-map' else '' }}"><i data-lucide="map"></i><span class="navtext">Factory map</span></a>
+      <a href="/admin/resources" @click="navOpen=false" class="nlink {{ 'active' if active_page=='resources' else '' }}"><i data-lucide="gauge"></i><span class="navtext">Resources</span></a>
+      <a href="/levers" @click="navOpen=false" class="nlink {{ 'active' if active_page=='levers' else '' }}"><i data-lucide="sliders-horizontal"></i><span class="navtext">Scenarios</span></a>
+      <a href="/admin/model-status" @click="navOpen=false" class="nlink {{ 'active' if active_page=='admin' else '' }}"><i data-lucide="settings"></i><span class="navtext">Administration</span></a>
     </nav>
     <div class="sfoot">
       {% if data_source=='live' %}<span class="pill live">● live IFS</span>
@@ -104,6 +129,7 @@
     </div>
   </aside>
   <div class="main">
+    <div class="mobilebar"><button class="iconbtn" @click="navOpen=true" title="Open navigation" aria-label="Open navigation"><i data-lucide="menu"></i></button><span class="mobilebrand">TwinWorks</span></div>
     <div class="cmd">
       <div>{% block cmdtitle %}<h1>{{ app_name|default("TwinWorks") }}</h1>{% endblock %}</div>
       <div class="right">{% block cmdright %}
@@ -111,11 +137,13 @@
       {% endblock %}</div>
     </div>
     {% block subbar %}{% endblock %}
-    <div class="content">{% block content %}{% endblock %}</div>
+    <main class="content" id="main-content">{% block content %}{% endblock %}</main>
   </div>
 </div>
 <script>
 function rtgTheme(){document.documentElement.classList.toggle('dark');localStorage.setItem('rtg-theme',document.documentElement.classList.contains('dark')?'dark':'light');}
+document.addEventListener('DOMContentLoaded',()=>{if(window.lucide)lucide.createIcons();});
+document.body.addEventListener('htmx:afterSwap',()=>{if(window.lucide)lucide.createIcons();});
 </script>
 {% block scripts %}{% endblock %}
 </body>

@@ -19,6 +19,8 @@ operational workflows.
   in legacy-shadow mode; resource records do not change allocation until separately activated.
 - Preserves published legacy forecasts while replayable `OBSERVE` candidates validate DB-backed
   resource profiles and surface assumption-review debt without publishing shadow dates.
+- Provides a portfolio operating console and shared program workspaces with lifecycle-safe Overview,
+  Schedule, Flow, Units, Resources, Assumptions, and History views.
 - Rejects external-load inputs that do not cover the forecast horizon unless a governed
   extrapolation policy is present.
 - Supports offline snapshot mode and OAuth-backed live IFS refreshes.
@@ -65,8 +67,8 @@ reviewed and documented.
 
 ## Current Priorities
 
-See `TASKS.md`. BCA finishing is registered for observation-only data collection; the next platform
-step is the portfolio console and adaptive program workspace. Physical shared-pool,
+See `TASKS.md`. BCA finishing is registered for observation-only data collection and the portfolio/
+workspace UI is complete. The next platform step is BCA layup/autoclave state cleanup. Physical shared-pool,
 external-demand, tooling, and BCA machine/dwell activation remain gated on reviewed evidence.
 The Marion virtual factory is live for reviewed P2/P3 locations and remains visual-only. It must
 not change simulation inputs without a separate approved design. Follow-ons #82-1a, #82-4, and

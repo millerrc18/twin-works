@@ -132,7 +132,7 @@ shadow. BCA starts without a commitment-ready epoch and therefore enters the pla
       lifecycle gating; separate forecast-log target fields; registry-derived labels; locked
       Schedule views outside commitment-ready states; and no AEGIS code special case or silent
       plan-to-contract fallback.
-  - [ ] **UI-01b - Replace the dashboard with a portfolio operations console**
+  - [x] **UI-01b - Replace the dashboard with a portfolio operations console**
     - Add a command strip, dense program operating table, and maturity/review ledger. Keep RTG-plan
       adherence and contract exposure separately labeled and exclude OBSERVE/PROVISIONAL programs
       from delivery KPIs. Label every aggregate denominator, show source-specific freshness, and
@@ -140,13 +140,24 @@ shadow. BCA starts without a commitment-ready epoch and therefore enters the pla
     - Acceptance: one registry-driven dashboard handles all programs without hardcoded cards or
       static KPIs and uses one pooled simulation/read-model pass per request. Keyboard/focus,
       color-independent status, epoch badges, and lifecycle suppression are part of this phase.
-  - [ ] **UI-01c - Add adaptive program workspaces and dynamic navigation**
+    - Delivered 2026-09-01: replaced the static KPI/card dashboard with a dense portfolio command
+      strip, registry-driven operating table, target-specific RTG/contract denominators, published-
+      baseline shared-pressure signal, maturity/review ledger, and source ledger. Each request uses
+      one published-program simulation and one capacity aggregation; five live requests averaged
+      3.29 seconds (2.84-4.63 seconds). BCA remains outside delivery-risk denominators.
+  - [x] **UI-01c - Add adaptive program workspaces and dynamic navigation**
     - Provide Overview, Schedule, Flow, Units, Resources, Assumptions, and History drill-downs.
       PLAN_SLOTS programs retain the RTG matrix; CONTRACT_DATES programs use a contract timeline;
       OBSERVE/PROVISIONAL programs expose evidence and constraints without forecast dates.
     - Acceptance: navigation is registry-driven, URLs retain review state, and every lifecycle/
       planning-basis combination has an intentional state. Schedule remains visibly locked outside
       commitment-ready states and explains lifecycle, basis, evidence gaps, owner, and next gate.
+    - Delivered 2026-09-01: added registry-driven sidebar navigation and URL-addressable Overview,
+      Schedule, Flow, Units, Resources, Assumptions, and History workspaces. Published RTG/contract
+      schedules retain their existing views; OBSERVE programs expose operational evidence and
+      governed gaps while Schedule stays locked. Mobile navigation is off-canvas and inert while
+      closed. Desktop/mobile, light/dark, keyboard interaction, and axe WCAG A/AA checks pass with
+      zero violations.
   - [ ] **UI-01d - Add the cross-program shared-capacity pressure board**
     - Show physical capacity, tracked and external demand, consuming programs, oversubscription,
       readiness, and drill-through to Resources, Factory Map, and affected units.
@@ -161,7 +172,7 @@ shadow. BCA starts without a commitment-ready epoch and therefore enters the pla
 
 ### Proposed Execution Order
 
-Items 1-5 are complete. The next execution target is item 6, UI-01b/UI-01c portfolio and workspace work.
+Items 1-6 are complete. The next execution target is item 7, BCA-06 layup/autoclave cleanup.
 
 1. PLAT-01a lifecycle, transition ownership, and immutable epoch behavior.
 2. UI-01a explicit planning-basis, target, and forecast-visibility semantics.

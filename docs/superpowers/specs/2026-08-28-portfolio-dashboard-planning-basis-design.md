@@ -1,6 +1,7 @@
 # TwinWorks Portfolio Dashboard and Planning-Basis Design
 
-**Status:** Approved 2026-08-28; UI-01a delivered 2026-08-31; UI-01b through UI-01e remain
+**Status:** Approved 2026-08-28; UI-01a delivered 2026-08-31; UI-01b/UI-01c delivered 2026-09-01;
+UI-01d/UI-01e remain
 
 ## Purpose
 

@@ -1,6 +1,6 @@
 """Dashboard + forecast routes."""
 import json
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.templating import templates
@@ -33,22 +33,44 @@ async def _plan_targets(db: AsyncSession, ds, program: str, planning):
 @router.get("/")
 async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
     ds = await _ds(db)
-    active_programs = await PLANNING.published_programs(db, PSVC.program_order())
-    simulation = FS._pooled_sim(ds, active_programs)
-    cards = []
-    for p in PSVC.program_order():
-        planning = await PLANNING.context_for_program(db, p)
-        _slots, plan_targets = await _plan_targets(db, ds, p, planning)
-        s = FS.program_summary(
-            ds, p, planning=planning, plan_targets=plan_targets,
-            programs=active_programs, simulation=simulation)
-        s["name"] = PSVC.name(p)
-        s["resource_health"] = await REX.program_readiness(db, p, ds.as_of().date())
-        cards.append(s)
+    from app.services.portfolio_service import build_portfolio
+    portfolio = await build_portfolio(db, ds)
     return templates.TemplateResponse(request, "dashboard.html",
                                       {"app_name": settings.app_name,
                                        "data_source": settings.data_source,
-                                       "programs": cards})
+                                       "portfolio": portfolio,
+                                       "programs": portfolio["programs"]})
+
+
+@router.get("/program/{program}")
+async def program_home(program: str):
+    return RedirectResponse(f"/program/{program.upper()}/overview", status_code=302)
+
+
+@router.get("/program/{program}/{tab}")
+async def program_workspace(request: Request, program: str, tab: str,
+                            db: AsyncSession = Depends(get_db)):
+    from app.services.portfolio_service import WORKSPACE_TABS, build_program_workspace
+
+    program = program.upper()
+    valid_tabs = {key for key, _label in WORKSPACE_TABS}
+    if tab not in valid_tabs:
+        raise HTTPException(status_code=404, detail="Unknown program workspace tab")
+    if tab == "schedule":
+        return RedirectResponse(f"/forecast/{program}", status_code=302)
+    try:
+        workspace = await build_program_workspace(db, await _ds(db), program, tab)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Unknown program") from None
+    return templates.TemplateResponse(request, "program_workspace.html", {
+        "app_name": settings.app_name,
+        "data_source": settings.data_source,
+        "program": program,
+        "program_name": workspace["program_name"],
+        "workspace": workspace,
+        "planning": workspace["planning"],
+        "active_tab": tab,
+    })
 
 
 @router.get("/forecast/{program}")
@@ -62,7 +84,8 @@ async def forecast(request: Request, program: str, view: str = "matrix",
     planning = await PLANNING.context_for_program(db, program)
     ctx = {"app_name": settings.app_name, "data_source": settings.data_source,
            "program": program, "program_name": PSVC.name(program),
-           "view": view, "flt": filter, "selected_serial": serial}
+           "view": view, "flt": filter, "selected_serial": serial,
+           "active_tab": "schedule"}
     ctx["planning"] = planning
     ctx["resource_health"] = await REX.program_readiness(db, program, ds.as_of().date())
     if planning.forecast_visibility != "PUBLISHED":

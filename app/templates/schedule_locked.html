@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% set active_page = 'dashboard' %}
+{% set active_page = 'program' %}
 
 {% block cmdtitle %}<h1>{{ program_name }}<span class="sub num">{{ program }} · Schedule</span></h1>{% endblock %}
 {% block cmdright %}
   <span class="badge">{{ planning.lifecycle_state|replace('_',' ')|title }}</span>
   <span class="badge">{{ planning.target_label }} · not in force</span>
 {% endblock %}
+{% block subbar %}{% include "partials/program_tabs.html" %}{% endblock %}
 
 {% block head %}<style>
 .locked{max-width:760px;margin:32px auto;border-left:4px solid var(--brand);padding:8px 0 8px 22px;}

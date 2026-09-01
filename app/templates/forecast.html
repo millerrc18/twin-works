@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set active_page = 'dashboard' %}
+{% set active_page = 'program' %}
 
 {% block cmdtitle %}<h1>{{ program_name }}<span class="sub num">{{ program }} · Forecast</span></h1>{% endblock %}
 {% block cmdright %}
@@ -7,6 +7,7 @@
   {% include "partials/view_toggle.html" %}
   <a href="/admin/resources" class="badge" title="Resource assumptions governing this program">Resources: {{ resource_health.readiness|title }}</a>
 {% endblock %}
+{% block subbar %}{% include "partials/program_tabs.html" %}{% endblock %}
 
 {% block head %}
 <style>

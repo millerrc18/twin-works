@@ -13,8 +13,8 @@ have actually bitten us. For the full human-facing reference see **MASTER.md**.
 **Current status:** Feature #81 is through its local safety gate; Feature #82 adds the read-only
 Marion virtual factory; BCA-01/02 provide revision-aware, economics-preserving IFS discovery; and
 PLAT-01a through PLAT-01c add governed model lifecycles, planning-basis isolation, recertification,
-and replayable incumbent shadows. BCA-05a now adds live observation-only finishing data. The
-regression suite has **61 passing
+and replayable incumbent shadows. BCA-05a adds live observation-only finishing data, and UI-01b/
+UI-01c provide the portfolio console and adaptive workspaces. The regression suite has **62 passing
 tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
 
@@ -39,9 +39,9 @@ intentionally contains the #81/#82, resource-registry, lifecycle, and documentat
 
 **Remaining work:**
 1. **#32b station calibration:** confirm the one-versus-two Plant 3 Radome electrical-seal station count. The allocator is live with a documented conservative value of one; see `TASKS.md`.
-2. **Platform/BCA execution:** UI-01a, PLAT-01a through PLAT-01c, and BCA-05a are complete. Next
-   build UI-01b/UI-01c while the BCA observation stream accrues. Follow the approved order and gates
-   in `TASKS.md`. BCA-01/02
+2. **Platform/BCA execution:** UI-01a through UI-01c, PLAT-01a through PLAT-01c, and BCA-05a are
+   complete. Next clean and quarantine the BCA layup/autoclave stream in BCA-06 while the finishing
+   observation stream accrues. Follow the approved order and gates in `TASKS.md`. BCA-01/02
    are complete; live revision-3 discovery
    shows A = 69.603 labor / 104.303 machine hours and C = 69.603 / 104.603.
    The BCA-03 evidence pass found `P3TRI`, `TRI A`, `PRNG`, and `P3NDI` are site-shared and
@@ -97,6 +97,10 @@ intentionally contains the #81/#82, resource-registry, lifecycle, and documentat
 - Forecast-log snapshots use schema-v3 replay envelopes. Schema-v2 historical snapshots remain
   valid profile evidence but are intentionally reported as non-replayable because their WIP inputs
   and results were never captured.
+- Portfolio and workspace routes must keep published and candidate metrics separate. The portfolio
+  read model performs one published-program simulation and one capacity aggregation. OBSERVE tabs
+  may show WIP, flow, source contract references, resources, assumptions, and history, but never P50,
+  P80, target deltas, or behind counts. Program navigation comes from `program_service`, not code.
 - Console is cp1252; use `PYTHONIOENCODING=utf-8` for non-ASCII output. Use a fresh port if a local uvicorn process is already listening.
 
 ---

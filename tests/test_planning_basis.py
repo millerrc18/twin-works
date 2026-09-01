@@ -102,11 +102,11 @@ def test_routes_use_basis_labels_and_lock_draft_schedule(tmp_path, monkeypatch):
         assert "Schedule is not published" in locked_page.text
         assert "Contract (not yet in force)" in locked_page.text
         assert "Observed Program" in locked_page.text
-        observed_card = dashboard_page.text.split('href="/forecast/TEST4"', 1)[1].split(
-            "</a>", 1)[0]
+        observed_card = dashboard_page.text.split(
+            '<a class="program-link" href="/program/TEST4/overview">', 1
+        )[1].split("</tr>", 1)[0]
         assert "Observe" in observed_card
-        assert "WIP observed" in observed_card
-        assert "no forecast or delivery KPI is published" in observed_card
+        assert "Not published" in observed_card
         assert "Model runs" not in observed_card
         assert ">behind<" not in observed_card
     finally:

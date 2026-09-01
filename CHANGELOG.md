@@ -5,6 +5,24 @@ work landed. Git is active for this repository; this file is the human-facing im
 See MASTER.md for the full architecture reference and AGENTS.md for working rules and the current
 handoff.
 
+## 2026-09-01 - Portfolio operations console and adaptive program workspaces
+- Completed UI-01b: replaced the hardcoded dashboard cards and static KPIs with a registry-driven
+  portfolio command strip, dense operating table, separately labeled RTG-plan and contract-risk
+  denominators, published-baseline shared-pressure signal, maturity/review ledger, and source
+  freshness ledger. The route performs one pooled simulation and one resource aggregation.
+- Completed UI-01c: added dynamic program navigation and URL-addressable Overview, Schedule, Flow,
+  Units, Resources, Assumptions, and History workspaces. Published program schedules preserve the
+  existing matrix/timeline behavior; OBSERVE workspaces expose position and evidence without dates
+  or delivery KPIs, and Schedule remains visibly locked.
+- Replaced the fixed mobile sidebar with an off-canvas drawer that is inert while closed and closes
+  after navigation. Added a skip link, Lucide tool icons, shared program tabs, responsive tables,
+  and explicit plan-source, epoch, readiness, and next-gate labels.
+- Added route/read-model regression coverage proving one portfolio simulation/capacity pass,
+  registry-driven navigation, BCA lifecycle suppression, and all workspace states. Desktop/mobile
+  and light/dark visual checks passed; interactive mobile drawer checks passed; axe WCAG A/AA audits
+  report zero violations. Five live portfolio requests averaged 3.29 seconds (2.84-4.63 seconds).
+- Full suite: 62 passing tests; Ruff and the static golden forecast remain exact.
+
 ## 2026-08-31 - Planning basis, recertification, and incumbent shadow parity
 - Completed BCA-05a observation registration from the app's authenticated IFS session. `BCAFIN`
   now tracks 73 live finishing orders with zero unresolved NOTE_TEXT serials under immutable
