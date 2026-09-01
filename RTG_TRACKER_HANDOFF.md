@@ -4,11 +4,11 @@
 > workflow. It is not the operating handoff for the current web application. For TwinWorks app
 > architecture and working rules, read `MASTER.md` and `AGENTS.md` first.
 
-## Current TwinWorks handoff (2026-08-31)
+## Current TwinWorks handoff (2026-09-01)
 
 **Completed:** Feature #81 is through its local safety gate. The database-backed program registry,
 IFS routing discovery, unknown-WC gate, and `/admin/programs` onboarding UI are implemented. The
-62-test suite includes isolated onboarding, governance, replay, parity, serial/slot, and portfolio/
+65-test suite includes isolated onboarding, governance, replay, parity, serial/slot, portfolio/
 workspace regressions
 that prove
 pooling, draft
@@ -32,6 +32,12 @@ production ops; A = 69.603 labor / 104.303 machine hours, C = 69.603 / 104.603. 
 from project `521938`, with all serials resolved from NOTE_TEXT. Its immutable revision-3 candidate
 is in OBSERVE, contract intent is not in force, Schedule is locked, forecast-log rows are zero, and
 all eight resource-binding gaps remain visibly incomplete. ELEV/RAD/AEGIS publication is unchanged.
+
+**BCA layup quarantine:** BCA-06 is complete as a blocked, separate stream. A live revision-3
+audit found 12 op-9999-closed/SO-Started conflicts; all are append-only quarantines and excluded
+from TRI L/ATUP conclusions. Seventeen orders remain eligible. TRI L labor and ATUP operator/
+six-hour occupancy semantics are defined, but staffing, slot count, compatibility, calendar, and
+external reserve are unapproved. `BCALAY` is not onboarded.
 
 **Portfolio and program UI:** UI-01b/UI-01c are complete. The home page is a registry-driven
 portfolio console with separate RTG and contract denominators, maturity and source ledgers, and one
@@ -71,8 +77,8 @@ drift policies), so shadow readiness is provisional rather than falsely green.
 External-load snapshots are now append-only and horizon-gated; BCA-03c still owns the live CRP
 capture and tracked-demand de-duplication.
 
-**Next implementation gate:** execute BCA-06 layup/autoclave cleanup while BCA finishing evidence
-accrues. The full critic-reviewed order, phase
+**Next implementation gate:** execute BCA-03b physical labor-pool definition in shadow while BCA
+finishing evidence accrues. The full critic-reviewed order, phase
 gates, and portfolio UI plan are in `TASKS.md` and
 `docs/superpowers/specs/2026-08-28-portfolio-dashboard-planning-basis-design.md`. Keep the
 `RTG_PROGRAM_SOURCE=routers` fallback until the integrated 2-4 week pilot and rollback gate pass.

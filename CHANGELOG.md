@@ -5,6 +5,25 @@ work landed. Git is active for this repository; this file is the human-facing im
 See MASTER.md for the full architecture reference and AGENTS.md for working rules and the current
 handoff.
 
+## 2026-09-01 - BCA layup state quarantine and resource boundary
+- Completed BCA-06 as a governed pre-onboarding cleanup. Live IFS selected revision 3 / alternative
+  `*` for `3301ED0032-101`: 29 open orders, 26 route rows, and 19 production operations after fixing
+  op-2 `Change Notes (NOWB)` classification. Included route economics are 86.2 labor hours and 72.0
+  machine hours.
+- Found 12 current terminal/state conflicts (backlog expected 10): each order remains `Started`
+  while op 9999 is status 90. Added migration `fdb4c5d6e7f8` and an append-only OPEN/RESOLVE/REOPEN
+  quarantine event stream. Reconciliation is idempotent and performs no IFS writes.
+- Excluded quarantined orders from layup demand conclusions. The 17 eligible orders include 14 with
+  remaining demand: TRI L 921.0 labor hours / 756.0 machine-hours evidence, and ATUP 51.8 operator
+  hours / 84.0 occupancy hours.
+- Added a validated blocked policy separating TRI L gross-site labor effort, ATUP operator effort,
+  and ATUP one-slot-per-unit 6-hour 24/7 occupancy. Physical slot count and capacity values remain
+  unapproved because IFS marks both WCs infinite and ATUP has demand from at least 15 other projects.
+  `BCALAY` remains outside the program registry until every quarantine and resource gate closes.
+- Added `/admin/quarantine`, portfolio quarantine debt, live audit/reconciliation scripts, migration
+  round-trip coverage, raw-SQL immutability tests, and the as-built validation record.
+- Full suite: 65 passing tests; Ruff and the static golden forecast remain exact.
+
 ## 2026-09-01 - Portfolio operations console and adaptive program workspaces
 - Completed UI-01b: replaced the hardcoded dashboard cards and static KPIs with a registry-driven
   portfolio command strip, dense operating table, separately labeled RTG-plan and contract-risk

@@ -11,6 +11,7 @@ from app.database import get_db
 from app.services import resource_explain as EXPLAIN
 from app.services.resource_profile import seed_legacy_resources
 from app.services.assumption_drift import export_assumption_audit
+from app.services.observation_quarantine import active_quarantines
 from app.templating import templates
 
 
@@ -41,6 +42,26 @@ async def seed_resources(db: AsyncSession = Depends(get_db)):
 @router.get("/admin/resources/audit.json")
 async def resource_audit_export(db: AsyncSession = Depends(get_db)):
     return await export_assumption_audit(db)
+
+
+@router.get("/admin/quarantine")
+async def quarantine_page(request: Request, db: AsyncSession = Depends(get_db)):
+    import json
+
+    rows = []
+    for event in await active_quarantines(db, "BCALAY"):
+        rows.append({
+            "stream_key": event.stream_key, "project_id": event.project_id,
+            "part_no": event.part_no, "order_no": event.order_no,
+            "serial": event.serial, "reason_code": event.reason_code,
+            "event_type": event.event_type, "actor": event.actor,
+            "occurred_at": event.occurred_at,
+            "evidence": json.loads(event.evidence_json),
+        })
+    return templates.TemplateResponse(request, "quarantine.html", {
+        "app_name": settings.app_name, "data_source": settings.data_source,
+        "quarantines": rows,
+    })
 
 
 @router.get("/admin/resources/{code:path}")

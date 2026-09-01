@@ -395,6 +395,17 @@ OBSERVE and expose source contract references without computing a target delta. 
 sidebar becomes an inert off-canvas drawer on mobile, so hidden links are not keyboard- or screen-
 reader-accessible. Axe WCAG A/AA audits pass with zero violations.
 
+### 5.5 Observation quarantine and BCA layup boundary (BCA-06)
+`ObservationQuarantineEvent` is an append-only OPEN/RESOLVE/REOPEN stream for source records that
+must not influence modeling. BCA layup audit `BCALAY` excludes shop orders whose IFS state remains
+Started after terminal operation 9999 closes. Reconciliation appends only state changes and never
+modifies IFS or prior evidence.
+
+The layup route remains outside the Program registry. Its blocked policy separates TRI L labor
+effort, ATUP operator effort, and ATUP six-hour discrete 24/7 autoclave occupancy. IFS reports both
+WCs as infinite capacity, so physical staffing, slot count, compatibility, calendar, and external
+demand require governed approvals before onboarding. See `docs/validation/bca-06-layup-quarantine.md`.
+
 ---
 
 ## 6. The forecast matrix (the flagship view)
@@ -453,8 +464,9 @@ Applied app-wide via `base.html` tokens. Principle: **calm canvas, loud signal.*
 ---
 
 ## 9. Database (SQLite) & JSON files
-**DB (`data/rtg_app_migrated.db`, Alembic-managed) — 24 tables:** ten core forecast/runtime and
-program tables; ten resource/assumption/snapshot tables; and four epoch-governance tables:
+**DB (`data/rtg_app_migrated.db`, Alembic-managed) — 25 tables:** ten core forecast/runtime and
+program tables; ten resource/assumption/snapshot tables; four epoch-governance tables, and one
+append-only observation-quarantine event table:
 `model_epoch`, `model_epoch_transition`, `program_epoch_activation`, and
 `simulation_snapshot_epoch`.
 **JSON (repo root, reference/computed):** accuracy_results.json (retrospective backtest),
@@ -468,7 +480,7 @@ rtg_targets.json, wi_signals.json, _rad_std.json.
 `d8ea03f5` approved-record protection · `e6a1b2c3` model epochs · `f7b2c3d4` audit hardening ·
 `a8c3d4e5` clean-install slot schema reconciliation · `b9d4e5f6` planning basis ·
 `cad0e1f2` assumption evidence/recertification · `dbe1f2a3` review-integrity hardening ·
-`ecf2a3b4` external-snapshot integrity.
+`ecf2a3b4` external-snapshot integrity · `fdb4c5d6` observation quarantine.
 Migration `a3f1c9d4e5b6_add_refresh_loop_tables` adds the three refresh-loop tables (also created
 idempotently by `create_all` at startup).
 

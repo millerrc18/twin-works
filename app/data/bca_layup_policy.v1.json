@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "stream_key": "BCALAY",
+  "identity": {
+    "project_id": "521938",
+    "part_no": "3301ED0032-101",
+    "site": "59",
+    "routing_revision": "3",
+    "routing_alternative": "*"
+  },
+  "onboarding_status": "BLOCKED",
+  "onboarding_blockers": [
+    "Open TERMINAL_COMPLETE_STATE_OPEN quarantine events must be resolved in IFS.",
+    "TRI L gross-site labor capacity requires an owner-approved effective-dated assumption.",
+    "ATUP physical autoclave slot count, calendar, and external-load policy require owner approval.",
+    "P3 QA inspection effort requires an approved route binding; it remains a mobile resource."
+  ],
+  "quarantine_policy": {
+    "reason_code": "TERMINAL_COMPLETE_STATE_OPEN",
+    "rule": "SHOP_ORD_CFV remains Started while operation 9999 is Closed",
+    "effect": "Exclude the order from WIP, labor demand, autoclave demand, cadence, and shared-resource conclusions.",
+    "resolution": "Append RESOLVE only after a later IFS audit no longer satisfies the rule."
+  },
+  "routing_evidence": {
+    "captured_date": "2026-09-01",
+    "row_count": 26,
+    "included_operations": 19,
+    "excluded_operations": 7,
+    "all_labor_hours": 86.204,
+    "all_machine_hours": 84.003,
+    "included_labor_hours": 86.2,
+    "included_machine_hours": 72.0
+  },
+  "resources": [
+    {
+      "resource_key": "59:TRI_L_LABOR",
+      "work_center_no": "TRI L",
+      "resource_type": "LABOR",
+      "capacity_unit": "HOURS",
+      "capacity_scope": "GROSS_SITE",
+      "requirement_mode": "EFFORT",
+      "demand_source": "LABOR",
+      "operations": [1000, 1100, 1200, 1300, 1400, 1500, 1550, 1600, 1650, 2100],
+      "machine_time_semantics": "EVIDENCE_ONLY_NOT_ADDITIVE",
+      "capacity_status": "UNAPPROVED",
+      "ifs_configuration": {
+        "description": "P3 LAM  TRI",
+        "calendar_id": "MARION 2",
+        "average_capacity": 8.0,
+        "demonstrated_capacity": 78.10083335,
+        "scheduling": "Infinite capacity"
+      },
+      "decision": "Schedule labor effort only after physical staffing and external-reserve assumptions are approved. Do not add routing machine hours to labor demand or infer capacity from IFS average/demonstrated values."
+    },
+    {
+      "resource_key": "59:ATUP_OPERATOR",
+      "work_center_no": "ATUP",
+      "resource_type": "LABOR",
+      "capacity_unit": "HOURS",
+      "capacity_scope": "GROSS_SITE",
+      "requirement_mode": "EFFORT",
+      "demand_source": "LABOR",
+      "operations": [2000],
+      "quantity_hours_per_unit": 3.7,
+      "capacity_status": "UNAPPROVED",
+      "decision": "Operator effort is separate from autoclave occupancy and requires an approved shared labor profile."
+    },
+    {
+      "resource_key": "59:ATUP_AUTOCLAVE",
+      "work_center_no": "ATUP",
+      "resource_type": "TOOL",
+      "capacity_unit": "SLOTS",
+      "capacity_scope": "GROSS_SITE",
+      "requirement_mode": "OCCUPANCY",
+      "demand_source": "MACHINE",
+      "acquire_op": 2000,
+      "release_event": "OP_COMPLETE",
+      "quantity_slots_per_unit": 1,
+      "minimum_hold_hours": 6.0,
+      "slot_count": null,
+      "capacity_status": "UNAPPROVED",
+      "ifs_configuration": {
+        "description": "P3 AUTO",
+        "calendar_id": "MARION 3",
+        "average_capacity": 23.983333333333334,
+        "demonstrated_capacity": 47.80583333333333,
+        "scheduling": "Infinite capacity"
+      },
+      "decision": "The 6.0 machine-run hours are 24/7 discrete autoclave occupancy, not labor. Activation is blocked until physical slot count, compatible load grouping, maintenance/calendar availability, and external demand are approved."
+    }
+  ],
+  "eligible_demand_snapshot": {
+    "captured_date": "2026-09-01",
+    "eligible_open_orders": 17,
+    "orders_with_remaining_tri_l_or_atup_demand": 14,
+    "tri_l_labor_hours": 921.0,
+    "tri_l_machine_hours_evidence_only": 756.0,
+    "atup_operator_labor_hours": 51.8,
+    "atup_occupancy_hours": 84.0
+  },
+  "shared_resource_finding": {
+    "tri_l_other_projects_with_open_demand": ["542227", "010978"],
+    "atup_other_project_count": 15,
+    "conclusion": "TRI L and ATUP are site-shared physical resources. Program-local capacity and DEFAULT_SHIFT are prohibited."
+  }
+}

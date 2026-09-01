@@ -152,7 +152,9 @@ def _classification(opno: int, wc: str, description: str) -> str:
     if upper_wc.startswith("WAIT") or upper_desc.startswith("WAITING ON"):
         return "waiting"
     if ((opno in {1, 2, 9}) and
-            any(term in upper_desc for term in ("EFFECTIVE DOCUMENT", "CHANGE LOG", "GENERAL INSPECTION"))):
+            any(term in upper_desc for term in (
+                "EFFECTIVE DOCUMENT", "CHANGE LOG", "CHANGE NOTE", "GENERAL INSPECTION",
+            ))):
         return "administrative"
     return "production"
 

@@ -31,7 +31,7 @@
     <div class="command-cell"><div class="command-label"><i data-lucide="file-clock"></i>Contract risk</div><div class="command-value num">{{ portfolio.contract_late }}<span class="denom"> / {{ portfolio.contract_denominator }}</span></div><div class="command-note">published contract-anchored units only</div></div>
     <div class="command-cell"><div class="command-label"><i data-lucide="shield-check"></i>Publication</div><div class="command-value num">{{ portfolio.commitment_ready }}<span class="denom"> / {{ portfolio.program_count }}</span></div><div class="command-note">programs commitment-ready</div></div>
     <div class="command-cell"><div class="command-label"><i data-lucide="activity"></i>Shared pressure</div><div class="command-value num">{{ portfolio.pressure_over }}<span class="denom"> over</span></div><div class="command-note">{{ portfolio.pressure_near }} near · published baseline</div></div>
-    <div class="command-cell"><div class="command-label"><i data-lucide="clipboard-check"></i>Governance debt</div><div class="command-value num">{{ portfolio.open_reviews + portfolio.coverage_debt }}</div><div class="command-note">{{ portfolio.open_reviews }} reviews · {{ portfolio.coverage_debt }} coverage gaps</div></div>
+    <div class="command-cell"><div class="command-label"><i data-lucide="clipboard-check"></i>Governance debt</div><div class="command-value num">{{ portfolio.open_reviews + portfolio.coverage_debt + portfolio.quarantine_count }}</div><div class="command-note">{{ portfolio.open_reviews }} reviews · {{ portfolio.coverage_debt }} gaps · {{ portfolio.quarantine_count }} quarantined</div></div>
   </section>
 
   <section aria-labelledby="program-ops-title">
@@ -67,6 +67,7 @@
       <div class="source-row"><span>Position and WIP state</span><b>{{ portfolio.as_of.strftime('%Y-%m-%d %H:%M') }}</b></div>
       <div class="source-row"><span>Latest successful refresh</span><b>{% if portfolio.latest_sync %}{{ portfolio.latest_sync.strftime('%Y-%m-%d %H:%M') }}{% else %}No completed sync{% endif %}</b></div>
       <div class="source-row"><span>Governed assumptions</span><b>{{ portfolio.open_reviews }} reviews open</b></div>
+      <div class="source-row"><span>Quarantined source records</span><b><a href="/admin/quarantine">{{ portfolio.quarantine_count }} open</a></b></div>
       <div class="source-row"><span>Shared capacity</span><b>Pressure board deferred to UI-01d</b></div>
     </div></aside>
   </section>

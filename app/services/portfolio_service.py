@@ -24,6 +24,7 @@ from app.services import planning_basis_service as PLANNING
 from app.services import program_service as PROGRAMS
 from app.services import resource_explain as RESOURCES
 from app.services.capacity_metrics import work_center_load_rows
+from app.services.observation_quarantine import active_quarantines
 
 
 WORKSPACE_TABS = (
@@ -112,6 +113,7 @@ async def build_portfolio(db: AsyncSession, ds) -> dict:
     )
     open_reviews = int(await db.scalar(select(func.count(AssumptionReview.id)).where(
         AssumptionReview.status == "OPEN")) or 0)
+    quarantine_count = len(await active_quarantines(db, "BCALAY"))
 
     rows = []
     maturity = []
@@ -215,6 +217,7 @@ async def build_portfolio(db: AsyncSession, ds) -> dict:
         "program_count": len(codes),
         "open_reviews": open_reviews,
         "coverage_debt": coverage_debt,
+        "quarantine_count": quarantine_count,
         "pressure_over": pressure_over,
         "pressure_near": pressure_near,
         "latest_sync": latest_sync.finished_at if latest_sync else None,

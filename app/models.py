@@ -161,6 +161,30 @@ class SyncRun(Base):
     finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 
+class ObservationQuarantineEvent(Base):
+    """Append-only quarantine lifecycle for source records excluded from modeling conclusions."""
+    __tablename__ = "observation_quarantine_event"
+    __table_args__ = (
+        UniqueConstraint("quarantine_key", "sequence"),
+        CheckConstraint("event_type IN ('OPEN','RESOLVE','REOPEN')"),
+        CheckConstraint("reason_code IN ('TERMINAL_COMPLETE_STATE_OPEN')"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_key: Mapped[str] = mapped_column(String(180), unique=True, index=True)
+    quarantine_key: Mapped[str] = mapped_column(String(160), index=True)
+    sequence: Mapped[int] = mapped_column(Integer)
+    stream_key: Mapped[str] = mapped_column(String(32), index=True)
+    project_id: Mapped[str] = mapped_column(String(40))
+    part_no: Mapped[str] = mapped_column(String(100))
+    order_no: Mapped[str] = mapped_column(String(40), index=True)
+    serial: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    reason_code: Mapped[str] = mapped_column(String(40))
+    event_type: Mapped[str] = mapped_column(String(16), index=True)
+    actor: Mapped[str] = mapped_column(String(128))
+    evidence_json: Mapped[str] = mapped_column(Text)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
 class Program(Base):
     """A tracked program's full config — the DB-backed replacement for the hardcoded routers.py /
     PROG_IFS / PACK_OP / threshold spread. Ops/cures/milestones/crew stored as JSON. When a row
@@ -548,6 +572,39 @@ BEGIN
 END
 """
 
+QUARANTINE_EVENT_VALIDATE_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_observation_quarantine_transition_validate
+BEFORE INSERT ON observation_quarantine_event
+WHEN
+    NEW.sequence != COALESCE((
+        SELECT MAX(sequence) + 1 FROM observation_quarantine_event
+        WHERE quarantine_key = NEW.quarantine_key
+    ), 1)
+    OR (NEW.sequence = 1 AND NEW.event_type != 'OPEN')
+    OR (NEW.sequence > 1 AND NOT EXISTS (
+        SELECT 1 FROM observation_quarantine_event first
+        WHERE first.quarantine_key = NEW.quarantine_key AND first.sequence = 1
+          AND first.stream_key = NEW.stream_key
+          AND first.project_id = NEW.project_id
+          AND first.part_no = NEW.part_no
+          AND first.order_no = NEW.order_no
+          AND first.reason_code = NEW.reason_code
+    ))
+    OR (NEW.sequence > 1 AND NOT (
+        (NEW.event_type = 'RESOLVE' AND (
+            SELECT event_type FROM observation_quarantine_event
+            WHERE quarantine_key = NEW.quarantine_key ORDER BY sequence DESC LIMIT 1
+        ) IN ('OPEN','REOPEN'))
+        OR (NEW.event_type = 'REOPEN' AND (
+            SELECT event_type FROM observation_quarantine_event
+            WHERE quarantine_key = NEW.quarantine_key ORDER BY sequence DESC LIMIT 1
+        ) = 'RESOLVE')
+    ))
+BEGIN
+    SELECT RAISE(ABORT, 'invalid observation quarantine transition');
+END
+"""
+
 
 def _guard_approved_update(target, status_field: str) -> None:
     state = sa_inspect(target)
@@ -737,6 +794,7 @@ _EPOCH_RECORDS = (
     ProgramEpochActivation,
     ExternalLoadSnapshot,
     ExternalLoadRow,
+    ObservationQuarantineEvent,
     SimulationSnapshot,
     SimulationSnapshotEpoch,
     ForecastConstraintEvent,
@@ -786,6 +844,7 @@ for _epoch_table in (
     ProgramEpochActivation.__table__,
     ExternalLoadSnapshot.__table__,
     ExternalLoadRow.__table__,
+    ObservationQuarantineEvent.__table__,
     SimulationSnapshot.__table__,
     SimulationSnapshotEpoch.__table__,
     ForecastConstraintEvent.__table__,
@@ -802,6 +861,9 @@ _EPOCH_INSERT_IDENTITIES = {
     ProgramEpochActivation.__table__: "id = NEW.id",
     ExternalLoadSnapshot.__table__: "id = NEW.id OR content_hash = NEW.content_hash",
     ExternalLoadRow.__table__: "id = NEW.id",
+    ObservationQuarantineEvent.__table__: (
+        "id = NEW.id OR event_key = NEW.event_key OR "
+        "(quarantine_key = NEW.quarantine_key AND sequence = NEW.sequence)"),
     SimulationSnapshot.__table__: "id = NEW.id OR content_hash = NEW.content_hash",
     SimulationSnapshotEpoch.__table__: (
         "simulation_snapshot_id = NEW.simulation_snapshot_id AND program = NEW.program"),
@@ -812,6 +874,11 @@ for _epoch_table, _identity_predicate in _EPOCH_INSERT_IDENTITIES.items():
         _epoch_table, "after_create",
         DDL(_append_only_insert_guard(_epoch_table.name, _identity_predicate)),
     )
+
+event.listen(
+    ObservationQuarantineEvent.__table__, "after_create",
+    DDL(QUARANTINE_EVENT_VALIDATE_TRIGGER),
+)
 
 
 class OAuthToken(Base):

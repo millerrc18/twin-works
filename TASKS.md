@@ -172,7 +172,7 @@ shadow. BCA starts without a commitment-ready epoch and therefore enters the pla
 
 ### Proposed Execution Order
 
-Items 1-6 are complete. The next execution target is item 7, BCA-06 layup/autoclave cleanup.
+Items 1-7 are complete. The next execution target is item 8, BCA-03b physical labor-pool activation.
 
 1. PLAT-01a lifecycle, transition ownership, and immutable epoch behavior.
 2. UI-01a explicit planning-basis, target, and forecast-visibility semantics.
@@ -314,12 +314,21 @@ promotion gates are complete. The first candidate is the BCA finishing family, n
     - Acceptance: current WIP forecasts without fallback capacity, every result carries an immutable
       epoch snapshot and readiness explanation, and no result reaches a commitment or KPI view.
 
-- [ ] **BCA-06 - Keep the BCA layup stream separate and clean its state**
+- [x] **BCA-06 - Keep the BCA layup stream separate and clean its state**
   - Treat `3301ED0032-101` as a separate 26-op layup/autoclave program, not a second part under
     the finishing program.
   - Acceptance: reconcile the 10 orders still in `Started` after terminal op `9999`, then define
     independent `TRI L` and `ATUP` capacity and machine/dwell semantics before onboarding. Quarantine
     inconsistent layup orders from shared-autoclave conclusions until their state is reconciled.
+  - Delivered 2026-09-01: live revision-3 audit found 29 open orders and 12, not 10, current source
+    conflicts where op `9999` is closed but the SO remains `Started`. All 12 are persisted in the
+    append-only `BCALAY` quarantine and excluded from WIP/capacity conclusions; 17 orders remain
+    eligible. The corrected 26-row route has 19 production ops, 86.2 labor h, and 72.0 machine h.
+    The blocked policy separates TRI L shared labor effort, ATUP operator effort (3.7 h/unit), and
+    ATUP discrete 6-hour 24/7 occupancy. IFS reports both WCs as infinite capacity; ATUP serves at
+    least 15 other projects. Slot count, staffing, calendars, compatibility, and external reserve
+    remain unapproved, so `BCALAY` is not onboarded and `DEFAULT_SHIFT` is prohibited. See
+    `docs/validation/bca-06-layup-quarantine.md`.
 
 - [ ] **BCA-07 - Run the live onboarding smoke test**
   - With an authenticated Connect IFS session, discover the selected pilot part, review the revision,

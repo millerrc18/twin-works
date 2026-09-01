@@ -8,20 +8,21 @@ have actually bitten us. For the full human-facing reference see **MASTER.md**.
 > plan files, legacy workbook artifacts, and the `RTG_` environment prefix.
 ---
 
-## HANDOFF (2026-08-31) - read first if you are picking this up
+## HANDOFF (2026-09-01) - read first if you are picking this up
 
 **Current status:** Feature #81 is through its local safety gate; Feature #82 adds the read-only
 Marion virtual factory; BCA-01/02 provide revision-aware, economics-preserving IFS discovery; and
 PLAT-01a through PLAT-01c add governed model lifecycles, planning-basis isolation, recertification,
 and replayable incumbent shadows. BCA-05a adds live observation-only finishing data, and UI-01b/
-UI-01c provide the portfolio console and adaptive workspaces. The regression suite has **62 passing
+UI-01c provide the portfolio console and adaptive workspaces. BCA-06 adds a governed layup
+quarantine and blocked resource policy. The regression suite has **65 passing
 tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
 
-**Current git state:** branch `codex/resource-assumption-registry`. Latest committed base is
-`42d20c4 #81 step 5 (partial): IFS routing discovery + /admin/programs onboarding UI`. Remote:
-`git@github.com:millerrc18/twin-works.git` (push over HTTPS; GD blocks SSH port 22). The working tree
-intentionally contains the #81/#82, resource-registry, lifecycle, and documentation work; preserve it.
+**Current git state:** branch `codex/resource-assumption-registry`, tracking the matching origin
+branch. Remote: `https://github.com/millerrc18/twin-works.git`. The completed #81/#82, resource-
+registry, lifecycle, BCA observation/quarantine, portfolio UI, and documentation work is committed;
+preserve the git-ignored live SQLite database and its backups.
 
 **#81 completed:**
 - `program` table and migration `b4e2f7a1`; DB-or-routers source flag; seed-the-3; `create_program`; snapshots; IFS metadata, program ordering, names, thresholds, and pack operations routed through `program_service`.
@@ -39,8 +40,8 @@ intentionally contains the #81/#82, resource-registry, lifecycle, and documentat
 
 **Remaining work:**
 1. **#32b station calibration:** confirm the one-versus-two Plant 3 Radome electrical-seal station count. The allocator is live with a documented conservative value of one; see `TASKS.md`.
-2. **Platform/BCA execution:** UI-01a through UI-01c, PLAT-01a through PLAT-01c, and BCA-05a are
-   complete. Next clean and quarantine the BCA layup/autoclave stream in BCA-06 while the finishing
+2. **Platform/BCA execution:** UI-01a through UI-01c, PLAT-01a through PLAT-01c, BCA-05a, and
+   BCA-06 are complete. Next define approved physical labor pools in BCA-03b while the finishing
    observation stream accrues. Follow the approved order and gates in `TASKS.md`. BCA-01/02
    are complete; live revision-3 discovery
    shows A = 69.603 labor / 104.303 machine hours and C = 69.603 / 104.603.
@@ -66,7 +67,7 @@ intentionally contains the #81/#82, resource-registry, lifecycle, and documentat
    not be dismissed wholesale.
    External-load snapshots are append-only and their source coverage cannot extend past the
    forecast horizon without an explicit approved policy. Live CRP ingestion remains BCA-03c.
-   The local DB is at migration `ecf2a3b4c5d6`. PLAT-01a backup:
+   The local DB is at migration `fdb4c5d6e7f8`. PLAT-01a backup:
    `data/rtg_app_migrated.pre_model_epochs.bak`, SHA-256
    `1F63D0C88AD53DA0CAF0E0BE2852C68D0D7B656D4734EB52BCCA2FAF97D436FF`.
    PLAT-01b backups: `data/rtg_app_migrated.pre_recertification.bak` SHA-256
@@ -75,9 +76,16 @@ intentionally contains the #81/#82, resource-registry, lifecycle, and documentat
    `FDB68AD4B32019A8EDAD5F2304DE3F722CD6B97CA026BCFB78D139F685B37E93`.
    Pre-external-integrity backup: `data/rtg_app_migrated.pre_external_integrity.bak`, SHA-256
    `D8AE83AC62FE93636BB0024FE41CE5B7E8B1B437F9B5E688E6436ED7A34BB74A`.
+   Pre-BCA-layup-quarantine backup: `data/rtg_app_migrated.pre_bca_layup_quarantine.bak`, SHA-256
+   `B056287443BCE92A0C31900C1A5710850978BCE0F2589CFCEB46AF3B32309EA4`.
    BCAFIN is epoch `BCAFIN:CANDIDATE:ad7afe75ea9f` in OBSERVE with 73 live WIP orders and zero
    unresolved serials. Its eight WC binding gaps remain incomplete; it has no published forecasts
    or forecast-log rows. The immutable source metadata carries both revision-3 A/C economics.
+   BCA layup remains separate and not onboarded. Stream `BCALAY` has 12 active append-only
+   quarantines for op-9999-closed/SO-Started conflicts. Use `scripts/audit_bca_layup.py` then
+   `scripts/reconcile_bca_layup_quarantine.py`; never include quarantined SOs in TRI L/ATUP demand.
+   `app/data/bca_layup_policy.v1.json` blocks activation until TRI L labor capacity, ATUP operator
+   capacity, physical autoclave slots/calendar/compatibility/external demand, and P3 QA are approved.
 3. **BCA live smoke test:** run BCA-07 with a real Connect IFS session after the revision, capacity, and machine-time tasks are complete.
 4. **#82 Marion virtual factory capacity map:** Phase 1 is implemented at `/factory-map`. Keep it
    display-only: it surfaces WIP and modeled capacity without changing forecast inputs.
@@ -101,6 +109,9 @@ intentionally contains the #81/#82, resource-registry, lifecycle, and documentat
   read model performs one published-program simulation and one capacity aggregation. OBSERVE tabs
   may show WIP, flow, source contract references, resources, assumptions, and history, but never P50,
   P80, target deltas, or behind counts. Program navigation comes from `program_service`, not code.
+- Observation quarantine is append-only governance, not an IFS correction mechanism. Never delete
+  quarantine history or manually resolve events; rerun the live audit and let reconciliation append
+  RESOLVE/REOPEN events. `BCALAY` must remain absent from program configuration while blockers exist.
 - Console is cp1252; use `PYTHONIOENCODING=utf-8` for non-ASCII output. Use a fresh port if a local uvicorn process is already listening.
 
 ---
@@ -121,7 +132,7 @@ caveats, Δ measured vs the RTG target the team actually works to.
   `routers.py` (ops/cures/crew/shift constants — source of truth), `schedule_engine.py`,
   `build_tracker.py` (Excel builder — has module-level side effects, see gotcha), `backtest_accuracy.py`.
 - **`app/`** — FastAPI. `main.py`, `config.py` (pydantic-settings, `RTG_` env prefix),
-  `database.py` (async SQLAlchemy/aiosqlite), `models.py` (**24 tables**), `templating.py`.
+  `database.py` (async SQLAlchemy/aiosqlite), `models.py` (**25 tables**), `templating.py`.
   - `app/engines/` — `router_registry.py` (`build_registry()` reads the `program` table via
     program_service, falls back to routers.py; `rebuild()` after add/edit), `rtg_wrapper.py`
     (`run_pooled(units_by_program, as_of)` + `pool_groups`/`shared_wcs` — plant-guarded transitive

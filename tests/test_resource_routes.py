@@ -15,6 +15,7 @@ def test_resource_registry_and_why_routes_render(tmp_path):
     from app.main import app
     from app.data.snapshot_source import SnapshotDataSource
     from app.routers import resources as resources_router
+    from app.services.observation_quarantine import reconcile_quarantines
     from app.services.resource_profile import seed_legacy_resources
 
     engine = create_async_engine(
@@ -27,6 +28,16 @@ def test_resource_registry_and_why_routes_render(tmp_path):
             await conn.run_sync(Base.metadata.create_all)
         async with sessions() as db:
             await seed_legacy_resources(db)
+            await reconcile_quarantines(
+                db, stream_key="BCALAY", project_id="521938",
+                part_no="3301ED0032-101",
+                reason_code="TERMINAL_COMPLETE_STATE_OPEN",
+                conflicts=[{
+                    "so": "1452412", "serial": "42", "state": "Started",
+                    "max_closed": 9999, "terminal_status": "90",
+                    "last_clock": "2026-05-22", "state_conflict": True,
+                }], actor="Test audit",
+            )
             await db.commit()
 
     asyncio.run(prepare())
@@ -44,6 +55,7 @@ def test_resource_registry_and_why_routes_render(tmp_path):
     try:
         registry_page = client.get("/admin/resources")
         audit = client.get("/admin/resources/audit.json")
+        quarantine = client.get("/admin/quarantine")
         why = client.get("/forecast/ELEV/LH%20229/why")
     finally:
         client.close()
@@ -57,6 +69,9 @@ def test_resource_registry_and_why_routes_render(tmp_path):
     assert "TwinWorks legacy model" in registry_page.text
     assert audit.status_code == 200
     assert audit.json()["retention_policy"] == "PERMANENT_APPEND_ONLY"
+    assert quarantine.status_code == 200
+    assert "1452412" in quarantine.text
+    assert "Terminal closed / state open" in quarantine.text
     assert why.status_code == 200
     assert 'id="forecast-why"' in why.text
     assert "Complete" in why.text

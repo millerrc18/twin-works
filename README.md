@@ -23,6 +23,8 @@ operational workflows.
   Schedule, Flow, Units, Resources, Assumptions, and History views.
 - Rejects external-load inputs that do not cover the forecast horizon unless a governed
   extrapolation policy is present.
+- Quarantines inconsistent source records in an append-only audit stream before they can affect
+  WIP, capacity, or shared-resource conclusions.
 - Supports offline snapshot mode and OAuth-backed live IFS refreshes.
 - Keeps model status honest: empirical residual bias until sufficient forward-scored ships justify
   trained P50/P80 models.
@@ -68,7 +70,8 @@ reviewed and documented.
 ## Current Priorities
 
 See `TASKS.md`. BCA finishing is registered for observation-only data collection and the portfolio/
-workspace UI is complete. The next platform step is BCA layup/autoclave state cleanup. Physical shared-pool,
+workspace UI and BCA layup cleanup are complete. The next platform step is approved physical labor
+pool definition in BCA-03b. Physical shared-pool,
 external-demand, tooling, and BCA machine/dwell activation remain gated on reviewed evidence.
 The Marion virtual factory is live for reviewed P2/P3 locations and remains visual-only. It must
 not change simulation inputs without a separate approved design. Follow-ons #82-1a, #82-4, and

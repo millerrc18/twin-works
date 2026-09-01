@@ -251,3 +251,9 @@ def test_program_onboarding_page_exposes_revision_and_economics_review():
     for label in ("Routing revision", "Include", "Labor h", "Machine h",
                   "Class", "Status", "All-row totals", "Included totals"):
         assert label in response.text
+
+
+def test_change_notes_nowb_is_administrative_not_production():
+    from app.data.ifs_routing import _classification
+
+    assert _classification(2, "297", "Change Notes (NOWB)") == "administrative"
