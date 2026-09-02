@@ -40,8 +40,24 @@ async def _current_capacity(db: AsyncSession, pool_id: int, as_of: date):
     return next((row for row in rows if row.effective_to is None or row.effective_to >= as_of), None)
 
 
+async def _display_capacity(db: AsyncSession, pool_id: int, as_of: date):
+    approved = await _current_capacity(db, pool_id, as_of)
+    if approved is not None:
+        return approved
+    drafts = (await db.execute(
+        select(ResourceCapacityVersion).where(
+            ResourceCapacityVersion.pool_id == pool_id,
+            ResourceCapacityVersion.status == "DRAFT",
+            ResourceCapacityVersion.effective_from <= as_of,
+        ).order_by(ResourceCapacityVersion.effective_from.desc(),
+                   ResourceCapacityVersion.id.desc())
+    )).scalars().all()
+    return next((row for row in drafts
+                 if row.effective_to is None or row.effective_to >= as_of), None)
+
+
 async def _resource_row(db: AsyncSession, pool: ResourcePool, as_of: date) -> dict:
-    version = await _current_capacity(db, pool.id, as_of)
+    version = await _display_capacity(db, pool.id, as_of)
     assumption = (await db.get(ModelAssumption, version.assumption_id)
                   if version and version.assumption_id else None)
     consumers = sorted(set((await db.execute(
@@ -82,6 +98,7 @@ async def _resource_row(db: AsyncSession, pool: ResourcePool, as_of: date) -> di
         "work_center_no": pool.work_center_no, "active": pool.active,
         "retired_at": pool.retired_at, "consumers": consumers,
         "capacity_schedule": schedule, "slot_count": version.slot_count if version else None,
+        "capacity_status": version.status if version else None,
         "capacity_scope": version.capacity_scope if version else None,
         "calendar_policy": calendar_policy, "external_policy": external_policy,
         "effective_from": version.effective_from if version else None,

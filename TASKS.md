@@ -259,6 +259,11 @@ gates are complete. Full rationale and acceptance details are in
       demand is modeled honestly; it is never hidden as nonblocking or ghost demand.
     - Acceptance: counts are persisted as owner-supplied facts but cannot affect dates without
       approved operation bindings.
+    - Progress 2026-09-02: five live draft pools now carry counts `2/2/1/3/1`, owner attribution,
+      internal-only status, and a 2026-10-02 review date. They have zero bindings and no forecast
+      effect. Floor/process approver, fungibility, named instances, maintenance, changeover, shared
+      consumers, and operation spans remain open. See
+      `docs/validation/tool-01a-aeronose-inventory.md`.
 
   - [ ] **TOOL-01b - Implement atomic occupancy leases and prove cure-station parity**
     - Acquire all required tools atomically; support fungible slots, named instances, multi-tool

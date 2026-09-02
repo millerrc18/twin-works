@@ -16,8 +16,13 @@ exclude it without deleting history. RES-01 retains the generic physical-resourc
 The next modeling path is TOOL-01:
 generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
 PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
-**78 passing tests**; the run still emits existing Python 3.14
+**79 passing tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
+
+**TOOL-01a live inventory:** pools 25-29 record Aeronose assembly jigs (2), holding fixtures (2),
+trim fixture (1), shell lamination molds (3), and core-forming mold set (1). All are DRAFT,
+INTERNAL_ONLY, unbound, and mathematically inactive. Do not approve or bind them until the questions
+in `docs/validation/tool-01a-aeronose-inventory.md` are answered.
 
 **Current git state:** branch `codex/resource-assumption-registry`, tracking the matching origin
 branch. Remote: `https://github.com/millerrc18/twin-works.git`. The BCA-03b/generic physical-pool

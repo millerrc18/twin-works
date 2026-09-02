@@ -84,6 +84,11 @@ three-program platform infrastructure. No BCA physical pool was created.
 
 #### TOOL-01a - Inventory and authority
 
+**Progress 2026-09-02:** all five counts are persisted as visible `DRAFT` / `INTERNAL_ONLY` slot
+pools with zero bindings. The task remains open for floor/process approval, fungibility, calendar,
+changeover, shared-consumer, and operation-span decisions. See
+`docs/validation/tool-01a-aeronose-inventory.md`.
+
 - Create draft `TOOL` pools for the five known tool families and their confirmed counts.
 - Record whether instances are fungible or individually constrained.
 - Classify every pool as dedicated or physically shared. A shared tool must identify every known
