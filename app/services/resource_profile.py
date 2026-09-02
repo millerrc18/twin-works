@@ -16,6 +16,7 @@ from app.models import (
     ModelAssumption,
     OperationResourceBinding,
     ResourceCapacityVersion,
+    ResourceInstance,
     ResourcePool,
     SimulationSnapshot,
     SimulationSnapshotEpoch,
@@ -196,6 +197,9 @@ def _scheduler_profile_base(programs: list[str]) -> dict:
         "pool_external_reserves": {},
         "pool_calendar_policies": {},
         "pool_assumption_ids": {},
+        "occupancy_requirements": {},
+        "occupancy_pool_capacities": {},
+        "occupancy_pool_instances": {},
         "cure_station_capacities": dict(R.CURE_STATION_CAPACITIES),
         "cure_station_rules": dict(R.CURE_STATION_RULES),
         "parallel_cure_gates": dict(R.PARALLEL_CURE_GATES),
@@ -234,6 +238,18 @@ def _jsonable_scheduler(profile: dict) -> dict:
         "pool_assumption_ids": {
             pool: list(ids)
             for pool, ids in sorted(profile.get("pool_assumption_ids", {}).items())
+        },
+        "occupancy_requirements": {
+            f"{program}|{opno}": list(rows)
+            for (program, opno), rows in sorted(
+                profile.get("occupancy_requirements", {}).items())
+        },
+        "occupancy_pool_capacities": dict(sorted(
+            profile.get("occupancy_pool_capacities", {}).items())),
+        "occupancy_pool_instances": {
+            pool: list(instances)
+            for pool, instances in sorted(
+                profile.get("occupancy_pool_instances", {}).items())
         },
         "cure_station_capacities": dict(sorted(profile["cure_station_capacities"].items())),
         "cure_station_rules": [
@@ -274,6 +290,18 @@ def _scheduler_from_jsonable(profile: dict) -> dict:
         "pool_calendar_policies": dict(profile.get("pool_calendar_policies", {})),
         "pool_assumption_ids": {
             pool: tuple(ids) for pool, ids in profile.get("pool_assumption_ids", {}).items()
+        },
+        "occupancy_requirements": {
+            (key.rsplit("|", 1)[0], int(key.rsplit("|", 1)[1])): tuple(rows)
+            for key, rows in profile.get("occupancy_requirements", {}).items()
+        },
+        "occupancy_pool_capacities": {
+            pool: int(capacity)
+            for pool, capacity in profile.get("occupancy_pool_capacities", {}).items()
+        },
+        "occupancy_pool_instances": {
+            pool: list(instances)
+            for pool, instances in profile.get("occupancy_pool_instances", {}).items()
         },
         "cure_station_capacities": dict(profile["cure_station_capacities"]),
         "cure_station_rules": {
@@ -316,16 +344,25 @@ def _serialize_units(units_by_program: dict) -> dict:
 
 
 def _serialize_results(results: dict) -> dict:
-    return {
-        serial: {
+    serialized = {}
+    for serial, row in sorted(results.items()):
+        item = {
             "finish": row["finish"].isoformat(),
             "op_dt": {str(key): value.isoformat()
                       for key, value in sorted(row.get("op_dt", {}).items())},
             "cure_dt": {str(key): value.isoformat()
                         for key, value in sorted(row.get("cure_dt", {}).items())},
         }
-        for serial, row in sorted(results.items())
-    }
+        if "constraint_events" in row:
+            item["constraint_events"] = [
+                {
+                    key: (value.isoformat() if isinstance(value, datetime) else value)
+                    for key, value in sorted(event.items())
+                }
+                for event in row["constraint_events"]
+            ]
+        serialized[serial] = item
+    return serialized
 
 
 async def verify_snapshot_integrity(db: AsyncSession, snapshot_id: int) -> dict:
@@ -379,6 +416,8 @@ async def persist_replay_snapshot(db: AsyncSession, *, base_snapshot_id: int,
         "input_hash": _hash_json(inputs),
         "expected_result": expected_result,
         "result_hash": _hash_json(expected_result),
+        "trace_constraints": any(
+            "constraint_events" in row for row in results.values()),
     }
     payload = {"schema_version": 3, "profile": profile, "replay": replay}
     profile_json = _canonical_json(payload)
@@ -511,6 +550,7 @@ async def replay_snapshot(db: AsyncSession, snapshot_id: int) -> ReplayVerificat
             actual.update(run_sim(
                 units, datetime.fromisoformat(profile["as_of"]),
                 ops_map=ops_map, cures_map=cures_map, profile=scheduler,
+                trace_constraints=bool(replay.get("trace_constraints")),
             ))
     serialized = _serialize_results(actual)
     actual_hash = _hash_json(serialized)
@@ -666,6 +706,20 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
                         ambiguous_wc_keys.add(wc_key)
                     elif wc_key not in wc_to_pool:
                         wc_to_pool[wc_key] = pool.code
+            elif binding.requirement_mode == "OCCUPANCY":
+                occupancy_key = (binding.program, int(binding.acquire_op))
+                scheduler_profile["occupancy_requirements"].setdefault(
+                    occupancy_key, tuple())
+                scheduler_profile["occupancy_requirements"][occupancy_key] += ({
+                    "pool_code": pool.code,
+                    "quantity": int(binding.quantity),
+                    "instance_code": binding.instance_code,
+                    "release_event": binding.release_event,
+                    "release_op": binding.release_op,
+                    "min_hold_hours": float(binding.min_hold_hours),
+                    "lag_hours": float(binding.lag_hours),
+                    "assumption_id": binding.assumption_id,
+                },)
         used_pool_ids = {binding.pool_id for binding in bindings}
         for pool_id in sorted(used_pool_ids):
             pool = pool_by_id[pool_id]
@@ -726,6 +780,16 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
                         scheduler_profile["shift_budgets"][(binding.program, operation_wc)] = {
                             int(shift): float(value) for shift, value in schedule.items()
                         }
+            elif pool.capacity_unit == "SLOTS" and version.slot_count:
+                scheduler_profile["occupancy_pool_capacities"][pool.code] = int(
+                    version.slot_count)
+                instance_codes = (await db.execute(select(ResourceInstance.instance_code).where(
+                    ResourceInstance.pool_id == pool.id,
+                    ResourceInstance.active.is_(True),
+                ).order_by(ResourceInstance.instance_code))).scalars().all()
+                if instance_codes:
+                    scheduler_profile["occupancy_pool_instances"][pool.code] = list(
+                        instance_codes)
         if any(not code.startswith("LEGACY:") for code in effort_pool_codes):
             scheduler_profile["allocation_mode"] = "PHYSICAL"
             for pool_code in sorted(effort_pool_codes):

@@ -16,7 +16,7 @@ exclude it without deleting history. RES-01 retains the generic physical-resourc
 The next modeling path is TOOL-01:
 generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
 PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
-**87 passing tests**; the run still emits existing Python 3.14
+**91 passing tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
 
 **Documentation roadmap:** DOC-01 adds a user-facing `/handbook` backed by version-controlled,
@@ -29,8 +29,9 @@ INTERNAL_ONLY, unbound, and mathematically inactive. Do not approve or bind them
 in `docs/validation/tool-01a-aeronose-inventory.md` are answered.
 
 **TOOL-01b core:** `app/engines/occupancy.py` provides atomic fixed reservations and active
-acquire/release leases; cure stations now use it with exact parity. It is not yet connected to
-approved Aeronose operation bindings. See `docs/validation/tool-01b-occupancy-core.md`.
+acquire/release leases; cure stations use it with exact parity. Approved synthetic occupancy
+bindings compile, execute, trace, and replay. Live Aeronose tools remain unbound. See
+`docs/validation/tool-01b-occupancy-core.md`.
 
 **Current git state:** branch `codex/resource-assumption-registry`, tracking the matching origin
 branch. Remote: `https://github.com/millerrc18/twin-works.git`. The BCA-03b/generic physical-pool

@@ -12,7 +12,11 @@ throughput, which is the right bottleneck constraint given current staffing.
 import datetime
 from datetime import datetime as DT, date, timedelta
 
-from app.engines.occupancy import OccupancyAllocator, OccupancyRequest
+from app.engines.occupancy import (
+    OccupancyAllocator,
+    OccupancyRequest,
+    ResourceAllocationDeadlock,
+)
 
 # Per-WC daily labor-hour budget (measured sustained utilization). Floors applied
 # to low-volume gate WCs so inspections/pack never artificially block the line.
@@ -75,20 +79,33 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
     pool_shift_budgets = profile.get("pool_shift_budgets", {})
     pool_external_reserves = profile.get("pool_external_reserves", {})
     pool_calendar_policies = profile.get("pool_calendar_policies", {})
+    occupancy_requirements = profile.get("occupancy_requirements", {})
+    occupancy_pool_capacities = profile.get("occupancy_pool_capacities", {})
+    occupancy_pool_instances = profile.get("occupancy_pool_instances", {})
     finite_cure_stations = {
         station: int(capacity)
         for station, capacity in cure_station_capacities.items()
         if int(capacity) > 0
     }
-    cure_station_allocator = OccupancyAllocator(
-        finite_cure_stations, as_of=as_of)
+    all_occupancy_capacities = dict(finite_cure_stations)
+    for pool_code, capacity in occupancy_pool_capacities.items():
+        if (pool_code in all_occupancy_capacities
+                and all_occupancy_capacities[pool_code] != int(capacity)):
+            raise ResourceAllocationDeadlock(
+                f"Conflicting capacities for occupancy pool {pool_code}")
+        all_occupancy_capacities[pool_code] = int(capacity)
+    occupancy_allocator = OccupancyAllocator(
+        all_occupancy_capacities,
+        instances=occupancy_pool_instances,
+        as_of=as_of,
+    )
     def crew_for(program, wc, opno):
         return float(crew_by_program.get(program, {}).get(opno, legacy_crew(wc, opno)))
 
     def reserve_cure_station(unit_key, station, requested_start, dwell_hours):
         if not station or station not in finite_cure_stations:
             return requested_start, None
-        reservation = cure_station_allocator.reserve_fixed(
+        reservation = occupancy_allocator.reserve_fixed(
             unit_key, [OccupancyRequest(station)], requested_start, dwell_hours)
         return reservation.start, reservation
 
@@ -118,9 +135,9 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                 station = cure_station_rules.get((program, opno, clabel))
                 if gop is not None:
                     # Parallel gates are not cure-station reservations.
-                    q.append(['pgate', clabel, gop, float(dwell), clabel, None])
+                    q.append(['pgate', clabel, gop, float(dwell), clabel, None, opno])
                 else:
-                    q.append(['cure', clabel, '', float(dwell), clabel, station])
+                    q.append(['cure', clabel, '', float(dwell), clabel, station, opno])
         return q
 
     state={}
@@ -128,10 +145,55 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
         q=build_queue(u['program'], u['maxop'])
         state[u['serial']]=dict(u=u, queue=q, idx=0,
                                 cure_until=None,  # datetime a cure finishes
+                                cure_trigger_op=None,
                                 clock=as_of,      # per-unit intra-day work clock
                                 gate_nb={},       # gate_op -> datetime the op cannot start before
                                 op_dt={}, cure_dt={}, finish=None,
-                                constraint_events=[])
+                                constraint_events=[],
+                                occupancy_acquired_ops=set(),
+                                occupancy_holds=[])
+
+    def occupancy_rows(program, opno):
+        return tuple(occupancy_requirements.get((program, opno), ()))
+
+    def release_occupancy(serial, st, event, opno, at):
+        matches = [
+            row for row in st["occupancy_holds"]
+            if row["release_event"] == event
+            and (row.get("release_op") is None or row.get("release_op") == opno)
+        ]
+        for pool_code in sorted({row["pool_code"] for row in matches}):
+            effective = occupancy_allocator.release(serial, pool_code, at)
+            if trace_constraints:
+                st["constraint_events"].append({
+                    "event_type": "OCCUPANCY_RELEASE",
+                    "pool_code": pool_code,
+                    "operation_no": opno,
+                    "work_center_no": None,
+                    "wait_start": at,
+                    "wait_end": effective,
+                    "wait_hours": max(
+                        0.0, (effective - at).total_seconds() / 3600.0),
+                })
+        if matches:
+            released = {(row["pool_code"], row.get("release_event"), row.get("release_op"))
+                        for row in matches}
+            st["occupancy_holds"] = [
+                row for row in st["occupancy_holds"]
+                if (row["pool_code"], row.get("release_event"), row.get("release_op"))
+                not in released
+            ]
+
+    def occupancy_requests(rows):
+        return [
+            OccupancyRequest(
+                row["pool_code"], quantity=int(row.get("quantity", 1)),
+                instance_code=row.get("instance_code"),
+                min_hold_hours=float(row.get("min_hold_hours", 0.0)),
+                lag_hours=float(row.get("lag_hours", 0.0)),
+            )
+            for row in rows
+        ]
     # priority: DPAS-rated programs that are BEHIND contract jump the queue for shared
     # capacity (e.g. Aegis shares paint booth WC221 + ovens with elevator and is DPAS-rated).
     # Then earliest commit first (None commit last).
@@ -295,6 +357,9 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                     if st['cure_until'] <= sh_close:
                         st['clock']=max(st['cure_until'], sh_open)
                         st['cure_until']=None
+                        release_occupancy(
+                            s, st, "CURE_COMPLETE", st["cure_trigger_op"], st['clock'])
+                        st["cure_trigger_op"] = None
                     else:
                         continue  # still curing through this shift
                 else:
@@ -306,6 +371,53 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                     item=st['queue'][st['idx']]
                     if item[0]=='op':
                         _,opno,wc,hrs,desc=item
+                        release_occupancy(s, st, "OP_START", opno, st['clock'])
+                        rows = occupancy_rows(prog, opno)
+                        if rows and opno not in st["occupancy_acquired_ops"]:
+                            requests = occupancy_requests(rows)
+                            acquired = occupancy_allocator.acquire_atomic(
+                                s, requests, st['clock'])
+                            if acquired is None:
+                                available_at = occupancy_allocator.next_available_at(
+                                    requests, st['clock'])
+                                wait_end = min(available_at, sh_close)
+                                if trace_constraints:
+                                    for pool_code in sorted({
+                                            request.pool_code for request in requests
+                                    }):
+                                        st["constraint_events"].append({
+                                            "event_type": "OCCUPANCY_WAIT",
+                                            "pool_code": pool_code,
+                                            "operation_no": opno,
+                                            "work_center_no": wc,
+                                            "wait_start": st['clock'],
+                                            "wait_end": wait_end,
+                                            "wait_hours": max(
+                                                0.0, (wait_end - st['clock']).total_seconds()
+                                                / 3600.0),
+                                            "requested_slots": sum(
+                                                request.quantity for request in requests
+                                                if request.pool_code == pool_code),
+                                            "allocated_slots": 0,
+                                        })
+                                if available_at < sh_close:
+                                    st['clock'] = available_at
+                                    continue
+                                break
+                            st["occupancy_acquired_ops"].add(opno)
+                            st["occupancy_holds"].extend(rows)
+                            if trace_constraints:
+                                for lease in acquired:
+                                    st["constraint_events"].append({
+                                        "event_type": "OCCUPANCY_ACQUIRE",
+                                        "pool_code": lease.pool_code,
+                                        "operation_no": opno,
+                                        "work_center_no": wc,
+                                        "wait_start": lease.acquired_at,
+                                        "wait_end": lease.min_release_at,
+                                        "wait_hours": 0.0,
+                                        "instance_code": lease.instance_code,
+                                    })
                         nb=st['gate_nb'].get(opno)
                         if nb is not None and st['clock'] < nb:
                             if nb <= sh_close:
@@ -331,6 +443,8 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                         st['clock']=st['clock']+timedelta(hours=take)
                         if item[3]<=0.01:
                             st['idx']+=1
+                            release_occupancy(
+                                s, st, "OP_COMPLETE", opno, st['clock'])
                         else:
                             if getb(prog, wc, opno) <= 0.01 and st['clock'] < sh_close:
                                 record_wait(
@@ -339,13 +453,13 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                                 )
                             break
                     elif item[0]=='pgate':
-                        _,clabel,gop,dwell,_,_station=item
+                        _,clabel,gop,dwell,_,_station,_trigger_op=item
                         cs=st['clock']
                         st['cure_dt'][clabel]=cs
                         st['gate_nb'][gop]=cs+timedelta(hours=dwell)
                         st['idx']+=1
                     else:  # serial cure
-                        _,clabel,_,dwell,_,station=item
+                        _,clabel,_,dwell,_,station,trigger_op=item
                         cs, occupancy = reserve_cure_station(
                             s, station, st['clock'], dwell)
                         if trace_constraints and occupancy and occupancy.wait_hours > 0:
@@ -362,9 +476,18 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                             })
                         st['cure_dt'][clabel] = cs
                         st['cure_until'] = cs + timedelta(hours=dwell)
+                        st["cure_trigger_op"] = trigger_op
+                        release_occupancy(
+                            s, st, "CURE_COMPLETE", trigger_op, st['cure_until'])
+                        st["cure_trigger_op"] = None
                         st['idx']+=1
                         break
                 if st['idx']>=len(st['queue']) and st['cure_until'] is None:
+                    release_occupancy(s, st, "ROUTE_COMPLETE", None, st['clock'])
+                    if st["occupancy_holds"]:
+                        held = sorted({row["pool_code"] for row in st["occupancy_holds"]})
+                        raise ResourceAllocationDeadlock(
+                            f"Unit {s} completed with unreleased occupancy pools: {held}")
                     st['finish']=st['clock']
         dd=dd+timedelta(days=1)
     unfinished = [serial for serial, item in state.items() if item['finish'] is None]

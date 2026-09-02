@@ -550,7 +550,10 @@ async def resource_coverage(db: AsyncSession, program: str,
     try:
         from app.engines.router_registry import registry
 
-        bound_ops = {binding.acquire_op for binding in bindings}
+        bound_ops = {
+            binding.acquire_op for binding in bindings
+            if binding.requirement_mode == "EFFORT"
+        }
         missing_by_wc = {}
         for opno, _description, wc, _hours, _milestone in registry.ops(program.upper()):
             if int(opno) not in bound_ops:

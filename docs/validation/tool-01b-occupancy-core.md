@@ -16,6 +16,11 @@ to approved Aeronose operation-span bindings, and no Aeronose tooling affects fo
 - In-memory reservation/acquire/release event history for causal integration.
 - Existing Plant 2 paint-booth and Plant 3 electrical-seal cure reservations migrated to the same
   allocator.
+- Approved occupancy bindings, slot capacities, and named instances compile into immutable
+  scheduler/replay profiles.
+- The scheduler acquires tools before the bound operation and releases on approved `OP_START`,
+  `OP_COMPLETE`, `CURE_COMPLETE`, or `ROUTE_COMPLETE` events.
+- Occupancy acquire/wait/release events are included in traced results and exact replay envelopes.
 
 ## Parity
 
@@ -24,19 +29,19 @@ cure tests and the static golden forecast are exact.
 
 ## Remaining Before TOOL-01b Closes
 
-1. Compile approved `OCCUPANCY` bindings and slot capacities into immutable scheduler profiles.
-2. Drive acquire/release events from the operation state machine, including atomic retry when a
-   higher-priority request becomes available within a shift.
-3. Apply future maintenance/unavailable intervals without incorrectly blocking earlier free time.
-4. Persist or materialize lease events in replayable simulation results and Why explanations.
-5. Prove fatal no-progress handling for a complete multi-unit scheduler run.
+1. Apply future maintenance/unavailable intervals without incorrectly blocking earlier free time.
+2. Reconstruct tools already held by units whose forecast starts between acquire and release ops.
+3. Revisit an occupancy-blocked higher-priority unit within the same shift when a lower-priority
+   holder releases later in that shift.
+4. Surface replayed lease events in Why explanations and prove fatal no-progress handling for a
+   complete multi-unit scheduler run.
 
 These remaining items do not require Aeronose operation spans, but Aeronose activation remains
 blocked until TOOL-01c approves those spans.
 
 ## Verification
 
-- Full regression suite: 87 passed.
+- Full regression suite: 91 passed.
 - Focused Ruff: passed.
 - Static golden forecast: exact.
 - Live Aeronose draft tooling pools remain unbound and have no forecast effect.

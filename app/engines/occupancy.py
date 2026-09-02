@@ -202,6 +202,23 @@ class OccupancyAllocator:
             ))
         return tuple(sorted(leases))
 
+    def next_available_at(self, requests: list[OccupancyRequest],
+                          at: datetime) -> datetime:
+        """Earliest instant all requested slots could be acquired, without mutation."""
+        plan = self._plan(requests)
+        candidate = at
+        for pool_code, item in plan.items():
+            slots = self._slots[pool_code]
+            chosen = list(item["specific"])
+            remaining = [
+                code for code, _available in sorted(
+                    slots.items(), key=lambda row: (row[1], row[0]))
+                if code not in chosen
+            ]
+            chosen.extend(remaining[:item["fungible_quantity"]])
+            candidate = max(candidate, *(slots[code] for code in chosen))
+        return candidate
+
     def release(self, unit_key: str, pool_code: str, at: datetime,
                 *, instance_code: str | None = None) -> datetime:
         """Release matching active leases and return their effective availability time."""

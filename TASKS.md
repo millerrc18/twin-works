@@ -281,9 +281,10 @@ gates are complete. Full rationale and acceptance details are in
       focused occupancy tests, exact cure-station behavior, and no static-golden drift.
     - Progress 2026-09-02: delivered deterministic fixed reservations, atomic multi-pool
       acquisition, named instances, minimum holds, release lag, explicit queue keys, fatal
-      impossible-request/invalid-release errors, lease history, and exact cure-station/golden
-      parity. Remaining work is scheduler binding/retry integration, future maintenance intervals,
-      replayable lease explanations, and full-run no-progress failure. See
+      impossible-request/invalid-release errors, lease history, approved-binding/profile
+      compilation, all four release events, replayable occupancy traces, and exact cure-station/
+      golden parity. Remaining work is future maintenance intervals, initial WIP holdings,
+      same-shift priority retry, Why rendering, and full-run no-progress failure. See
       `docs/validation/tool-01b-occupancy-core.md`.
 
   - [ ] **TOOL-01c - Approve Aeronose acquire/release bindings**
