@@ -120,6 +120,8 @@
       <a href="/admin/quarantine" @click="navOpen=false" class="nlink {{ 'active' if active_page=='quarantine' else '' }}"><i data-lucide="shield-alert"></i><span class="navtext">Quarantine</span></a>
       <a href="/levers" @click="navOpen=false" class="nlink {{ 'active' if active_page=='levers' else '' }}"><i data-lucide="sliders-horizontal"></i><span class="navtext">Scenarios</span></a>
       <a href="/admin/model-status" @click="navOpen=false" class="nlink {{ 'active' if active_page=='admin' else '' }}"><i data-lucide="settings"></i><span class="navtext">Administration</span></a>
+      <div class="nlabel">Reference</div>
+      <a href="/handbook" @click="navOpen=false" class="nlink {{ 'active' if active_page=='handbook' else '' }}"><i data-lucide="book-open"></i><span class="navtext">Handbook</span></a>
     </nav>
     <div class="sfoot">
       {% if data_source=='live' %}<span class="pill live">● live IFS</span>

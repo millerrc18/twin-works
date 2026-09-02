@@ -187,7 +187,8 @@ from the execution sequence and retained only in the deferred evidence section.
    do not alter the parity epoch.
 6. TOOL-01c approve and freeze Aeronose acquire/release bindings.
 7. TOOL-01d run the Aeronose tooling shadow and expose causal explanations.
-8. DOC-01a/DOC-01b add the in-app handbook shell and core user documentation.
+8. DOC-01a/DOC-01b add the in-app handbook shell and core user documentation. **Complete
+   2026-09-02.**
 9. UI-01d add the three-program resource/tooling pressure board from governed data.
 10. TOOL-02 survey and model Elevator tooling in its own candidate.
 11. TOOL-03 document and periodically review Aegis present-rate assumptions.
@@ -332,19 +333,24 @@ gates are complete. Full rationale and acceptance details are in
     contracts, but mutable WIP counts, forecasts, readiness, and source freshness must come from
     live views rather than copied prose.
 
-  - [ ] **DOC-01a - Add the handbook information architecture and application shell**
+  - [x] **DOC-01a - Add the handbook information architecture and application shell**
     - Add registry-driven sections, left navigation, breadcrumbs, page metadata, full-text search,
       print-friendly rendering, and direct anchors.
     - Acceptance: `/handbook` is keyboard accessible, responsive, dark/light compatible, and does
       not conflict with `/docs` or expose repository paths, credentials, tokens, or sensitive logs.
+    - Delivered 2026-09-02: manifest-driven navigation, sanitized Markdown rendering, search,
+      breadcrumbs, ownership/review metadata, responsive reading layout, print styles, and the
+      Reference navigation entry.
 
-  - [ ] **DOC-01b - Publish the initial operational content set**
+  - [x] **DOC-01b - Publish the initial operational content set**
     - Cover: Getting Started; program/planning-basis behavior; forecast methodology; data sources
       and freshness; interpreting Portfolio/Schedule/Flow/Resources; assumptions and lifecycle;
       tooling and capacity semantics; administrator runbooks; glossary; release notes.
     - Clearly label measured facts, model assumptions, provisional inputs, and published outputs.
     - Acceptance: every active top-level workflow has a concise procedure and every model term used
       in the UI has one canonical definition.
+    - Delivered 2026-09-02: nine initial pages cover all listed topics. See
+      `docs/validation/doc-01ab-handbook.md`.
 
   - [ ] **DOC-01c - Add contextual help and evidence links**
     - Link relevant handbook anchors from program tabs, Resource Registry, tooling views, planning-

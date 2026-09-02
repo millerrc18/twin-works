@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ page.title }} · TwinWorks Handbook{% endblock %}
+{% block cmdtitle %}<h1>Handbook<span class="sub">{{ page.section }} / {{ page.title }}</span></h1>{% endblock %}
+{% block cmdright %}<span class="badge">Owner: {{ page.owner }}</span><span class="asof">review {{ page.review_due }}</span>{% endblock %}
+{% block head %}
+<style>
+.handbook{display:grid;grid-template-columns:230px minmax(0,760px);gap:32px;align-items:start;max-width:1080px;margin:0 auto;}
+.hnav{position:sticky;top:0;border-right:1px solid var(--border);padding-right:18px;max-height:calc(100vh - 96px);overflow:auto;}
+.hsearch{position:relative;margin-bottom:18px}.hsearch svg{position:absolute;left:9px;top:9px;width:15px;height:15px;color:var(--faint)}.hsearch input{width:100%;height:34px;padding:0 10px 0 31px;border:1px solid var(--border);border-radius:6px;background:var(--panel);color:var(--text);font-size:12px;}
+.hsection{margin:14px 0 5px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--faint)}.hitem{display:block;padding:6px 8px;border-left:2px solid transparent;color:var(--muted);font-size:12px}.hitem:hover{color:var(--text);background:var(--panel2)}.hitem.on{border-left-color:var(--brand);color:var(--brand);font-weight:600;background:color-mix(in srgb,var(--brand) 7%,transparent)}
+.hresults{margin:0 0 18px;border-top:1px solid var(--border)}.hresult{display:block;padding:9px 2px;border-bottom:1px solid var(--border2)}.hresult b{display:block;font-size:12px}.hresult span{font-size:10px;color:var(--faint)}
+.hdoc{min-width:0}.hmeta{display:flex;gap:10px;align-items:center;padding-bottom:13px;margin-bottom:22px;border-bottom:1px solid var(--border);font-size:11px;color:var(--faint)}
+.hbody{font-size:14px;line-height:1.68;color:var(--muted)}.hbody h1{font-size:27px;line-height:1.15;color:var(--text);margin:0 0 18px}.hbody h2{font-size:17px;color:var(--text);margin:30px 0 10px;border-bottom:1px solid var(--border2);padding-bottom:6px}.hbody h3{font-size:14px;color:var(--text);margin:22px 0 7px}.hbody p{margin:0 0 14px}.hbody ul,.hbody ol{padding-left:22px;margin:0 0 16px}.hbody li{margin:5px 0}.hbody code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--panel2);border:1px solid var(--border2);border-radius:4px;padding:1px 4px;color:var(--text)}.hbody pre{overflow:auto;background:var(--panel2);border:1px solid var(--border);padding:12px;border-radius:6px}.hbody pre code{border:0;padding:0}.hbody table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:12px}.hbody th{text-align:left;color:var(--text);background:var(--panel2)}.hbody th,.hbody td{padding:8px;border-bottom:1px solid var(--border)}.hbody blockquote{margin:16px 0;padding:8px 14px;border-left:3px solid var(--brand);background:var(--panel2)}.hbody a{color:var(--brand);text-decoration:underline;text-underline-offset:2px}
+@media(max-width:820px){.handbook{grid-template-columns:1fr;gap:20px}.hnav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--border);padding:0 0 16px}.hnavlinks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}.hsection{grid-column:1/-1}.hbody h1{font-size:23px}}
+@media(max-width:460px){.hnavlinks{grid-template-columns:1fr}.hbody{font-size:13px}.hbody table{display:block;overflow-x:auto}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="handbook">
+  <aside class="hnav" aria-label="Handbook navigation">
+    <form class="hsearch" action="/handbook" method="get" role="search"><i data-lucide="search"></i><label class="sr-only" for="handbook-search">Search handbook</label><input id="handbook-search" name="q" value="{{ query }}" placeholder="Search handbook"></form>
+    {% if query %}<div class="hresults" aria-live="polite">{% for result in results %}<a class="hresult" href="/handbook/{{ result.page.slug }}?q={{ query|urlencode }}"><b>{{ result.page.title }}</b><span>{{ result.page.summary }}</span></a>{% else %}<div class="hresult"><b>No matches</b><span>Try a model term, view, or workflow.</span></div>{% endfor %}</div>{% endif %}
+    <div class="hnavlinks">{% for section in sections %}<div class="hsection">{{ section.name }}</div>{% for item in section.pages %}<a class="hitem {{ 'on' if item.slug==page.slug else '' }}" href="/handbook/{{ item.slug }}">{{ item.title }}</a>{% endfor %}{% endfor %}</div>
+  </aside>
+  <article class="hdoc"><div class="hmeta"><span>Version 1</span><span>Source controlled</span><span>Review due {{ page.review_due }}</span></div><div class="hbody">{{ page.html|safe }}</div></article>
+</div>
+{% endblock %}

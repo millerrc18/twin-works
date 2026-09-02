@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "pages": [
+    {"slug": "getting-started", "title": "Getting Started", "section": "Operate", "order": 10, "summary": "How to read TwinWorks and choose the right program view.", "file": "getting-started.md", "owner": "Program Operations", "review_due": "2026-10-02"},
+    {"slug": "planning-basis", "title": "Planning Basis and Publication", "section": "Understand", "order": 20, "summary": "RTG plans, contract dates, lifecycle states, and what can publish.", "file": "planning-basis.md", "owner": "Program Scheduling", "review_due": "2026-10-02"},
+    {"slug": "forecast-method", "title": "Forecast Method", "section": "Understand", "order": 30, "summary": "Finite-capacity physics, cure gates, residual correction, and uncertainty.", "file": "forecast-method.md", "owner": "TwinWorks Model Owner", "review_due": "2026-10-02"},
+    {"slug": "data-freshness", "title": "Data Sources and Freshness", "section": "Operate", "order": 40, "summary": "IFS refresh behavior, snapshots, source age, and fallback rules.", "file": "data-freshness.md", "owner": "Data Administration", "review_due": "2026-10-02"},
+    {"slug": "resources-tooling", "title": "Resources and Tooling", "section": "Model", "order": 50, "summary": "Labor effort, occupancy leases, assumptions, and readiness.", "file": "resources-tooling.md", "owner": "Industrial Engineering", "review_due": "2026-10-02"},
+    {"slug": "workspace-guide", "title": "Workspace Guide", "section": "Operate", "order": 60, "summary": "Portfolio and program tabs, schedules, Why panels, and factory map.", "file": "workspace-guide.md", "owner": "Program Operations", "review_due": "2026-10-02"},
+    {"slug": "administration", "title": "Administration Runbook", "section": "Administer", "order": 70, "summary": "Refreshes, program lifecycle, resource reviews, and recovery rules.", "file": "administration.md", "owner": "TwinWorks Administrator", "review_due": "2026-10-02"},
+    {"slug": "glossary", "title": "Glossary", "section": "Reference", "order": 80, "summary": "Canonical definitions for the terms used throughout TwinWorks.", "file": "glossary.md", "owner": "TwinWorks Model Owner", "review_due": "2026-10-02"},
+    {"slug": "release-notes", "title": "Release Notes", "section": "Reference", "order": 90, "summary": "User-visible changes to scope, workflows, forecasts, and model governance.", "file": "release-notes.md", "owner": "TwinWorks Product Owner", "review_due": "2026-10-02"}
+  ]
+}

@@ -44,9 +44,11 @@ from app.routers.levers import router as levers_router  # noqa: E402
 from app.routers.auth import router as auth_router  # noqa: E402
 from app.routers.factory_map import router as factory_map_router  # noqa: E402
 from app.routers.resources import router as resources_router  # noqa: E402
+from app.routers.handbook import router as handbook_router  # noqa: E402
 app.include_router(dashboard_router)
 app.include_router(admin_router)
 app.include_router(levers_router)
 app.include_router(auth_router)
 app.include_router(factory_map_router)
 app.include_router(resources_router)
+app.include_router(handbook_router)

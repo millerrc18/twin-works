@@ -19,6 +19,9 @@ handoff.
 - Added DOC-01 to the active roadmap: a version-controlled in-app `/handbook`, core operational
   content, contextual help, and documentation governance/acceptance without colliding with the
   FastAPI `/docs` endpoint.
+- Delivered DOC-01a/DOC-01b with sanitized Markdown, manifest navigation, search, responsive/print
+  styling, ownership/review metadata, and nine initial operating/reference pages. Full suite: 100
+  passed; `/handbook` and `/docs` both pass live route checks.
 - Completed SCOPE-01: deactivated `BCAFIN`, archived epoch 10, and enforced active-program filters
   from registry and sync ingress through WIP, simulation, forecast routes/logs, portfolio, and
   navigation. Retained 73 BCA position rows and 12 quarantine events. Backup SHA-256:
