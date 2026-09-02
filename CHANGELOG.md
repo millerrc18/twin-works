@@ -16,6 +16,9 @@ handoff.
   and quantitative floor-validation gates after independent Gemini review. Shared Aegis demand will
   be modeled honestly rather than hidden because current rate is low.
 - Planning record: `docs/plans/three-program-tooling-roadmap.md`.
+- Added DOC-01 to the active roadmap: a version-controlled in-app `/handbook`, core operational
+  content, contextual help, and documentation governance/acceptance without colliding with the
+  FastAPI `/docs` endpoint.
 - Completed SCOPE-01: deactivated `BCAFIN`, archived epoch 10, and enforced active-program filters
   from registry and sync ingress through WIP, simulation, forecast routes/logs, portfolio, and
   navigation. Retained 73 BCA position rows and 12 quarantine events. Backup SHA-256:

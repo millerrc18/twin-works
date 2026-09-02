@@ -80,6 +80,8 @@ adds deterministic occupancy leases and Aeronose tooling as the first governed t
 five tool counts are registered as unbound drafts, and the allocator core now carries the existing
 cure-station constraints with exact parity. Operation binding and maintenance integration remain.
 No tooling candidate can change published dates until its shadow and approval gates pass.
+DOC-01 will add a searchable in-app `/handbook`; the initial shell and core operating content may
+proceed in parallel with TOOL-01.
 The Marion virtual factory is live for reviewed P2/P3 locations and remains visual-only. It must
 not change simulation inputs without a separate approved design. Follow-ons #82-1a, #82-4, and
 #82-5 cover the governed full-WC catalog refresh, reviewed physical expansion, and live acceptance.

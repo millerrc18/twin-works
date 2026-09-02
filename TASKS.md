@@ -29,7 +29,7 @@ remains in `AGENTS.md`.
 
 **Status:** Revised 2026-09-02. Active product scope is Elevator, Aeronose, and Aegis. The migration
 must preserve their published forecasts while the enhanced resource model is evaluated in shadow.
-BCA is being parked through SCOPE-01; its completed evidence remains historical and cannot affect
+BCA was parked through SCOPE-01; its completed evidence remains historical and cannot affect
 active product behavior.
 
 - [ ] **PLAT-01 - Apply resource governance and candidate epochs to existing programs**
@@ -187,13 +187,15 @@ from the execution sequence and retained only in the deferred evidence section.
    do not alter the parity epoch.
 6. TOOL-01c approve and freeze Aeronose acquire/release bindings.
 7. TOOL-01d run the Aeronose tooling shadow and expose causal explanations.
-8. UI-01d add the three-program resource/tooling pressure board from governed data.
-9. TOOL-02 survey and model Elevator tooling in its own candidate.
-10. TOOL-03 document and periodically review Aegis present-rate assumptions.
-11. PLAT-01d certify accepted physical/tooling candidate inputs without promoting them.
-12. UI-01e complete integrated UX, lifecycle-suppression, accessibility, and performance acceptance.
-13. TOOL-01e complete the 2-4 week Aeronose pilot.
-14. PLAT-01e promote only explicitly accepted replacement epochs; retain rollback.
+8. DOC-01a/DOC-01b add the in-app handbook shell and core user documentation.
+9. UI-01d add the three-program resource/tooling pressure board from governed data.
+10. TOOL-02 survey and model Elevator tooling in its own candidate.
+11. TOOL-03 document and periodically review Aegis present-rate assumptions.
+12. DOC-01c add contextual documentation links after tooling views stabilize.
+13. PLAT-01d certify accepted physical/tooling candidate inputs without promoting them.
+14. UI-01e and DOC-01d complete integrated UX/documentation acceptance.
+15. TOOL-01e complete the 2-4 week Aeronose pilot.
+16. PLAT-01e promote only explicitly accepted replacement epochs; retain rollback.
 
 **Phase gates:**
 - Gate 1 - foundation: authorized lifecycle transitions, immutable epoch snapshots, expiry/drift
@@ -319,12 +321,49 @@ gates are complete. Full rationale and acceptance details are in
   - Classify tools as dedicated or physically shared. Any shared Aegis demand consumes the same
     physical pool; low rate is not permission to suppress real contention.
 
+## Product Documentation
+
+- [ ] **DOC-01 - Build an in-app documentation and operating-handbook section**
+  - Use `/handbook` for the user-facing route because FastAPI already owns `/docs` for OpenAPI.
+  - Render version-controlled, sanitized Markdown from a dedicated user-documentation directory;
+    do not create a second manually maintained source of truth in templates or the database.
+  - Separate stable methodology from live status. Documentation may explain calculations and data
+    contracts, but mutable WIP counts, forecasts, readiness, and source freshness must come from
+    live views rather than copied prose.
+
+  - [ ] **DOC-01a - Add the handbook information architecture and application shell**
+    - Add registry-driven sections, left navigation, breadcrumbs, page metadata, full-text search,
+      print-friendly rendering, and direct anchors.
+    - Acceptance: `/handbook` is keyboard accessible, responsive, dark/light compatible, and does
+      not conflict with `/docs` or expose repository paths, credentials, tokens, or sensitive logs.
+
+  - [ ] **DOC-01b - Publish the initial operational content set**
+    - Cover: Getting Started; program/planning-basis behavior; forecast methodology; data sources
+      and freshness; interpreting Portfolio/Schedule/Flow/Resources; assumptions and lifecycle;
+      tooling and capacity semantics; administrator runbooks; glossary; release notes.
+    - Clearly label measured facts, model assumptions, provisional inputs, and published outputs.
+    - Acceptance: every active top-level workflow has a concise procedure and every model term used
+      in the UI has one canonical definition.
+
+  - [ ] **DOC-01c - Add contextual help and evidence links**
+    - Link relevant handbook anchors from program tabs, Resource Registry, tooling views, planning-
+      basis badges, freshness states, and Why panels without cluttering repeated workflows.
+    - Acceptance: links preserve current program/epoch context where relevant and never imply that
+      a candidate assumption is published.
+
+  - [ ] **DOC-01d - Add documentation governance and acceptance**
+    - Define owner, reviewer, version/effective date, review cadence, stale-page indicator, broken-
+      link checks, content tests, and release checklist integration.
+    - Acceptance: all links and anchors pass automated checks; content passes desktop/mobile,
+      keyboard, light/dark, and print review; documentation changes are required when behavior or
+      terminology changes.
+
 ## Deferred BCA Evidence - Not Active Product Scope
 
 **Decision (2026-09-02):** Project `521938` is paused indefinitely. Completed discovery,
 observation, and quarantine work is retained as historical evidence, but no BCA task below is on the
-active execution path. SCOPE-01 removes the existing observation registration from active product
-surfaces and refresh behavior without deleting audit history.
+active execution path. SCOPE-01 removed the observation registration from active product surfaces
+and refresh behavior without deleting audit history.
 
 - [x] **BCA-01 - Make routing discovery revision-aware**
   - Update the IFS discovery path to choose an explicit routing revision, defaulting to the active

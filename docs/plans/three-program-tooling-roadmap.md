@@ -171,14 +171,17 @@ maintenance intervals, replayable lease explanations, and full-run deadlock hand
    do not alter the parity epoch.
 6. TOOL-01c approve Aeronose operation bindings.
 7. TOOL-01d run the Aeronose tooling shadow and expose explanations.
-8. UI-01d add the three-program resource/tooling pressure board from governed data.
-9. TOOL-02 execute the Elevator tooling survey and shadow candidate.
-10. TOOL-03 record and periodically review Aegis present-rate assumptions.
-11. PLAT-01d certify accepted physical/tooling candidates without promotion.
-12. UI-01e complete integrated behavioral, accessibility, visual, and performance acceptance.
-13. TOOL-01e complete the pilot; PLAT-01e promotes only explicitly accepted epochs.
+8. DOC-01a/DOC-01b add the in-app handbook shell and core user documentation.
+9. UI-01d add the three-program resource/tooling pressure board from governed data.
+10. TOOL-02 execute the Elevator tooling survey and shadow candidate.
+11. TOOL-03 record and periodically review Aegis present-rate assumptions.
+12. DOC-01c add contextual help after tooling views stabilize.
+13. PLAT-01d certify accepted physical/tooling candidates without promotion.
+14. UI-01e/DOC-01d complete integrated UX and documentation acceptance.
+15. TOOL-01e complete the pilot; PLAT-01e promotes only explicitly accepted epochs.
 
-The governed work-center catalog (#82-1a) and reviewed floor-map follow-ons may run in parallel.
+The governed work-center catalog (#82-1a), reviewed floor-map follow-ons, and DOC-01a/DOC-01b may
+run in parallel once SCOPE-01 is complete. Contextual DOC-01c follows stable tooling views.
 
 ## Phase Gates
 
