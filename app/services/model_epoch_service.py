@@ -362,7 +362,8 @@ def _legacy_definition(program: str) -> dict:
     }
 
 
-async def _candidate_definition(db: AsyncSession, program: str) -> dict:
+async def _candidate_definition(db: AsyncSession, program: str,
+                                *, include_physical_policies: bool = False) -> dict:
     """Freeze the one-to-one DB-shadow mapping used for incumbent parity."""
     legacy = _legacy_definition(program)
     bindings = (await db.execute(
@@ -393,7 +394,7 @@ async def _candidate_definition(db: AsyncSession, program: str) -> dict:
             "work_center_no": pool.work_center_no,
             "active": pool.active,
             "capacity_versions": [
-                {
+                ({
                     "id": version.id,
                     "effective_from": version.effective_from.isoformat(),
                     "effective_to": (version.effective_to.isoformat()
@@ -403,7 +404,10 @@ async def _candidate_definition(db: AsyncSession, program: str) -> dict:
                                           if version.capacity_schedule_json else None),
                     "slot_count": version.slot_count,
                     "assumption_id": version.assumption_id,
-                }
+                } | ({
+                    "calendar_policy": json.loads(version.calendar_policy_json or "{}"),
+                    "external_policy": json.loads(version.external_policy_json or "{}"),
+                } if include_physical_policies else {}))
                 for version in versions
             ],
         }
@@ -433,6 +437,14 @@ async def _candidate_definition(db: AsyncSession, program: str) -> dict:
     }
 
 
+async def _physical_candidate_definition(db: AsyncSession, program: str) -> dict:
+    definition = await _candidate_definition(
+        db, program, include_physical_policies=True)
+    definition["purpose"] = "physical_pool_shadow"
+    definition["resource_registry"]["strategy"] = "physical_pools"
+    return definition
+
+
 async def assert_candidate_definition_current(
         db: AsyncSession, selections: Mapping[str, EpochSelection]) -> None:
     """Reject a shadow run when its frozen registry mapping has drifted."""
@@ -440,13 +452,74 @@ async def assert_candidate_definition_current(
         if selection.epoch.epoch_kind != "CANDIDATE":
             continue
         stored = json.loads(selection.epoch.definition_json)["definition"]
-        if stored.get("purpose") != "incumbent_legacy_parity":
+        purpose = stored.get("purpose")
+        if purpose == "incumbent_legacy_parity":
+            current = await _candidate_definition(db, program)
+        elif purpose == "physical_pool_shadow":
+            current = await _physical_candidate_definition(db, program)
+        else:
             continue
-        current = await _candidate_definition(db, program)
         if _canonical_json(stored) != _canonical_json(current):
             raise EpochSelectionError(
                 f"Candidate epoch {selection.epoch.epoch_key} no longer matches "
                 "the live resource registry; create a successor epoch")
+
+
+async def create_physical_shadow_epochs(
+        db: AsyncSession, programs, *, actor: str = "TwinWorks resource migration",
+        as_of: date | None = None) -> dict[str, EpochSelection]:
+    """Freeze complete physical-pool definitions in OBSERVE without publication."""
+    from app.services.resource_registry import resource_coverage
+
+    as_of = as_of or date.today()
+    programs = tuple(code.upper() for code in programs if code.upper() in registry.programs)
+    await ensure_legacy_epochs(db, programs)
+    candidates = {}
+    for program in programs:
+        published_before = await published_epoch(db, program)
+        predecessor = published_before or await latest_epoch(db, program)
+        if predecessor is None:
+            raise EpochSelectionError(
+                f"Physical shadow for {program} requires an existing model epoch")
+        issues = await resource_coverage(db, program, as_of)
+        missing = [issue for issue in issues if issue.severity == "MISSING"]
+        if missing:
+            detail = "; ".join(
+                f"{issue.subject_key}:{issue.parameter}" for issue in missing)
+            raise EpochSelectionError(
+                f"Physical shadow for {program} has incomplete resources: {detail}")
+        definition = await _physical_candidate_definition(db, program)
+        pool_codes = {
+            row["code"] for row in definition["resource_registry"]["pools"]
+        }
+        if not any(not code.startswith("LEGACY:") for code in pool_codes):
+            raise EpochSelectionError(
+                f"Physical shadow for {program} has no physical labor pool")
+        epoch = await create_epoch(
+            db, program=program, label="Physical labor-pool shadow",
+            epoch_kind="CANDIDATE", resource_mode="DB_SHADOW",
+            definition=definition, predecessor_epoch_id=predecessor.epoch.id,
+            created_by=actor,
+        )
+        transition = await current_transition(db, epoch.id)
+        if transition.to_state == "DRAFT":
+            transition = await transition_epoch(
+                db, epoch.id, to_state="OBSERVE", actor=actor,
+                authority_role="DATA_ADMIN",
+                rationale="Begin governed physical labor-pool shadow",
+                evidence={"gate": "BCA-03b", "publication_change": False},
+            )
+        if transition.to_state != "OBSERVE":
+            raise EpochSelectionError(
+                f"Physical shadow for {program} is {transition.to_state}, not OBSERVE")
+        published = await published_epoch(db, program)
+        published_id = published.epoch.id if published else None
+        published_before_id = published_before.epoch.id if published_before else None
+        if published_id != published_before_id:
+            raise EpochSelectionError(
+                f"Creating the {program} physical shadow changed publication")
+        candidates[program] = EpochSelection(epoch=epoch, transition=transition)
+    return candidates
 
 
 async def ensure_incumbent_shadow_epochs(

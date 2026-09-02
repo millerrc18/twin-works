@@ -61,6 +61,12 @@ def test_replay_uses_frozen_inputs_routes_profile_and_expected_result(tmp_path, 
         first = await replay_snapshot(db, frozen.id)
         assert first.exact_match
         assert (await verify_snapshot_integrity(db, frozen.id))["replayable"] is True
+        legacy_engine_snapshot = await persist_replay_snapshot(
+            db, base_snapshot_id=compiled.snapshot_id,
+            units_by_program=units, results=result,
+            engine_version="capacity_engine.v1",
+        )
+        assert (await replay_snapshot(db, legacy_engine_snapshot.id)).exact_match
         await db.commit()
 
         monkeypatch.setitem(R.WC_SHIFT, ("ELEV", "221"), {1: 1, 2: 1, 3: 1})

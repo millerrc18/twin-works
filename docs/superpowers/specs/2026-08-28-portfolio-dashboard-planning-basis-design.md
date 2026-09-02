@@ -3,6 +3,11 @@
 **Status:** Approved 2026-08-28; UI-01a delivered 2026-08-31; UI-01b/UI-01c delivered 2026-09-01;
 UI-01d/UI-01e remain
 
+**Scope update 2026-09-02:** Active product scope returns to Elevator, Aeronose, and Aegis. The
+registry-driven portfolio architecture remains, but SCOPE-01 removes BCA from active ingress and
+navigation while retaining its immutable history. UI-01d is now a three-program published-or-
+candidate resource/tooling pressure board; contexts may not be blended.
+
 ## Purpose
 
 TwinWorks is moving from three known programs to a portfolio that includes programs at different

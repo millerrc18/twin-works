@@ -92,6 +92,9 @@ class LiveMcpDataSource(DataSource):
         return baseline_serial(program, so) or so
 
     def get_wip_units(self, program: str) -> list[UnitRecord]:
+        from app.services.program_service import is_active
+        if not is_active(program):
+            return []
         if program in self._cache:
             return self._cache[program]
         try:
@@ -138,6 +141,9 @@ class LiveMcpDataSource(DataSource):
 
     def get_shipped_units(self, program: str) -> list[ShippedRecord]:
         # shipped/accuracy records stay from the curated snapshot set (pack dates + logged fx)
+        from app.services.program_service import is_active
+        if not is_active(program):
+            return []
         return SnapshotDataSource().get_shipped_units(program)
 
     def get_close_date(self, so: str) -> date | None:

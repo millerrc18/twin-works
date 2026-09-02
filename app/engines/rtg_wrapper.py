@@ -22,12 +22,16 @@ from app.engines import router_registry as RR
 from app.services import program_service as PSVC
 
 
-def run_sim(units, as_of: datetime, ops_map=None, cures_map=None, profile=None) -> dict:
+def run_sim(units, as_of: datetime, ops_map=None, cures_map=None, profile=None,
+            trace_constraints=False) -> dict:
     """units: list of {serial, so, maxop, commit, program}. Returns
     {serial: {finish, op_dt, cure_dt}} straight from simulate()."""
     ops_map = ops_map or RR.registry.ops_map()
     cures_map = cures_map or RR.registry.cures_map()
-    return simulate(units, ops_map, cures_map, as_of, profile=profile)
+    return simulate(
+        units, ops_map, cures_map, as_of, profile=profile,
+        trace_constraints=trace_constraints,
+    )
 
 
 def _program_wcs(code: str) -> set:
@@ -66,6 +70,8 @@ def _simulation_profile() -> dict:
     """
     codes = list(RR.registry.programs)
     return {
+        "resource_mode": "LEGACY",
+        "allocation_mode": "LEGACY_COMPAT",
         "crew_by_program": {c: dict(RR.registry.spec(c).crew_by_op) for c in codes},
         "dpas_programs": {c for c in codes if RR.registry.spec(c).dpas},
         "shift_budgets": {
@@ -75,6 +81,11 @@ def _simulation_profile() -> dict:
         },
         "budget_programs": codes,
         "shared_wcs": shared_wcs(),
+        "operation_pools": {},
+        "pool_shift_budgets": {},
+        "pool_external_reserves": {},
+        "pool_calendar_policies": {},
+        "pool_assumption_ids": {},
         "cure_station_capacities": dict(R.CURE_STATION_CAPACITIES),
         "cure_station_rules": dict(R.CURE_STATION_RULES),
         "parallel_cure_gates": dict(R.PARALLEL_CURE_GATES),
@@ -85,13 +96,22 @@ def simulation_profile() -> dict:
     """Return a detached snapshot of the active scheduler configuration."""
     return _simulation_profile()
 
-def pool_groups(codes) -> list:
+def pool_groups(codes, profile=None) -> list:
     """Partition program codes into pools: two programs are in the same pool iff they share at
     least one shared WC (transitive). Returns a list of code-lists (connected components)."""
     codes = list(codes)
-    shared = shared_wcs()
-    # program -> its shared WCs
-    pwc = {c: (_program_wcs(c) & shared) for c in codes}
+    profile = profile or {}
+    if profile.get("allocation_mode") == "PHYSICAL":
+        operation_pools = profile.get("operation_pools", {})
+        pwc = {
+            code: {pool for (program, _opno), pool in operation_pools.items()
+                   if program == code}
+            for code in codes
+        }
+    else:
+        shared = shared_wcs()
+        # program -> its shared WCs
+        pwc = {c: (_program_wcs(c) & shared) for c in codes}
     parent = {c: c for c in codes}
 
     def find(x):
@@ -109,7 +129,9 @@ def pool_groups(codes) -> list:
     plant = _plants(codes)
     for i, a in enumerate(codes):
         for b in codes[i + 1:]:
-            if (pwc[a] & pwc[b]) and plant.get(a) == plant.get(b):
+            same_site = (profile.get("allocation_mode") == "PHYSICAL"
+                         or plant.get(a) == plant.get(b))
+            if (pwc[a] & pwc[b]) and same_site:
                 union(a, b)
     groups = {}
     for c in codes:
@@ -118,16 +140,20 @@ def pool_groups(codes) -> list:
     return [sorted(g) for _, g in sorted(groups.items())]
 
 
-def run_pooled(units_by_program: dict, as_of: datetime, profile=None) -> dict:
+def run_pooled(units_by_program: dict, as_of: datetime, profile=None,
+               ops_map=None, cures_map=None, trace_constraints=False) -> dict:
     """units_by_program: {code: [unit dicts]}. Simulate each shared-WC-connected pool together,
     merge results into one {serial: result} dict. Programs with no shared WC run alone."""
     merged = {}
     profile = profile or _simulation_profile()
     codes = [c for c in units_by_program if units_by_program.get(c)]
-    for group in pool_groups(codes):
+    for group in pool_groups(codes, profile=profile):
         pooled_in = []
         for c in group:
             pooled_in += list(units_by_program.get(c, []))
         if pooled_in:
-            merged.update(run_sim(pooled_in, as_of, profile=profile))
+            merged.update(run_sim(
+                pooled_in, as_of, ops_map=ops_map, cures_map=cures_map,
+                profile=profile, trace_constraints=trace_constraints,
+            ))
     return merged

@@ -7,7 +7,7 @@ and the snapshot export on save. `router_registry` consumes `load_specs()` to bu
 """
 import json
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from sqlalchemy import select
@@ -32,6 +32,10 @@ _SEED_PLANNING = {
     "RAD": ("PLAN_SLOTS", "RTG", "2026"),
     "AEGIS": ("CONTRACT_DATES", "Contract", None),
 }
+
+
+class ProgramDeactivationError(ValueError):
+    pass
 
 
 def _db_path() -> str:
@@ -116,6 +120,11 @@ def program_order() -> list:
         extra = sorted(c for c in specs if c not in _SEED_ORDER)
         return [c for c in _SEED_ORDER if c in specs] + extra
     return list(_SEED_ORDER)
+
+
+def is_active(code: str) -> bool:
+    """Return whether a program belongs to the current runtime product scope."""
+    return (code or "").upper() in program_order()
 
 
 def names() -> dict:
@@ -288,6 +297,66 @@ async def create_program(db: AsyncSession, *, code, name, plant, project_id, par
         code=code, ops=len(ops), epoch_id=epoch.id, epoch_key=epoch.epoch_key,
         lifecycle_state=(await EPOCHS.current_transition(db, epoch.id)).to_state,
     )
+
+
+async def deactivate_program(db: AsyncSession, code: str, *, actor: str,
+                             rationale: str) -> dict:
+    """Archive an unpublished program and exclude it from current runtime scope."""
+    from app.engines import router_registry as RR
+    from app.models import ModelEpoch
+    from app.services import model_epoch_service as EPOCHS
+
+    code = (code or "").strip().upper()
+    actor = (actor or "").strip()
+    rationale = (rationale or "").strip()
+    if not code or not actor or not rationale:
+        raise ProgramDeactivationError("code, actor, and rationale are required")
+    program = await db.get(Program, code)
+    if program is None:
+        raise ProgramDeactivationError(f"Program {code} was not found")
+    if await EPOCHS.published_epoch(db, code) is not None:
+        raise ProgramDeactivationError(
+            f"Cannot deactivate published program {code}; retire its publication first")
+
+    epochs = (await db.execute(
+        select(ModelEpoch).where(ModelEpoch.program == code).order_by(ModelEpoch.id)
+    )).scalars().all()
+    pending_archives = []
+    for epoch in epochs:
+        transition = await EPOCHS.current_transition(db, epoch.id)
+        if transition.to_state in {"ARCHIVED", "DEPRECATED"}:
+            continue
+        if transition.to_state not in {"DRAFT", "OBSERVE", "PAUSED"}:
+            raise ProgramDeactivationError(
+                f"Program {code} epoch {epoch.epoch_key} is {transition.to_state}; "
+                "move it through the authorized lifecycle before deactivation")
+        pending_archives.append(epoch)
+
+    archived_epoch_ids = []
+    for epoch in pending_archives:
+        await EPOCHS.transition_epoch(
+            db, epoch.id, to_state="ARCHIVED", actor=actor,
+            authority_role="DATA_ADMIN", rationale=rationale,
+            evidence={
+                "scope_change": "DEACTIVATE",
+                "program_active": False,
+                "history_retained": True,
+            },
+        )
+        archived_epoch_ids.append(epoch.id)
+
+    changed = bool(program.active or archived_epoch_ids)
+    if program.active:
+        program.active = False
+        program.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    invalidate_cache()
+    RR.rebuild()
+    return {
+        "code": code,
+        "changed": changed,
+        "archived_epoch_ids": archived_epoch_ids,
+    }
 
 
 def _export_snapshot_all():

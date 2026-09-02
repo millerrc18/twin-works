@@ -6,13 +6,19 @@ from datetime import datetime, date
 from app.data import wip_tables as W
 from app.data.source import DataSource, UnitRecord, ShippedRecord
 from app.services import position_state as PS
+from app.services import program_service as PROGRAMS
 
 STALL_DAYS = 7
 
 
 class SnapshotDataSource(DataSource):
     def __init__(self, use_position_state: bool = True):
-        self._state = PS.load_state() if use_position_state else {}
+        state = PS.load_state() if use_position_state else {}
+        active = set(PROGRAMS.program_order())
+        self._state = {
+            so: row for so, row in state.items()
+            if row.get("program") in active
+        }
 
     # --- as-of clock ---
     def as_of(self) -> datetime:
@@ -35,6 +41,8 @@ class SnapshotDataSource(DataSource):
 
     # --- WIP (open units) ---
     def get_wip_units(self, program: str) -> list[UnitRecord]:
+        if not PROGRAMS.is_active(program):
+            return []
         if self._state:
             out = []
             for so, v in self._state.items():
@@ -56,6 +64,8 @@ class SnapshotDataSource(DataSource):
 
     # --- shipped (closed units) ---
     def get_shipped_units(self, program: str) -> list[ShippedRecord]:
+        if not PROGRAMS.is_active(program):
+            return []
         if self._state:
             out = []
             for so, v in self._state.items():

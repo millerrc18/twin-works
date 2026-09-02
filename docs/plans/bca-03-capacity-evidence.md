@@ -2,8 +2,16 @@
 
 ## Status
 
+Deferred historical evidence as of 2026-09-02. BCA is not active TwinWorks product scope and these
+utilization findings do not authorize further BCA modeling or refresh work.
+
 Read-only IFS evidence pass completed 2026-08-27 for `P3TRI`, `TRI A`, `PRNG`, and `P3NDI`.
 No production capacity values were changed. These findings constrain the BCA-03 design.
+
+The BCA-03b software gate was implemented on 2026-09-01. It can now enforce physical pool IDs,
+finite calendars, explicit external reserves, immutable shadow epochs, replay, and causal profile
+comparison. The four BCA capacity decisions below remain unapproved, so no live physical pool was
+created. See `../validation/bca-03b-physical-pool-shadow.md`.
 
 ## Sources and Window
 

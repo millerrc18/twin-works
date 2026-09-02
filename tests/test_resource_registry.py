@@ -232,10 +232,27 @@ def test_resource_coverage_reports_missing_provisional_and_stale_inputs(tmp_path
             effective_from=date(2026, 8, 1), review_due_at=date(2026, 8, 15),
             owner="Plant 3", approver="Owner",
         )
+        reserve_assumption = await add_assumption(
+            db, subject_type="POOL", subject_key=complete.code,
+            parameter="external_reserve", value={"1": 0},
+            unit="HOURS_PER_SHIFT", basis="OWNER_CONFIRMED",
+            approval_status="APPROVED", commitment_grade="COMMITMENT_READY",
+            effective_from=date(2026, 8, 1), owner="Plant 3", approver="Owner",
+        )
         await add_capacity_version(
             db, pool_id=complete.id, effective_from=date(2026, 8, 1),
             status="APPROVED", capacity_scope="GROSS_SITE",
-            capacity_schedule={"1": 20}, assumption_id=assumption.id,
+            capacity_schedule={"1": 20},
+            calendar_policy={
+                "mode": "WEEKDAY_FACTORS",
+                "factors": {str(day): 1.0 for day in range(7)},
+                "exceptions": {}, "covered_until": "2027-03-01",
+            },
+            external_policy={
+                "mode": "STATIC_RESERVE", "shift_reserve": {"1": 0},
+                "assumption_id": reserve_assumption.id,
+            },
+            assumption_id=assumption.id,
         )
         for pool in (complete, missing):
             await add_binding(
@@ -252,6 +269,85 @@ def test_resource_coverage_reports_missing_provisional_and_stale_inputs(tmp_path
         tri_issue = next(issue for issue in issues if issue.subject_key == "59:TRI_A")
         assert "internal only" in tri_issue.reason.lower()
         assert "stale" in tri_issue.reason.lower()
+
+    _run_scenario(tmp_path, scenario)
+
+
+def test_physical_pool_coverage_requires_calendar_and_external_reserve_policy(tmp_path):
+    from app.services.resource_registry import (
+        add_assumption,
+        add_binding,
+        add_capacity_version,
+        create_pool,
+        resource_coverage,
+    )
+
+    async def scenario(db):
+        pool = await create_pool(
+            db, code="59:P3TRI", site="59", name="P3 trim labor",
+            resource_type="LABOR", capacity_unit="HOURS", work_center_no="P3TRI",
+        )
+        assumption = await add_assumption(
+            db, subject_type="POOL", subject_key=pool.code, parameter="shift_capacity",
+            value={"1": 16}, unit="HOURS_PER_SHIFT", basis="OWNER_CONFIRMED",
+            approval_status="APPROVED", commitment_grade="COMMITMENT_READY",
+            effective_from=date(2026, 9, 1), owner="Floor owner", approver="IE owner",
+        )
+        await add_capacity_version(
+            db, pool_id=pool.id, effective_from=date(2026, 9, 1),
+            status="APPROVED", capacity_scope="GROSS_SITE",
+            capacity_schedule={"1": 16}, assumption_id=assumption.id,
+        )
+        await add_binding(
+            db, program="TESTCAP", pool_id=pool.id, acquire_op=4000,
+            requirement_mode="EFFORT", quantity=1, demand_source="LABOR",
+            release_event="OP_COMPLETE", status="APPROVED", valid_operations={4000},
+        )
+
+        issues = await resource_coverage(db, "TESTCAP", date(2026, 9, 1))
+
+        assert {(issue.parameter, issue.severity) for issue in issues} == {
+            ("calendar_policy", "MISSING"),
+            ("external_reserve", "MISSING"),
+        }
+
+    _run_scenario(tmp_path, scenario)
+
+
+def test_physical_pool_definition_requires_reserve_and_supersedes_effort_binding(tmp_path):
+    from sqlalchemy import select
+
+    from app.models import OperationResourceBinding
+    from app.services.resource_profile import seed_legacy_resources
+    from app.services.resource_registry import (
+        ResourceRegistryError,
+        define_physical_labor_pool,
+    )
+
+    async def scenario(db):
+        await seed_legacy_resources(db)
+        common = dict(
+            db=db, code="59:P2-PAINT", site="59", name="Plant 2 paint labor",
+            bindings={"ELEV": {3800}}, shift_capacity={1: 17, 2: 9, 3: 13},
+            weekday_factors={day: 1.0 for day in range(7)},
+            calendar_exceptions={}, calendar_covered_until=date(2026, 10, 1),
+            effective_from=date(2026, 9, 1), owner="Floor owner", approver="IE owner",
+            evidence_source="Owner-approved staffing plan",
+            calculation_method="People by shift multiplied by paid production hours",
+            review_due_at=date(2026, 10, 1),
+        )
+        with pytest.raises(ResourceRegistryError, match="external reserve"):
+            await define_physical_labor_pool(**common)
+        result = await define_physical_labor_pool(
+            **common, external_reserve={1: 1, 2: 2, 3: 3})
+
+        approved = (await db.execute(select(OperationResourceBinding).where(
+            OperationResourceBinding.program == "ELEV",
+            OperationResourceBinding.acquire_op == 3800,
+        ))).scalars().all()
+        assert result["pool"].code == "59:P2-PAINT"
+        assert result["reserve_assumption"].review_due_at == date(2026, 10, 1)
+        assert sorted(row.status for row in approved) == ["APPROVED", "SUPERSEDED"]
 
     _run_scenario(tmp_path, scenario)
 

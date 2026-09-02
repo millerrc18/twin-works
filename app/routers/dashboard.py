@@ -81,6 +81,8 @@ async def forecast(request: Request, program: str, view: str = "matrix",
     filter=all|behind|active (matrix only). Query params are URL-stated for QBR reproducibility."""
     ds = await _ds(db)
     program = program.upper()
+    if not PSVC.is_active(program):
+        raise HTTPException(status_code=404, detail="Unknown program")
     planning = await PLANNING.context_for_program(db, program)
     ctx = {"app_name": settings.app_name, "data_source": settings.data_source,
            "program": program, "program_name": PSVC.name(program),
@@ -132,6 +134,8 @@ async def forecast(request: Request, program: str, view: str = "matrix",
 async def reassign_slot(program: str, request: Request, db: AsyncSession = Depends(get_db)):
     """Inline slot reassignment (swap handling)."""
     from app.services import slot_service
+    if not PSVC.is_active(program):
+        raise HTTPException(status_code=404, detail="Unknown program")
     planning = await PLANNING.context_for_program(db, program)
     if (planning.forecast_visibility != "PUBLISHED"
             or planning.configured_planning_basis != "PLAN_SLOTS"):

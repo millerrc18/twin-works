@@ -1,5 +1,9 @@
 # Resource and Assumption Registry Implementation Plan
 
+> **Scope update 2026-09-02:** BCA-specific execution in this historical plan is deferred. Generic
+> resource and occupancy work continues for Elevator, Aeronose, and Aegis under
+> `docs/plans/three-program-tooling-roadmap.md`. Do not execute the BCA pilot tasks below.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use
 > checkbox (`- [ ]`) syntax for tracking.
@@ -268,6 +272,13 @@ git commit -m "feat: expose forecast assumptions and resource explanations"
 ---
 
 ### Task 4: Activate Physical Labor Pools and Remove DB-Mode Defaults
+
+**Progress 2026-09-01:** the pool-ID scheduler, hybrid transition behavior, static reserve,
+finite-calendar gate, DB-active fail-closed behavior, immutable OBSERVE successor, replay, and
+causal comparison are implemented and tested. No BCA pool was created because owner-approved
+capacity/calendar/reserve inputs are still outstanding. The separate onboarding activation UI and
+first live BCA shadow report remain open. See
+`docs/validation/bca-03b-physical-pool-shadow.md`.
 
 **Files:**
 - Modify: `capacity_engine.py`, `app/engines/rtg_wrapper.py`

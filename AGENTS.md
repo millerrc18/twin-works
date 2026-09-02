@@ -8,21 +8,21 @@ have actually bitten us. For the full human-facing reference see **MASTER.md**.
 > plan files, legacy workbook artifacts, and the `RTG_` environment prefix.
 ---
 
-## HANDOFF (2026-09-01) - read first if you are picking this up
+## HANDOFF (2026-09-02) - read first if you are picking this up
 
-**Current status:** Feature #81 is through its local safety gate; Feature #82 adds the read-only
-Marion virtual factory; BCA-01/02 provide revision-aware, economics-preserving IFS discovery; and
-PLAT-01a through PLAT-01c add governed model lifecycles, planning-basis isolation, recertification,
-and replayable incumbent shadows. BCA-05a adds live observation-only finishing data, and UI-01b/
-UI-01c provide the portfolio console and adaptive workspaces. BCA-06 adds a governed layup
-quarantine and blocked resource policy. The regression suite has **65 passing
-tests**; the run still emits existing Python 3.14
+**Current status:** Active product scope is Elevator, Aeronose, and Aegis. SCOPE-01 is complete:
+`BCAFIN` is inactive, epoch 10 is `ARCHIVED`, and registry/sync/WIP/simulation/forecast surfaces
+exclude it without deleting history. RES-01 retains the generic physical-resource shadow runtime.
+The next modeling path is TOOL-01:
+generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
+PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
+**78 passing tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
 
 **Current git state:** branch `codex/resource-assumption-registry`, tracking the matching origin
-branch. Remote: `https://github.com/millerrc18/twin-works.git`. The completed #81/#82, resource-
-registry, lifecycle, BCA observation/quarantine, portfolio UI, and documentation work is committed;
-preserve the git-ignored live SQLite database and its backups.
+branch. Remote: `https://github.com/millerrc18/twin-works.git`. The BCA-03b/generic physical-pool
+runtime and three-program tooling plan are currently uncommitted. Preserve the git-ignored live
+SQLite database and its backups.
 
 **#81 completed:**
 - `program` table and migration `b4e2f7a1`; DB-or-routers source flag; seed-the-3; `create_program`; snapshots; IFS metadata, program ordering, names, thresholds, and pack operations routed through `program_service`.
@@ -40,17 +40,20 @@ preserve the git-ignored live SQLite database and its backups.
 
 **Remaining work:**
 1. **#32b station calibration:** confirm the one-versus-two Plant 3 Radome electrical-seal station count. The allocator is live with a documented conservative value of one; see `TASKS.md`.
-2. **Platform/BCA execution:** UI-01a through UI-01c, PLAT-01a through PLAT-01c, BCA-05a, and
-   BCA-06 are complete. Next define approved physical labor pools in BCA-03b while the finishing
-   observation stream accrues. Follow the approved order and gates in `TASKS.md`. BCA-01/02
-   are complete; live revision-3 discovery
+2. **Three-program tooling pivot:** execute SCOPE-01, then RES-01 and TOOL-01 in the order defined
+   by `TASKS.md` and `docs/plans/three-program-tooling-roadmap.md`. Do not start BCA capacity,
+   external-demand, machine/dwell, or pilot work. Historical BCA facts are retained below only for
+   audit and a possible future restart. BCA-01/02 are complete; live revision-3 discovery
    shows A = 69.603 labor / 104.303 machine hours and C = 69.603 / 104.603.
    The BCA-03 evidence pass found `P3TRI`, `TRI A`, `PRNG`, and `P3NDI` are site-shared and
    IFS-infinite; do not derive final budgets from observed clocking. Use the evidence report in
    `docs/plans/bca-03-capacity-evidence.md`. The approved architecture and execution sequence are
    in `docs/superpowers/specs/2026-08-27-resource-assumption-registry-design.md` and
-   `docs/superpowers/plans/2026-08-27-resource-assumption-registry-plan.md`. BCA-03a is complete;
-   BCA-03b has exact legacy parity and now awaits approved physical-pool assumptions.
+   `docs/superpowers/plans/2026-08-27-resource-assumption-registry-plan.md`. BCA-03a is complete.
+   BCA-03b has exact legacy parity plus the physical-pool compiler/scheduler, finite calendar and
+   external-reserve gates, immutable OBSERVE successors, exact replay, and causal comparison.
+   Do not create live BCA pools. The generic physical-pool software is retained under RES-01; the
+   historical acceptance record is `docs/validation/bca-03b-physical-pool-shadow.md`.
    PLAT-01a added append-only model epochs, authorized transition events, append-only publication
    selections, and simulation-snapshot epoch links. ELEV/RAD/AEGIS are published as legacy
    `COMMITMENT_READY` epochs; candidates cannot replace them without explicit publication.
@@ -66,7 +69,7 @@ preserve the git-ignored live SQLite database and its backups.
    attestations, and 22 missing drift policies. It keeps candidate readiness provisional and must
    not be dismissed wholesale.
    External-load snapshots are append-only and their source coverage cannot extend past the
-   forecast horizon without an explicit approved policy. Live CRP ingestion remains BCA-03c.
+   forecast horizon without an explicit approved policy. Live CRP ingestion is deferred.
    The local DB is at migration `fdb4c5d6e7f8`. PLAT-01a backup:
    `data/rtg_app_migrated.pre_model_epochs.bak`, SHA-256
    `1F63D0C88AD53DA0CAF0E0BE2852C68D0D7B656D4734EB52BCCA2FAF97D436FF`.
@@ -78,15 +81,18 @@ preserve the git-ignored live SQLite database and its backups.
    `D8AE83AC62FE93636BB0024FE41CE5B7E8B1B437F9B5E688E6436ED7A34BB74A`.
    Pre-BCA-layup-quarantine backup: `data/rtg_app_migrated.pre_bca_layup_quarantine.bak`, SHA-256
    `B056287443BCE92A0C31900C1A5710850978BCE0F2589CFCEB46AF3B32309EA4`.
-   BCAFIN is epoch `BCAFIN:CANDIDATE:ad7afe75ea9f` in OBSERVE with 73 live WIP orders and zero
-   unresolved serials. Its eight WC binding gaps remain incomplete; it has no published forecasts
-   or forecast-log rows. The immutable source metadata carries both revision-3 A/C economics.
+   Historical BCAFIN epoch `BCAFIN:CANDIDATE:ad7afe75ea9f` is `ARCHIVED`; its 73 position rows are
+   retained but excluded from active WIP. Its eight WC binding gaps remain historical, and it has
+   no published forecasts or forecast-log rows. Immutable metadata carries both revision-3 A/C
+   economics.
    BCA layup remains separate and not onboarded. Stream `BCALAY` has 12 active append-only
    quarantines for op-9999-closed/SO-Started conflicts. Use `scripts/audit_bca_layup.py` then
    `scripts/reconcile_bca_layup_quarantine.py`; never include quarantined SOs in TRI L/ATUP demand.
    `app/data/bca_layup_policy.v1.json` blocks activation until TRI L labor capacity, ATUP operator
    capacity, physical autoclave slots/calendar/compatibility/external demand, and P3 QA are approved.
-3. **BCA live smoke test:** run BCA-07 with a real Connect IFS session after the revision, capacity, and machine-time tasks are complete.
+3. **SCOPE-01 BCA park complete:** `BCAFIN` is inactive and archived; its 73 position rows and 12
+   `BCALAY` events remain historical. Backup `data/rtg_app_migrated.pre_bca_park.bak`, SHA-256
+   `22ADC5E690FA00328D11A0EF241FE67345BF850DEE3BCAB55D906C38F7888FA6`.
 4. **#82 Marion virtual factory capacity map:** Phase 1 is implemented at `/factory-map`. Keep it
    display-only: it surfaces WIP and modeled capacity without changing forecast inputs.
    VAMA02/VAMA03 coordinates live in `app/data/marion_floor_map.v1.json`; `P3 QA` stays mobile and
@@ -105,6 +111,11 @@ preserve the git-ignored live SQLite database and its backups.
 - Forecast-log snapshots use schema-v3 replay envelopes. Schema-v2 historical snapshots remain
   valid profile evidence but are intentionally reported as non-replayable because their WIP inputs
   and results were never captured.
+- Physical labor-pool definitions must go through `define_physical_labor_pool`. A `GROSS_SITE`
+  pool requires a separately approved per-shift external reserve; calendars require seven weekday
+  factors, explicit exception dates, and a finite coverage end. Physical mode never uses
+  `DEFAULT_SHIFT`. Create successor shadows with `create_physical_shadow_epochs`; do not change
+  publication while evaluating them.
 - Portfolio and workspace routes must keep published and candidate metrics separate. The portfolio
   read model performs one published-program simulation and one capacity aggregation. OBSERVE tabs
   may show WIP, flow, source contract references, resources, assumptions, and history, but never P50,

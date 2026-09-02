@@ -113,7 +113,8 @@ async def build_portfolio(db: AsyncSession, ds) -> dict:
     )
     open_reviews = int(await db.scalar(select(func.count(AssumptionReview.id)).where(
         AssumptionReview.status == "OPEN")) or 0)
-    quarantine_count = len(await active_quarantines(db, "BCALAY"))
+    quarantine_count = (len(await active_quarantines(db, "BCALAY"))
+                        if PROGRAMS.is_active("BCAFIN") else 0)
 
     rows = []
     maturity = []

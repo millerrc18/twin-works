@@ -7,15 +7,16 @@ Audience: humans (PM, engineers, reviewers). For AI-agent working rules see **AG
 
 ## 1. What it is
 
-A finite-capacity manufacturing **ship-date forecasting + decision tool** for three published GD
-Mission Systems composite programs plus one observation-only program built at Marion:
+A finite-capacity manufacturing **ship-date forecasting + decision tool** for three active GD
+Mission Systems composite programs built at Marion. BCA is retained as deferred historical
+evidence after SCOPE-01 archival:
 
 | Program | Project | Top assembly | Notes |
 |---|---|---|---|
 | G500 Elevator | 531335 | 72P5520501-029P01 (LH) / 72P5520502-029P01 (RH) | ships as LH/RH shipsets |
 | Aeronose Radome | C48178 | 3700ED0001-101 | |
 | Aegis Reflector | 530349 | 00999000563 | DPAS-rated; **no RTG plan** (contract-anchored) |
-| BCA Triband Finishing | 521938 | 3301ED0031-101A / -101C | `OBSERVE`; no published dates or KPIs |
+| BCA Triband Finishing | 521938 | 3301ED0031-101A / -101C | deferred; inactive with archived candidate history |
 
 It replaces/augments the Excel "RTG Operation Tracker" with a live web app that:
 - forecasts each in-process unit's ship date from a finite-capacity shop simulation,
@@ -323,10 +324,9 @@ shows a pooling preview, saves the program row, exports a snapshot, and rebuilds
 DB, verifies Plant 2/WC 221 pooling and draft forecasting, and confirms seed-program forecasts do
 not drift. Under PLAT-01a, new programs receive a DRAFT candidate epoch and are excluded from the
 authoritative `ForecastLog.stamp_build` path until explicitly published.
-- **Remaining:** BCA revision-aware discovery and operation economics are complete. Persisted
-  work-center budgets (BCA-03) and machine/dwell semantics (BCA-04) remain before the first real
-  BCA add. The live OAuth smoke test follows; retain the fallback for 2-4 weeks of clean runs before
-  a flag-gated routers fallback removal.
+- **Remaining:** SCOPE-01 parks BCA at registry and data ingress while preserving immutable history.
+  RES-01 retains the generic physical-resource runtime. TOOL-01 then adds deterministic occupancy
+  leases and Aeronose tooling in shadow. See `docs/plans/three-program-tooling-roadmap.md`.
 - **Spatial capacity view (#82):** `/factory-map` is the delivered visual-only Marion capacity and
   work-center layer. It consumes forecast and bottleneck telemetry through one pooled simulation
   per request and never alters simulation inputs. See the as-built section below and `TASKS.md`.
@@ -351,8 +351,8 @@ not a global lock preventing later publication decisions.
 
 Planning basis is independent from lifecycle. `PLAN_SLOTS`, `CONTRACT_DATES`, and `NONE` describe
 the intended comparison target; `basis_effective` becomes true only for a published
-`COMMITMENT_READY` epoch. ELEV/RAD retain RTG slots, AEGIS uses contract dates, and an OBSERVE BCA
-configuration may carry contract intent without exposing forecast dates or delivery KPIs. Forecast
+`COMMITMENT_READY` epoch. ELEV/RAD retain RTG slots and AEGIS uses contract dates. The deferred BCA
+configuration retains historical contract intent without active forecasts or delivery KPIs. Forecast
 DTOs and logs retain contract, plan, and effective comparison targets separately. There is no
 plan-to-contract fallback.
 
@@ -366,7 +366,35 @@ at `/admin/resources/audit.json`; retention policy is permanent append-only.
 External-load snapshots and rows are also append-only. Each snapshot declares its coverage window
 and one of `BLOCK`, `HOLD_LAST_COMPLETE_WEEK`, or `TRAILING_MEAN`. A run past source coverage is
 incomplete under `BLOCK`; extrapolation requires an approved, commitment-ready policy assumption.
-The live CRP capture and tracked-demand de-duplication remain BCA-03c work.
+Live CRP capture and tracked-demand de-duplication are deferred until an active three-program
+resource case requires them.
+
+RES-01 retains the physical allocation mode developed during BCA-03b. Each labor operation resolves
+to a stable pool ID, so differently named work centers can consume one physical budget. Gross-site
+capacity subtracts an explicitly approved per-shift reserve; the raw deficit remains visible when
+reserve exceeds capacity. Physical calendars include all seven weekday factors, explicit exception
+dates, and a finite coverage end. Missing bindings, budgets, calendars, or reserve policy fail
+closed and never consult `DEFAULT_SHIFT`. `define_physical_labor_pool` validates the complete owner
+input packet before creating immutable assumptions/capacity and superseding covered effort
+bindings. `create_physical_shadow_epochs` freezes that registry state in OBSERVE without changing
+publication. `resource_shadow.compare_resource_profiles` reports per-unit date movement and the
+causal pool waits/assumption IDs. No live BCA capacity values were created. The BCA validation note
+is retained as historical evidence in `docs/validation/bca-03b-physical-pool-shadow.md`.
+
+### 5.3a Three-program tooling pivot
+
+The 2026-09-02 product decision limits active scope to Elevator, Aeronose, and Aegis. SCOPE-01 now
+enforces `Program.active` at registry loading, sync/data ingress, the WIP state matrix, pooled
+simulation, and forecast logging. BCA is inactive and archived; its immutable evidence remains.
+
+TOOL-01 makes Aeronose the first tooling pilot. Known counts are two assembly jigs, two holding
+fixtures, one trim fixture, three shell lamination molds, and one core-forming mold set. Counts are
+facts only. Schedule effects require approved identity/fungibility, calendars, acquire/release
+events, hold/changeover rules, and ownership. The generic allocator uses atomic acquisition and the
+deterministic queue `(ready_time, DPAS-behind priority, commit, program, serial, pool)`. Deadlock
+aborts the candidate run and opens a blocking review. Published and candidate UI/read-model contexts
+must remain separate. Full sequencing and pilot criteria are in
+`docs/plans/three-program-tooling-roadmap.md`.
 
 Forecast stamps point to schema-v3 simulation snapshots containing the complete schema-v2 profile,
 frozen WIP inputs, epoch routing definitions, canonical expected results, engine/serializer version,

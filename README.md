@@ -17,6 +17,8 @@ operational workflows.
   read-only WIP, capacity, and forecast-risk signals.
 - Provides a Resource Registry, assumption provenance, readiness badges, and unit-level Why panels
   in legacy-shadow mode; resource records do not change allocation until separately activated.
+- Supports fail-closed physical labor-pool shadows with immutable calendars, explicit external
+  reserves, cross-program contention, exact replay, and causal baseline-versus-candidate diffs.
 - Preserves published legacy forecasts while replayable `OBSERVE` candidates validate DB-backed
   resource profiles and surface assumption-review debt without publishing shadow dates.
 - Provides a portfolio operating console and shared program workspaces with lifecycle-safe Overview,
@@ -58,6 +60,8 @@ reviewed and documented.
 - `TASKS.md`: prioritized implementation backlog.
 - `docs/plans/82-marion-virtual-factory-capacity-map.md`: #82 scope, mapping contract, and
   Phase 1 delivery record.
+- `docs/plans/three-program-tooling-roadmap.md`: current product boundary and Aeronose-first
+  tooling execution plan.
 - `docs/superpowers/specs/2026-08-27-resource-assumption-registry-design.md`: shared resources,
   external demand, tooling, and assumption-governance architecture.
 - `docs/superpowers/plans/2026-08-27-resource-assumption-registry-plan.md`: phased TDD execution plan.
@@ -69,10 +73,11 @@ reviewed and documented.
 
 ## Current Priorities
 
-See `TASKS.md`. BCA finishing is registered for observation-only data collection and the portfolio/
-workspace UI and BCA layup cleanup are complete. The next platform step is approved physical labor
-pool definition in BCA-03b. Physical shared-pool,
-external-demand, tooling, and BCA machine/dwell activation remain gated on reviewed evidence.
+See `TASKS.md`. Active product scope is Elevator, Aeronose, and Aegis. SCOPE-01 is complete: BCA is
+inactive and archived outside active ingress/navigation while its audit history remains. The
+generic physical-resource shadow foundation is retained under RES-01. TOOL-01
+then adds deterministic occupancy leases and Aeronose tooling as the first governed tooling pilot.
+No tooling candidate can change published dates until its shadow and approval gates pass.
 The Marion virtual factory is live for reviewed P2/P3 locations and remains visual-only. It must
 not change simulation inputs without a separate approved design. Follow-ons #82-1a, #82-4, and
 #82-5 cover the governed full-WC catalog refresh, reviewed physical expansion, and live acceptance.

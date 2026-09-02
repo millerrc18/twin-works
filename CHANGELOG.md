@@ -5,6 +5,42 @@ work landed. Git is active for this repository; this file is the human-facing im
 See MASTER.md for the full architecture reference and AGENTS.md for working rules and the current
 handoff.
 
+## 2026-09-02 - Three-program scope and Aeronose tooling roadmap
+- Reset active product scope to Elevator, Aeronose, and Aegis. BCA discovery, observation, and
+  quarantine records are retained as historical evidence, but BCA leaves the active execution path.
+- Added SCOPE-01 to archive the BCA observation candidate and enforce `Program.active` at registry,
+  sync/data-ingress, WIP, simulation, and forecast-log boundaries without deleting history.
+- Reframed the generic physical-resource runtime as RES-01 and replaced the BCA critical path with
+  TOOL-01, an Aeronose-first occupancy pilot covering the known jig, fixture, and mold inventory.
+- Added deterministic queue, fatal deadlock, published/candidate UI-context, separate #32b epoch,
+  and quantitative floor-validation gates after independent Gemini review. Shared Aegis demand will
+  be modeled honestly rather than hidden because current rate is low.
+- Planning record: `docs/plans/three-program-tooling-roadmap.md`.
+- Completed SCOPE-01: deactivated `BCAFIN`, archived epoch 10, and enforced active-program filters
+  from registry and sync ingress through WIP, simulation, forecast routes/logs, portfolio, and
+  navigation. Retained 73 BCA position rows and 12 quarantine events. Backup SHA-256:
+  `22ADC5E690FA00328D11A0EF241FE67345BF850DEE3BCAB55D906C38F7888FA6`.
+- Completed RES-01: retained the generic physical-pool compiler/scheduler, finite calendar and
+  reserve gates, immutable shadow definitions, replay, and causal comparison for the three active
+  programs without creating BCA capacity inputs.
+
+## 2026-09-01 - Physical labor-pool shadow runtime (BCA-03b software gate)
+- Added pool-ID effort allocation so differently named work centers can consume one physical
+  budget. Mixed migration remains supported through explicit `LEGACY:*` pools, while physical mode
+  fails on unbound operations and never uses `DEFAULT_SHIFT`.
+- Added governed gross-site capacity with separately approved static external reserve, finite
+  seven-day calendars with exception dates, raw oversubscription visibility, and wait traces that
+  retain requested versus allocated hours.
+- Added a create-only physical-pool definition service, immutable OBSERVE successor epochs, exact
+  physical-profile replay, and baseline-versus-candidate reports with unit deltas, causal pools,
+  assumption IDs, and waits. Published incumbent epochs remain unchanged.
+- Independent Gemini review findings on hybrid migration, determinism, calendar coverage,
+  oversubscription, partial allocation, and WIP isolation were incorporated. Claude/GPT aliases
+  were unavailable from the critic service.
+- No BCA capacity value was inferred from utilization or written to the live database. BCA-03b
+  remains open for floor-owner approval of `P3TRI`, `TRI A`, `PRNG`, and `P3NDI` inputs.
+- Full suite: 76 passing tests; focused Ruff checks pass; static golden forecast remains exact.
+
 ## 2026-09-01 - BCA layup state quarantine and resource boundary
 - Completed BCA-06 as a governed pre-onboarding cleanup. Live IFS selected revision 3 / alternative
   `*` for `3301ED0032-101`: 29 open orders, 26 route rows, and 19 production operations after fixing

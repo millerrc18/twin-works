@@ -7,6 +7,10 @@ read-only telemetry, responsive UI, and drill-through are delivered. The full al
 IFS catalog refresh remains #82-1a. This plan remains the contract that the map cannot alter
 forecast or scheduler behavior.
 
+Scope update 2026-09-02: active telemetry and program filters cover ELEV/RAD/AEGIS only after
+SCOPE-01. Deferred BCA work-center catalog facts may remain for audit/reference, but they do not
+create active WIP, capacity pressure, navigation, or forecast context.
+
 ## Objective
 
 Add a Marion factory view that lets a program manager see relevant work centers, modeled load and

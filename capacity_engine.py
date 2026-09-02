@@ -29,6 +29,14 @@ DEFAULT_WC = 12.0  # any WC not listed
 
 SHIFT_START = 6
 
+
+class MissingPhysicalResource(RuntimeError):
+    """A registry-driven run reached an operation without a governed pool."""
+
+
+class InvalidPhysicalResourceProfile(RuntimeError):
+    """A physical pool is present but its budget or calendar is unusable."""
+
 def wc_budget(wc):
     return WC_DAILY.get(wc, DEFAULT_WC)
 
@@ -43,7 +51,7 @@ def day_factor(dd):
         return 0.5
     return 0.25
 
-def simulate(units, ops_map, cures_map, as_of, profile=None):
+def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=False):
     """units: list of dicts {serial, so, maxop, commit, program}
        ops_map: program -> ops list; cures_map: program -> cures list
     Returns: per-serial {finish, op_dt{opno:start_dt}, cure_dt{label:start_dt}, stalled}
@@ -61,6 +69,11 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
     cure_station_rules = profile.get("cure_station_rules", CURE_STATION_RULES)
     cure_station_capacities = profile.get("cure_station_capacities", CURE_STATION_CAPACITIES)
     parallel_cure_gates = profile.get("parallel_cure_gates", PARALLEL_CURE_GATES)
+    allocation_mode = profile.get("allocation_mode", "LEGACY_COMPAT")
+    operation_pools = profile.get("operation_pools", {})
+    pool_shift_budgets = profile.get("pool_shift_budgets", {})
+    pool_external_reserves = profile.get("pool_external_reserves", {})
+    pool_calendar_policies = profile.get("pool_calendar_policies", {})
     cure_station_slots = {}
     for station, capacity in cure_station_capacities.items():
         if int(capacity) > 0:
@@ -117,7 +130,8 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
                                 cure_until=None,  # datetime a cure finishes
                                 clock=as_of,      # per-unit intra-day work clock
                                 gate_nb={},       # gate_op -> datetime the op cannot start before
-                                op_dt={}, cure_dt={}, finish=None)
+                                op_dt={}, cure_dt={}, finish=None,
+                                constraint_events=[])
     # priority: DPAS-rated programs that are BEHIND contract jump the queue for shared
     # capacity (e.g. Aegis shares paint booth WC221 + ovens with elevator and is DPAS-rated).
     # Then earliest commit first (None commit last).
@@ -129,6 +143,8 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
         behind = 1 if (u['commit'] and u['commit'] < as_of_d) else 0
         dpas_behind = (u.get('program') in dpas_programs) and behind
         # sort key: DPAS-behind units first (0), then by commit date, then serial
+        if allocation_mode == "PHYSICAL":
+            return (0 if dpas_behind else 1, commit, u.get('program', ''), u['serial'])
         return (0 if dpas_behind else 1, commit, u['serial'])
     order=sorted(units, key=prio)
     serial_order=[u['serial'] for u in order]
@@ -163,10 +179,11 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
             sh_close=sh_open+timedelta(hours=sh_span)
             if sh_close <= as_of:
                 continue  # shift already past
-            # Per-shift WC budget buckets. The profile keeps legacy router budgets as the
-            # fallback, but shared resources are derived from the active registry rather than
-            # the seed-only SHARED_WC list.
+            # Per-shift budget buckets. Legacy-compatible profiles retain the established
+            # (program, WC) behavior. Physical profiles key the budget by immutable pool code,
+            # so differently named WCs can contend for one real resource.
             budget={}
+            budget_meta={}
 
             def raw_budget(prog, wc):
                 shifts = shift_budgets.get((prog, wc))
@@ -174,7 +191,48 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
                     return shifts.get(shn, 0)
                 return wc_shift_budget(prog, wc, shn)
 
-            def getb(prog, wc):
+            def physical_day_fac(pool_code, prog):
+                policy = pool_calendar_policies.get(pool_code) or {}
+                if not policy and pool_code.startswith("LEGACY:"):
+                    return day_fac(prog, dd)
+                if policy.get("mode") != "WEEKDAY_FACTORS":
+                    raise InvalidPhysicalResourceProfile(
+                        f"Physical pool {pool_code} has no WEEKDAY_FACTORS calendar")
+                factors = policy.get("factors") or {}
+                covered_until = policy.get("covered_until")
+                if covered_until and dd > date.fromisoformat(covered_until):
+                    raise InvalidPhysicalResourceProfile(
+                        f"Physical pool {pool_code} calendar ends before {dd.isoformat()}")
+                exceptions = policy.get("exceptions") or {}
+                value = exceptions.get(dd.isoformat())
+                if value is None:
+                    value = factors.get(str(dd.weekday()), factors.get(dd.weekday()))
+                if value is None:
+                    raise InvalidPhysicalResourceProfile(
+                        f"Physical pool {pool_code} has no factor for weekday {dd.weekday()}")
+                return float(value)
+
+            def getb(prog, wc, opno):
+                if allocation_mode == "PHYSICAL":
+                    pool_code = operation_pools.get((prog, opno))
+                    if not pool_code:
+                        raise MissingPhysicalResource(
+                            f"{prog} operation {opno} ({wc}) has no physical pool binding")
+                    shifts = pool_shift_budgets.get(pool_code)
+                    if shifts is None:
+                        raise InvalidPhysicalResourceProfile(
+                            f"Physical pool {pool_code} has no shift budget")
+                    pk=("_POOL_", pool_code)
+                    if pk not in budget:
+                        factor = physical_day_fac(pool_code, prog)
+                        gross = float(shifts.get(shn, 0.0)) * factor
+                        reserve_shifts = pool_external_reserves.get(pool_code, {})
+                        reserve = float(reserve_shifts.get(shn, 0.0)) * factor
+                        schedulable = max(0.0, gross - reserve)
+                        budget[pk] = schedulable
+                        budget_meta[pk] = (gross, reserve, schedulable, pool_code)
+                    budget[(prog, wc, opno)] = pk
+                    return budget[pk]
                 key=(prog, wc)
                 if key not in budget:
                     if wc in shared_wcs:
@@ -194,18 +252,42 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
                     budget[key]=raw_budget(prog, wc)*day_fac(prog,dd)
                 b=budget[key]
                 return budget[b] if isinstance(b,tuple) else b
-            def useb(prog, wc, amt):
-                key=(prog,wc)
+            def useb(prog, wc, opno, amt):
+                key = ((prog, wc, opno) if allocation_mode == "PHYSICAL"
+                       else (prog, wc))
                 b=budget[key]
                 pk=b if isinstance(b,tuple) else key
                 budget[pk]=budget[pk]-amt
+
+            def record_wait(st, prog, opno, wc, wait_start, wait_end,
+                            requested_hours, allocated_hours):
+                if not trace_constraints or allocation_mode != "PHYSICAL":
+                    return
+                pk = budget[(prog, wc, opno)]
+                gross, reserve, schedulable, pool_code = budget_meta[pk]
+                st["constraint_events"].append({
+                    "event_type": ("OVERSUBSCRIBED" if reserve > gross
+                                   else "CAPACITY_WAIT"),
+                    "pool_code": pool_code,
+                    "operation_no": opno,
+                    "work_center_no": wc,
+                    "wait_start": wait_start,
+                    "wait_end": wait_end,
+                    "wait_hours": max(
+                        0.0, (wait_end - wait_start).total_seconds() / 3600.0),
+                    "gross_capacity": gross,
+                    "external_reserve": reserve,
+                    "schedulable_capacity": schedulable,
+                    "requested_hours": requested_hours,
+                    "allocated_hours": allocated_hours,
+                })
 
             for s in serial_order:
                 st=state[s]
                 if st['finish'] is not None:
                     continue
                 prog=unit_prog[s]
-                fac=day_fac(prog, dd)
+                fac=(1.0 if allocation_mode == "PHYSICAL" else day_fac(prog, dd))
                 if fac<=0:  # program not working this day (e.g. elevator off-weekend)
                     continue
                 # if unit is in a cure, check if done (cures 24/7 wall-clock)
@@ -233,17 +315,28 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
                                 break
                         if opno not in st['op_dt']:
                             st['op_dt'][opno]=st['clock']
-                        avail=getb(prog, wc)
+                        avail=getb(prog, wc, opno)
                         shift_left=(sh_close-st['clock']).total_seconds()/3600.0
                         if avail<=0.01 or shift_left<=0.01:
+                            if avail <= 0.01 and shift_left > 0.01:
+                                record_wait(
+                                    st, prog, opno, wc, st['clock'], sh_close,
+                                    requested_hours=item[3], allocated_hours=0.0,
+                                )
                             break  # WC out of hours this shift, or shift over
+                        requested = item[3]
                         take=min(item[3], avail, shift_left)
-                        useb(prog, wc, take)
+                        useb(prog, wc, opno, take)
                         item[3]-=take
                         st['clock']=st['clock']+timedelta(hours=take)
                         if item[3]<=0.01:
                             st['idx']+=1
                         else:
+                            if getb(prog, wc, opno) <= 0.01 and st['clock'] < sh_close:
+                                record_wait(
+                                    st, prog, opno, wc, st['clock'], sh_close,
+                                    requested_hours=requested, allocated_hours=take,
+                                )
                             break
                     elif item[0]=='pgate':
                         _,clabel,gop,dwell,_,_station=item
@@ -261,11 +354,18 @@ def simulate(units, ops_map, cures_map, as_of, profile=None):
                 if st['idx']>=len(st['queue']) and st['cure_until'] is None:
                     st['finish']=st['clock']
         dd=dd+timedelta(days=1)
+    unfinished = [serial for serial, item in state.items() if item['finish'] is None]
+    if unfinished and allocation_mode == "PHYSICAL":
+        raise InvalidPhysicalResourceProfile(
+            "Physical resource profile made no complete schedule within 1,200 shifts: "
+            + ", ".join(unfinished))
     # finalize
     out={}
     for s,st in state.items():
         fin=st['finish'] or (st['cure_until'] or cur)
         out[s]=dict(finish=fin, op_dt=st['op_dt'], cure_dt=st['cure_dt'])
+        if trace_constraints:
+            out[s]["constraint_events"] = st["constraint_events"]
     return out
 
 

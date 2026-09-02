@@ -1,8 +1,14 @@
 # Resource and Assumption Registry Design
 
-**Implementation status (2026-08-31):** foundation, evidence/recertification governance,
-schema-v3 replay, and incumbent one-to-one shadow parity are complete. Physical shared-pool,
-external-load, generic occupancy, and BCA pilot activation remain gated work.
+**Implementation status (2026-09-01):** foundation, evidence/recertification governance,
+schema-v3 replay, incumbent one-to-one parity, and the fail-closed physical labor-pool shadow
+runtime are complete. Actual BCA pool creation remains gated on owner inputs; dynamic external
+load, generic occupancy, and BCA pilot activation remain gated work.
+
+**Scope update (2026-09-02):** BCA-specific activation, external-load, machine/dwell, and pilot work
+is deferred indefinitely. The generic resource architecture remains active for Elevator, Aeronose,
+and Aegis. Occupancy/tooling execution is superseded by the Aeronose-first roadmap in
+`docs/plans/three-program-tooling-roadmap.md`.
 
 ## Status
 

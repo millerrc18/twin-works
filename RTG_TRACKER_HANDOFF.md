@@ -6,6 +6,12 @@
 
 ## Current TwinWorks handoff (2026-09-01)
 
+**Scope decision 2026-09-02:** Active product scope is Elevator, Aeronose, and Aegis. BCA is
+paused indefinitely. SCOPE-01 is complete: `BCAFIN` is inactive, its candidate is archived, and
+registry/sync/WIP/simulation boundaries exclude it without deleting historical evidence. The new
+critical path is RES-01 followed by the Aeronose-first TOOL-01 roadmap in
+`docs/plans/three-program-tooling-roadmap.md`.
+
 **Completed:** Feature #81 is through its local safety gate. The database-backed program registry,
 IFS routing discovery, unknown-WC gate, and `/admin/programs` onboarding UI are implemented. The
 65-test suite includes isolated onboarding, governance, replay, parity, serial/slot, portfolio/
@@ -26,14 +32,16 @@ configured programs.
 shop-order usage and retains operation economics/classification in the review draft. Live project
 `521938` evidence: A and C use revision 3 / alternative `*`, each has 32 rows and 25 included
 production ops; A = 69.603 labor / 104.303 machine hours, C = 69.603 / 104.603. Ops
-`1,2,6,7,8,9,9999` default excluded. Next gates are BCA-03 capacity and BCA-04 machine/dwell rules.
+`1,2,6,7,8,9,9999` default excluded. The former BCA-03/BCA-04 gates are now deferred historical
+work and must not be resumed without a new product-scope decision.
 
-**BCA observation registration:** BCA-05a is complete. `BCAFIN` tracks 73 live finishing orders
+**Deferred BCA observation history:** BCA-05a was completed. `BCAFIN` tracks 73 live finishing orders
 from project `521938`, with all serials resolved from NOTE_TEXT. Its immutable revision-3 candidate
 is in OBSERVE, contract intent is not in force, Schedule is locked, forecast-log rows are zero, and
 all eight resource-binding gaps remain visibly incomplete. ELEV/RAD/AEGIS publication is unchanged.
+The candidate is archived and cannot receive another active refresh.
 
-**BCA layup quarantine:** BCA-06 is complete as a blocked, separate stream. A live revision-3
+**Deferred BCA layup evidence:** BCA-06 is complete as a blocked, separate stream. A live revision-3
 audit found 12 op-9999-closed/SO-Started conflicts; all are append-only quarantines and excluded
 from TRI L/ATUP conclusions. Seventeen orders remain eligible. TRI L labor and ATUP operator/
 six-hour occupancy semantics are defined, but staffing, slot count, compatibility, calendar, and
@@ -46,12 +54,14 @@ Assumptions, and History tabs. OBSERVE pages expose evidence but no forecast dat
 Responsive navigation, dark mode, keyboard use, and WCAG A/AA audits passed.
 
 **Resource foundation:** BCA-03a originated at migration `d8ea03f5b7c9`; the local DB has since
-advanced to `dbe1f2a3b4c5`. It contains
+advanced to `fdb4c5d6e7f8`. It contains
 24 one-to-one legacy pools and immutable assumption/capacity/simulation-snapshot records. Resource
 Registry, readiness badges, and unit Why panels are available while legacy scheduling remains
 authoritative. Approved assumptions/capacity are protected from ORM and direct SQL edits except
-through supersession. DB-shadow forecasts match the golden baseline exactly. BCA-03b physical-pool
-activation remains blocked on owner-approved capacities.
+through supersession. DB-shadow forecasts match the golden baseline exactly. BCA-03b now provides
+pool-ID allocation, explicit reserve subtraction, finite calendar coverage, immutable OBSERVE
+successors, exact replay, and causal profile comparison. No BCA pool values were guessed or added;
+live activation remains blocked on owner-approved capacity, calendar, reserve, and review inputs.
 
 **Lifecycle and epoch foundation:** PLAT-01a was completed through migration `a8c3d4e5f6a7`.
 ELEV, RAD, and AEGIS each have an immutable published legacy epoch at
@@ -74,13 +84,13 @@ scheduler profiles, and expected results for exact replay. ELEV/RAD/AEGIS have i
 candidates with exact 29-unit legacy parity; published legacy epochs remain unchanged. The current
 review ledger contains 70 explicit inherited debts (24 review dates, 24 evidence attestations, 22
 drift policies), so shadow readiness is provisional rather than falsely green.
-External-load snapshots are now append-only and horizon-gated; BCA-03c still owns the live CRP
-capture and tracked-demand de-duplication.
+External-load snapshots are now append-only and horizon-gated. Live CRP capture and tracked-demand
+de-duplication are deferred until an active three-program resource case requires them.
 
-**Next implementation gate:** execute BCA-03b physical labor-pool definition in shadow while BCA
-finishing evidence accrues. The full critic-reviewed order, phase
-gates, and portfolio UI plan are in `TASKS.md` and
-`docs/superpowers/specs/2026-08-28-portfolio-dashboard-planning-basis-design.md`. Keep the
+**Next implementation gate:** execute SCOPE-01, then reframe the generic physical-resource work as
+RES-01 and begin TOOL-01 with the governed Aeronose tooling inventory. The critic-reviewed order,
+occupancy semantics, pilot metrics, and promotion gates are in `TASKS.md` and
+`docs/plans/three-program-tooling-roadmap.md`. Keep the
 `RTG_PROGRAM_SOURCE=routers` fallback until the integrated 2-4 week pilot and rollback gate pass.
 
 **Current data rule that supersedes this legacy document where they differ:** head serials are read

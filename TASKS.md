@@ -27,14 +27,14 @@ remains in `AGENTS.md`.
 
 ## Platform-Wide Resource Adoption
 
-**Status:** Approved 2026-08-28. The migration must preserve the current
-published Elevator, Aeronose, and Aegis forecasts while the enhanced resource model is evaluated in
-shadow. BCA starts without a commitment-ready epoch and therefore enters the platform in `OBSERVE`.
+**Status:** Revised 2026-09-02. Active product scope is Elevator, Aeronose, and Aegis. The migration
+must preserve their published forecasts while the enhanced resource model is evaluated in shadow.
+BCA is being parked through SCOPE-01; its completed evidence remains historical and cannot affect
+active product behavior.
 
 - [ ] **PLAT-01 - Apply resource governance and candidate epochs to existing programs**
-  - Reuse the Resource and Assumption Registry for every program rather than treating BCA as a
-    separate modeling path. Capacity values, tooling, evidence, and readiness remain program- or
-    physical-pool-specific.
+  - Reuse the Resource and Assumption Registry for all three active programs. Capacity values,
+    tooling, evidence, and readiness remain program- or physical-pool-specific.
 
   - [x] **PLAT-01a - Define lifecycle, ownership, and epoch rules**
     - Add `DRAFT`, `OBSERVE`, `PROVISIONAL`, `COMMITMENT_READY`, `PAUSED`, and terminal
@@ -59,7 +59,7 @@ shadow. BCA starts without a commitment-ready epoch and therefore enters the pla
       epoch selection, and materialized epoch definitions in schema-v2 simulation snapshots.
       Startup verifies SQLite integrity pragmas and the complete governance-trigger inventory;
       raw UPDATE/DELETE/INSERT-OR-REPLACE bypass attempts are regression-tested.
-      Physical-resource calibration and pilot gates remain in PLAT-01d and BCA-03e.
+      Physical-resource calibration and pilot gates remain in PLAT-01d and TOOL-01e.
 
   - [x] **PLAT-01b - Add shadow-integrity and recertification controls**
     - Implement assumption expiry, drift review, idempotent recertification items, immutable replay,
@@ -78,13 +78,14 @@ shadow. BCA starts without a commitment-ready epoch and therefore enters the pla
       External-load snapshots are append-only and enforce explicit `BLOCK`,
       `HOLD_LAST_COMPLETE_WEEK`, or `TRAILING_MEAN` horizon policy before integration.
       Existing schema-v2 snapshots remain integrity-verifiable and are explicitly non-replayable.
-      External actor writes remain disabled pending authenticated role binding; BCA-03c still owns
-      the live `CRP_ORDER_LOAD2` capture, tracked-demand exclusion, and policy approval.
+      External actor writes remain disabled pending authenticated role binding. Live
+      `CRP_ORDER_LOAD2` capture and tracked-demand exclusion are deferred until an active
+      three-program resource case requires them.
 
   - [x] **PLAT-01c - Backfill and verify existing-program shadow coverage**
     - Confirm ELEV, RAD, and AEGIS operation bindings, readiness, owners, evidence, review dates,
       and immutable snapshot linkage. Build on the 24 legacy-equivalent pools and 162 bindings
-      delivered in BCA-03a rather than reseeding a second registry.
+      delivered by the Resource Registry foundation rather than reseeding a second registry.
     - Run the candidate resource epoch in shadow and prove exact legacy parity before physical-pool,
       external-demand, or tooling constraints are activated.
     - Acceptance: current published forecasts remain unchanged, every shadow run is replayable from
@@ -123,7 +124,7 @@ shadow. BCA starts without a commitment-ready epoch and therefore enters the pla
     - Model `PLAN_SLOTS`, `CONTRACT_DATES`, and `NONE` independently from lifecycle. Add a derived
       `basis_effective` flag so configured intent cannot become an active comparison before the
       selected epoch is commitment-ready. Preserve RTG
-      slots for Elevator/Aeronose, use contract anchoring for Aegis and initially BCA, and remove
+      slots for Elevator/Aeronose, use contract anchoring for Aegis, and remove
       program-code special cases and silent RTG-to-contract fallback.
     - Acceptance: forecast DTOs expose contract, plan, comparison target, basis, and visibility as
       separate fields; ineffective bases produce no comparison target/delta, and missing plan data
@@ -144,7 +145,8 @@ shadow. BCA starts without a commitment-ready epoch and therefore enters the pla
       strip, registry-driven operating table, target-specific RTG/contract denominators, published-
       baseline shared-pressure signal, maturity/review ledger, and source ledger. Each request uses
       one published-program simulation and one capacity aggregation; five live requests averaged
-      3.29 seconds (2.84-4.63 seconds). BCA remains outside delivery-risk denominators.
+      3.29 seconds (2.84-4.63 seconds). Out-of-scope/deferred programs remain outside delivery-risk
+      denominators.
   - [x] **UI-01c - Add adaptive program workspaces and dynamic navigation**
     - Provide Overview, Schedule, Flow, Units, Resources, Assumptions, and History drill-downs.
       PLAN_SLOTS programs retain the RTG matrix; CONTRACT_DATES programs use a contract timeline;
@@ -172,51 +174,146 @@ shadow. BCA starts without a commitment-ready epoch and therefore enters the pla
 
 ### Proposed Execution Order
 
-Items 1-7 are complete. The next execution target is item 8, BCA-03b physical labor-pool activation.
+The active critical path is now three-program tooling, beginning with Aeronose. BCA work is removed
+from the execution sequence and retained only in the deferred evidence section.
 
-1. PLAT-01a lifecycle, transition ownership, and immutable epoch behavior.
-2. UI-01a explicit planning-basis, target, and forecast-visibility semantics.
-3. PLAT-01b shadow-integrity, expiry, drift, recertification, and replay controls.
-4. PLAT-01c existing-program shadow backfill and exact-parity verification.
-5. BCA-05a observation-only finishing registration so data collection starts early.
-6. UI-01b/UI-01c portfolio shell, dynamic navigation, and adaptive program workspaces; no shared-
-   capacity pressure board until its governed data is ready.
-7. BCA-06 layup/autoclave state cleanup and quarantine; it does not block finishing observation.
-8. BCA-03b define approved physical labor pools across affected programs, shadow only.
-9. BCA-03c ingest external demand, discover shared consumers, and prove no double counting.
-10. UI-01d add the cross-program capacity pressure board using governed shared-resource data.
-11. BCA-03d add generic occupancy allocation and Aeronose tooling as the first validated case.
-12. BCA-04 classify BCA machine time and dwell.
-13. PLAT-01d certify existing-program physical resources without promoting them.
-14. BCA-05b run the integrated BCA `OBSERVE` shadow with shared-resource effects.
-15. UI-01e complete integrated UX, lifecycle-suppression, accessibility, and performance acceptance.
-16. BCA-07 run the authenticated live onboarding and cross-program smoke test.
-17. BCA-03e complete the 2-4 week integrated shadow pilot and stabilization gate.
-18. PLAT-01e promote only accepted replacement epochs; retain rollback.
+1. SCOPE-01 park BCA and prove three-program no-drift. **Complete 2026-09-02.**
+2. RES-01 reframe and commit the generic physical-resource shadow foundation. **Complete
+   2026-09-02.**
+3. TOOL-01a create the governed Aeronose tooling inventory.
+4. TOOL-01b build the generic atomic occupancy allocator and migrate cure stations with exact
+   legacy parity.
+5. #32b confirm the Plant 3 electrical-seal station count in a distinct successor candidate epoch;
+   do not alter the parity epoch.
+6. TOOL-01c approve and freeze Aeronose acquire/release bindings.
+7. TOOL-01d run the Aeronose tooling shadow and expose causal explanations.
+8. UI-01d add the three-program resource/tooling pressure board from governed data.
+9. TOOL-02 survey and model Elevator tooling in its own candidate.
+10. TOOL-03 document and periodically review Aegis present-rate assumptions.
+11. PLAT-01d certify accepted physical/tooling candidate inputs without promoting them.
+12. UI-01e complete integrated UX, lifecycle-suppression, accessibility, and performance acceptance.
+13. TOOL-01e complete the 2-4 week Aeronose pilot.
+14. PLAT-01e promote only explicitly accepted replacement epochs; retain rollback.
 
 **Phase gates:**
 - Gate 1 - foundation: authorized lifecycle transitions, immutable epoch snapshots, expiry/drift
   behavior, and deterministic replay are verified before non-parity shadow modeling.
 - Gate 2 - baseline: the static golden suite and live refresh comparisons show exact incumbent
   legacy parity, with no production assumption silently supplied by `DEFAULT_SHIFT`.
-- Gate 3 - observation isolation: BCA data is collected without dates or leadership KPIs and has
-  zero effect on active incumbent outputs.
-- Gate 4 - shared-resource integrity: tracked-demand exclusion is mathematically tested, source
-  coverage spans the forecast horizon, and BCA/C17 load reconciles before reserve subtraction.
-- Gate 5 - integrated shadow: physical labor, occupancy, machine/dwell, and tooling constraints have
-  no deadlocks, explain material changes, and pass point-error and interval-coverage thresholds.
-- Gate 6 - promotion: the live smoke test and 2-4 week pilot are stable and the named IE/floor,
+- Gate 3 - scope isolation: BCA leaves active navigation, refresh, and portfolio reads while its
+  immutable evidence remains available for audit; `Program.active` excludes it at sync ingress and
+  from the WIP/simulation matrix; three-program outputs remain exact.
+- Gate 4 - occupancy parity: cure stations migrate to the generic allocator without date drift,
+  deadlock, or nondeterminism. Queue order is explicit; any deadlock aborts the whole run and opens
+  a blocking review rather than producing partial output.
+- Gate 5 - Aeronose tooling integrity: counts, calendars, instances, and acquire/release spans are
+  approved; shadow waits explain material changes and agree with floor reality. Published and
+  candidate UI/read-model contexts cannot be aggregated.
+- Gate 6 - promotion: two consecutive reviewed weeks meet the lease-completeness, severity-1,
+  sample-sufficiency, and one-shift timing-error criteria, and the named tooling/floor,
   program, and master-scheduling owners approve the candidate epoch.
 
-Tasks #32b and #82-1a/#82-4/#82-5 may proceed in parallel because they do not change the lifecycle
-or candidate-epoch critical path. The legacy resource fallback remains until the accepted pilot and
-rollback-retention gates are complete.
+Tasks #82-1a/#82-4/#82-5 may proceed in parallel because they do not change the tooling candidate
+critical path. The legacy resource fallback remains until the accepted pilot and rollback-retention
+gates are complete. Full rationale and acceptance details are in
+`docs/plans/three-program-tooling-roadmap.md`.
 
-## BCA Triband Radomes - Onboarding Readiness
+## Three-Program Tooling Adoption
 
-**Decision:** Project `521938` may be registered early for observation-only data collection after
-the platform isolation controls pass. Do not publish BCA dates or leadership KPIs until the later
-promotion gates are complete. The first candidate is the BCA finishing family, not the layup family.
+- [x] **SCOPE-01 - Park BCA and restore the three-program product boundary**
+  - Archive the BCA finishing candidate through the lifecycle service and mark its program inactive.
+  - Remove BCA from navigation, portfolio reads, sync targets, and active data collection without
+    deleting its program row, epochs, snapshots, source metadata, or `BCALAY` quarantine evidence.
+  - Enforce `Program.active` at registry loading, sync/data ingress, the WIP state matrix, pooled
+    simulation inputs, and forecast-log stamping; UI hiding alone does not satisfy isolation.
+  - Acceptance: only ELEV/RAD/AEGIS appear in active product surfaces; refresh and forecast logs do
+    not touch BCA; all three published forecasts and the static golden master remain exact.
+  - Restart gate: explicit product approval, current IFS rediscovery, fresh resource/tooling
+    approval, a new candidate epoch, and a new shadow pilot.
+  - Delivered 2026-09-02: `BCAFIN` is inactive and epoch 10 is `ARCHIVED`; active registry, sync,
+    WIP, simulation, forecast routes/logging, portfolio, and navigation resolve only ELEV/RAD/AEGIS.
+    All 73 BCA position rows, zero BCA forecast-log rows, and 12 `BCALAY` quarantine events were
+    retained. Pre-change backup: `data/rtg_app_migrated.pre_bca_park.bak`, SHA-256
+    `22ADC5E690FA00328D11A0EF241FE67345BF850DEE3BCAB55D906C38F7888FA6`.
+
+- [x] **RES-01 - Preserve and reframe the generic resource shadow foundation**
+  - Retain pool-ID allocation, finite calendars, explicit reserves, immutable candidates, replay,
+    readiness, and causal comparison as platform capabilities for the three active programs.
+  - Remove BCA-specific next-step framing from current handoffs while keeping historical evidence
+    documents clearly labeled as deferred.
+  - Acceptance: generic resource tests remain green, published outputs do not move, and no BCA
+    capacity or tooling input is created.
+  - Delivered 2026-09-02: pool-ID effort allocation, finite calendars, explicit static reserve,
+    fail-closed DB-active compilation, immutable physical shadow epochs, exact v1/v2 replay, and
+    causal baseline/candidate comparisons are platform capabilities. No BCA pool was created.
+
+- [ ] **TOOL-01 - Add Aeronose tooling through a governed occupancy shadow**
+  - Design and execution reference: `docs/plans/three-program-tooling-roadmap.md`.
+
+  - [ ] **TOOL-01a - Register the Aeronose tooling inventory and authority**
+    - Create internal-only draft pools for two assembly jigs, two holding fixtures, one trim
+      fixture, three shell lamination molds, and one core-forming mold set.
+    - Record fungibility/named-instance rules, owner, approver, evidence, effective date, review
+      date, maintenance calendar, and changeover/cleanup assumptions.
+    - Classify each pool as dedicated or physically shared and identify every known consumer. Shared
+      demand is modeled honestly; it is never hidden as nonblocking or ghost demand.
+    - Acceptance: counts are persisted as owner-supplied facts but cannot affect dates without
+      approved operation bindings.
+
+  - [ ] **TOOL-01b - Implement atomic occupancy leases and prove cure-station parity**
+    - Acquire all required tools atomically; support fungible slots, named instances, multi-tool
+      acquisition, minimum hold, lag, cleanup/changeover, maintenance exceptions, and explicit
+      release events. Reject invalid release targets and fail loudly on deadlock/no progress.
+    - Queue deterministically by ready time, DPAS-behind priority, commit date, program, serial, and
+      pool code. Database/input order must not decide acquisition.
+    - Deadlock raises `ResourceAllocationDeadlock`, aborts the run, writes no forecast result/log,
+      and opens a blocking review; partial or skipped-unit output is prohibited.
+    - Migrate the current Plant 2 paint-booth and Plant 3 electrical-seal constraints through the
+      same allocator before activating Aeronose tools.
+    - Acceptance: deterministic results under input reordering, complete lease audit history,
+      focused occupancy tests, exact cure-station behavior, and no static-golden drift.
+
+  - [ ] **TOOL-01c - Approve Aeronose acquire/release bindings**
+    - Review the frozen Aeronose routing and work instructions with manufacturing/process owners.
+    - Approve acquire/release spans for every tool; validate overlapping and multi-tool needs.
+    - Acceptance: every event exists in the frozen route, no span is guessed, and approved bindings
+      are frozen in an immutable Aeronose `OBSERVE` candidate.
+
+  - [ ] **TOOL-01d - Run and explain the Aeronose tooling shadow**
+    - Compare identical WIP under the published legacy epoch and tooling candidate.
+    - Show occupancy windows, blocking tool, wait duration, assumption IDs, and RTG-slot impact in
+      Resources, the unit Why view, and Factory Map detail without changing published dates/KPIs.
+    - Require an explicit published or candidate epoch context in every read model and UI request;
+      never aggregate published ELEV/AEGIS output with Aeronose candidate tooling output.
+    - Acceptance: every material date change has a causal tool wait; replay is exact; floor review
+      confirms or rejects the modeled waits.
+
+  - [ ] **TOOL-01e - Complete the Aeronose shadow pilot and promotion decision**
+    - Run 2-4 weeks of replayable shadow forecasts and reconcile modeled occupancy with floor use.
+    - Require two consecutive reviewed weeks, zero unresolved severity-1 tool identity/span or
+      missed-conflict defects, complete traces for every observed lease, and acquire/release timing
+      MAE within one production shift for a sufficient sample. Extend the pilot if evidence is thin.
+    - Acceptance: tooling, program, and scheduling owners approve the candidate; otherwise the
+      published legacy epoch remains active with no loss of functionality.
+
+- [ ] **TOOL-02 - Survey and model Elevator tooling**
+  - Inventory assembly jigs, holding/trim fixtures, molds, dedicated gauges, and shared tools.
+  - Reuse TOOL-01 governance and allocator behavior, but approve Elevator-specific spans and
+    calendars independently.
+
+- [ ] **TOOL-03 - Record Aegis present-rate tooling assessment**
+  - Record the current rate-one-per-month nonbinding assessment with owner, evidence, and review
+    expiry. Reassess when rate, mix, or tooling availability changes.
+  - Do not encode a permanent absence of constraints from today's low rate.
+  - Classify tools as dedicated or physically shared. Any shared Aegis demand consumes the same
+    physical pool; low rate is not permission to suppress real contention.
+
+## Deferred BCA Evidence - Not Active Product Scope
+
+**Decision (2026-09-02):** Project `521938` is paused indefinitely. Completed discovery,
+observation, and quarantine work is retained as historical evidence, but no BCA task below is on the
+active execution path. SCOPE-01 removes the existing observation registration from active product
+surfaces and refresh behavior without deleting audit history.
 
 - [x] **BCA-01 - Make routing discovery revision-aware**
   - Update the IFS discovery path to choose an explicit routing revision, defaulting to the active
@@ -238,7 +335,7 @@ promotion gates are complete. The first candidate is the BCA finishing family, n
     code, parallel flag, reference-order status, NOWB flag, classification, and inclusion state.
     The A/C machine delta is at ops 3000, 3100, and 4000; labor, WC, crew, and exclusions match.
 
-- [ ] **BCA-03 - Persist per-program work-center capacity configuration**
+- [ ] **BCA-03 - Persist per-program work-center capacity configuration (DEFERRED)**
   - Expand this into the Resource and Assumption Registry: physical shared pools, effective-dated
     capacity, dynamic external demand, occupancy tooling, immutable forecast snapshots, and visible
     assumption provenance.
@@ -261,8 +358,16 @@ promotion gates are complete. The first candidate is the BCA finishing family, n
   - [ ] **BCA-03b - Legacy parity and physical labor-pool activation**
     - Seed one-to-one legacy pools, prove exact parity, then collapse approved shared pools through
       an explainable diff gate. Eliminate `DEFAULT_SHIFT` in DB-active mode.
-    - Progress: one-to-one seeding and exact legacy parity are complete. Physical shared-pool
-      activation remains gated on owner-approved capacity assumptions.
+    - Progress 2026-09-01: one-to-one seeding and exact legacy parity are complete. The physical
+      scheduler now allocates once by stable pool ID across differently named WCs, supports explicit
+      gross-minus-static-reserve capacity, requires finite reviewed calendars, fails closed without
+      bindings, freezes OBSERVE successor epochs, replays them exactly, and produces causal unit
+      diffs. See `docs/validation/bca-03b-physical-pool-shadow.md`.
+    - Remaining: approve shift capacity, calendar, external reserve, ownership, and review dates for
+      `P3TRI`, `TRI A`, `PRNG`, and `P3NDI`; then create the physical pools and run the first live
+      shadow comparison. IFS utilization envelopes are not approved capacity.
+    - Deferred by the 2026-09-02 scope decision. The generic software is retained under RES-01;
+      no BCA physical pool will be created.
   - [ ] **BCA-03c - Dynamic external demand and collision monitoring**
     - Materialize `CRP_ORDER_LOAD2`, prevent tracked-demand double counting, preserve horizon/source
       quality, and validate BCA against C17 Triband as a known external shared-resource consumer
@@ -270,6 +375,7 @@ promotion gates are complete. The first candidate is the BCA finishing family, n
   - [ ] **BCA-03d - General discrete occupancy and Aeronose tooling**
     - Unify cure stations and tooling under atomic slot leases. Register the confirmed Aeronose tool
       counts, then block activation until acquire/release operation spans are approved.
+    - Superseded for active execution by TOOL-01; no BCA occupancy work is authorized.
   - [ ] **BCA-03e - Integrated shadow pilot and stabilization gate**
     - After platform-level expiry, drift, recertification, and replay controls exist, complete the
       2-4 week integrated BCA/incumbent shadow pilot before any candidate epoch promotion or legacy
@@ -278,14 +384,14 @@ promotion gates are complete. The first candidate is the BCA finishing family, n
       calibration and interval-coverage thresholds pass, and named owners approve all activated
       shared-resource and tooling profiles.
 
-- [ ] **BCA-04 - Model machine time and dwell deliberately**
+- [ ] **BCA-04 - Model machine time and dwell deliberately (DEFERRED)**
   - Define whether BCA machine-heavy operations are labor, constrained machine time, or 24/7 dwell or cure gates; validate against work instructions and floor practice.
   - Acceptance: the modeling decision covers at least finish-route ops `4100` (34.2 machine hours),
     `5100` (21), and `5300` (10.5), with an auditable reason for each treatment. It also reconciles
     the A/C machine-time differences at ops `3000`, `3100`, and `4000` before selecting one shared
     program model or part-specific overrides.
 
-- [ ] **BCA-05 - Onboard BCA finishing through the controlled `OBSERVE` lifecycle**
+- [ ] **BCA-05 - Onboard BCA finishing through the controlled `OBSERVE` lifecycle (DEFERRED)**
   - Candidate identity: project `521938`, site `59` / Plant 3, parts
     `3301ED0031-101A` and `3301ED0031-101C`, active routing revision `3`, pack op `7000`, terminal
     op `9999`.
@@ -313,6 +419,7 @@ promotion gates are complete. The first candidate is the BCA finishing family, n
       demand in incumbent candidate-epoch shadow forecasts only.
     - Acceptance: current WIP forecasts without fallback capacity, every result carries an immutable
       epoch snapshot and readiness explanation, and no result reaches a commitment or KPI view.
+    - Deferred; SCOPE-01 archives the current observation candidate and stops BCA collection.
 
 - [x] **BCA-06 - Keep the BCA layup stream separate and clean its state**
   - Treat `3301ED0032-101` as a separate 26-op layup/autoclave program, not a second part under
@@ -330,7 +437,7 @@ promotion gates are complete. The first candidate is the BCA finishing family, n
     remain unapproved, so `BCALAY` is not onboarded and `DEFAULT_SHIFT` is prohibited. See
     `docs/validation/bca-06-layup-quarantine.md`.
 
-- [ ] **BCA-07 - Run the live onboarding smoke test**
+- [ ] **BCA-07 - Run the live onboarding smoke test (DEFERRED)**
   - With an authenticated Connect IFS session, discover the selected pilot part, review the revision,
     capacity profile, and unknown-WC gate, save it, then verify the dashboard, matrix, sync, and
     forecast-log flows. Verify active incumbent outputs and candidate-epoch shadows separately.
@@ -347,8 +454,8 @@ visual only and must not become a scheduler input without an explicit future des
 - [x] **#82-1 - Define the floor-map data model**
   - Create a versioned mapping from work center to plant, floor zone, coordinate, display label,
     and optional shared-resource group.
-  - Acceptance: mappings cover existing TwinWorks centers and can add BCA centers such as `P3TRI`,
-    `TRI A`, `236`, `P3 QA`, `PRNG`, `P3NDI`, `3FINL`, and `235` without code changes.
+  - Acceptance: mappings cover existing TwinWorks centers and can retain deferred/future centers
+    such as `P3TRI`, `TRI A`, `PRNG`, and `P3NDI` without making them active programs.
 
 - [ ] **#82-1a - Complete the governed IFS work-center catalog refresh**
   - Add a repeatable read-only `WORK_CENTER_CFV` refresh for Marion site `59`. Use the
@@ -385,8 +492,8 @@ visual only and must not become a scheduler input without an explicit future des
 
 - [ ] **#82-5 - Run the authenticated live-map acceptance check**
   - With a real Connect IFS session, compare the map's active/queued units and WC risk signals to
-    current IFS positions, including BCA after onboarding. Capture page response time and confirm
-    the one-pooled-simulation-per-request contract remains true as programs are added.
+    current IFS positions for ELEV/RAD/AEGIS. Capture page response time and confirm the one-pooled-
+    simulation-per-request contract remains true.
   - Acceptance: live and snapshot modes both render without writes; the route, registry, WIP,
     budgets, and golden forecasts are unchanged by map use; any materially stale catalog facts are
     surfaced through #82-1a rather than silently accepted.

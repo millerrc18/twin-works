@@ -14,7 +14,11 @@ from app.models import (
     ResourceCapacityVersion,
     ResourcePool,
 )
-from app.services.resource_registry import CoverageIssue, resource_coverage
+from app.services.resource_registry import (
+    CoverageIssue,
+    capacity_policy_coverage,
+    resource_coverage,
+)
 
 
 def aggregate_readiness(issues: list[CoverageIssue]) -> str:
@@ -48,8 +52,13 @@ async def _resource_row(db: AsyncSession, pool: ResourcePool, as_of: date) -> di
     )).scalars().all()))
     schedule = (json.loads(version.capacity_schedule_json)
                 if version and version.capacity_schedule_json else None)
+    calendar_policy = (json.loads(version.calendar_policy_json or "{}")
+                       if version else None)
+    external_policy = (json.loads(version.external_policy_json or "{}")
+                       if version else None)
     readiness = "MISSING"
     open_reviews = []
+    policy_issues = []
     if version and assumption and assumption.approval_status == "APPROVED":
         open_reviews = (await db.execute(
             select(AssumptionReview).where(
@@ -62,6 +71,11 @@ async def _resource_row(db: AsyncSession, pool: ResourcePool, as_of: date) -> di
                 (assumption.review_due_at and assumption.review_due_at < as_of)
                 or open_reviews):
             readiness = "PROVISIONAL"
+        policy_issues = await capacity_policy_coverage(db, pool, version, as_of)
+        if any(issue.severity == "MISSING" for issue in policy_issues):
+            readiness = "MISSING"
+        elif policy_issues:
+            readiness = "PROVISIONAL"
     return {
         "id": pool.id, "code": pool.code, "site": pool.site, "name": pool.name,
         "resource_type": pool.resource_type, "capacity_unit": pool.capacity_unit,
@@ -69,6 +83,7 @@ async def _resource_row(db: AsyncSession, pool: ResourcePool, as_of: date) -> di
         "retired_at": pool.retired_at, "consumers": consumers,
         "capacity_schedule": schedule, "slot_count": version.slot_count if version else None,
         "capacity_scope": version.capacity_scope if version else None,
+        "calendar_policy": calendar_policy, "external_policy": external_policy,
         "effective_from": version.effective_from if version else None,
         "effective_to": version.effective_to if version else None,
         "assumption_id": assumption.id if assumption else None,
@@ -93,6 +108,7 @@ async def _resource_row(db: AsyncSession, pool: ResourcePool, as_of: date) -> di
             }
             for review in open_reviews
         ],
+        "policy_issues": [issue.__dict__ for issue in policy_issues],
         "readiness": readiness,
     }
 

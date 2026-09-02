@@ -13,6 +13,7 @@ import routers as R
 from app.engines import rtg_wrapper as WRAPPER
 from app.engines.router_registry import registry
 from app.models import (
+    ModelAssumption,
     OperationResourceBinding,
     ResourceCapacityVersion,
     ResourcePool,
@@ -30,7 +31,19 @@ from app.services.resource_registry import (
 
 
 REPLAY_SERIALIZER_VERSION = 1
-REPLAY_ENGINE_VERSION = "capacity_engine.v1"
+REPLAY_ENGINE_VERSION = "capacity_engine.v2"
+SUPPORTED_REPLAY_ENGINE_VERSIONS = {"capacity_engine.v1", REPLAY_ENGINE_VERSION}
+
+
+class ResourceProfileIncomplete(RuntimeError):
+    """A DB-active run cannot proceed with unresolved resource coverage."""
+
+    def __init__(self, issues):
+        self.issues = tuple(issues)
+        detail = "; ".join(
+            f"{item.subject_key}:{item.parameter} {item.reason}" for item in self.issues
+        )
+        super().__init__(f"Resource profile is incomplete: {detail}")
 
 
 @dataclass(frozen=True)
@@ -60,6 +73,35 @@ class ReplayVerification:
 
 def _as_date(value) -> date:
     return value.date() if isinstance(value, datetime) else value
+
+
+def _routing_work_centers(epoch_selections) -> dict[str, dict[int, str]]:
+    """Read operation identities from the immutable epoch selected for this run."""
+    result = {}
+    for program, selection in epoch_selections.items():
+        definition = json.loads(selection.epoch.definition_json).get("definition", {})
+        if "routing" in definition:
+            operations = definition["routing"].get("ops", [])
+        elif "program_config" in definition:
+            operations = definition["program_config"].get("ops", [])
+        else:
+            operations = registry.ops(program)
+        result[program] = {int(row[0]): row[2] for row in operations}
+    return result
+
+
+def _shift_values(payload: dict | None, field: str) -> dict[int, float]:
+    if not payload:
+        return {}
+    values = payload.get(field) or {}
+    return {int(shift): float(value) for shift, value in values.items()}
+
+
+def _policy_date(value) -> date | None:
+    try:
+        return date.fromisoformat(value) if value else None
+    except (TypeError, ValueError):
+        return None
 
 
 def _legacy_programs() -> list[str]:
@@ -142,11 +184,18 @@ async def seed_legacy_resources(db: AsyncSession) -> dict:
 
 def _scheduler_profile_base(programs: list[str]) -> dict:
     return {
+        "resource_mode": "DB_SHADOW",
+        "allocation_mode": "LEGACY_COMPAT",
         "crew_by_program": {code: dict(registry.spec(code).crew_by_op) for code in programs},
         "dpas_programs": {code for code in programs if registry.spec(code).dpas},
         "shift_budgets": {},
         "budget_programs": list(programs),
         "shared_wcs": WRAPPER.shared_wcs(),
+        "operation_pools": {},
+        "pool_shift_budgets": {},
+        "pool_external_reserves": {},
+        "pool_calendar_policies": {},
+        "pool_assumption_ids": {},
         "cure_station_capacities": dict(R.CURE_STATION_CAPACITIES),
         "cure_station_rules": dict(R.CURE_STATION_RULES),
         "parallel_cure_gates": dict(R.PARALLEL_CURE_GATES),
@@ -155,6 +204,8 @@ def _scheduler_profile_base(programs: list[str]) -> dict:
 
 def _jsonable_scheduler(profile: dict) -> dict:
     return {
+        "resource_mode": profile.get("resource_mode", "LEGACY"),
+        "allocation_mode": profile.get("allocation_mode", "LEGACY_COMPAT"),
         "crew_by_program": {
             code: {str(op): value for op, value in sorted(rows.items())}
             for code, rows in sorted(profile["crew_by_program"].items())
@@ -166,6 +217,24 @@ def _jsonable_scheduler(profile: dict) -> dict:
         },
         "budget_programs": list(profile["budget_programs"]),
         "shared_wcs": sorted(profile["shared_wcs"]),
+        "operation_pools": {
+            f"{program}|{opno}": pool
+            for (program, opno), pool in sorted(profile.get("operation_pools", {}).items())
+        },
+        "pool_shift_budgets": {
+            pool: {str(shift): value for shift, value in sorted(shifts.items())}
+            for pool, shifts in sorted(profile.get("pool_shift_budgets", {}).items())
+        },
+        "pool_external_reserves": {
+            pool: {str(shift): value for shift, value in sorted(shifts.items())}
+            for pool, shifts in sorted(profile.get("pool_external_reserves", {}).items())
+        },
+        "pool_calendar_policies": dict(sorted(
+            profile.get("pool_calendar_policies", {}).items())),
+        "pool_assumption_ids": {
+            pool: list(ids)
+            for pool, ids in sorted(profile.get("pool_assumption_ids", {}).items())
+        },
         "cure_station_capacities": dict(sorted(profile["cure_station_capacities"].items())),
         "cure_station_rules": [
             [program, opno, label, station]
@@ -177,6 +246,8 @@ def _jsonable_scheduler(profile: dict) -> dict:
 
 def _scheduler_from_jsonable(profile: dict) -> dict:
     return {
+        "resource_mode": profile.get("resource_mode", "LEGACY"),
+        "allocation_mode": profile.get("allocation_mode", "LEGACY_COMPAT"),
         "crew_by_program": {
             code: {int(op): value for op, value in rows.items()}
             for code, rows in profile["crew_by_program"].items()
@@ -188,6 +259,22 @@ def _scheduler_from_jsonable(profile: dict) -> dict:
         },
         "budget_programs": list(profile["budget_programs"]),
         "shared_wcs": set(profile["shared_wcs"]),
+        "operation_pools": {
+            (key.rsplit("|", 1)[0], int(key.rsplit("|", 1)[1])): pool
+            for key, pool in profile.get("operation_pools", {}).items()
+        },
+        "pool_shift_budgets": {
+            pool: {int(shift): value for shift, value in shifts.items()}
+            for pool, shifts in profile.get("pool_shift_budgets", {}).items()
+        },
+        "pool_external_reserves": {
+            pool: {int(shift): value for shift, value in shifts.items()}
+            for pool, shifts in profile.get("pool_external_reserves", {}).items()
+        },
+        "pool_calendar_policies": dict(profile.get("pool_calendar_policies", {})),
+        "pool_assumption_ids": {
+            pool: tuple(ids) for pool, ids in profile.get("pool_assumption_ids", {}).items()
+        },
         "cure_station_capacities": dict(profile["cure_station_capacities"]),
         "cure_station_rules": {
             (program, int(opno), label): station
@@ -322,6 +409,33 @@ async def persist_replay_snapshot(db: AsyncSession, *, base_snapshot_id: int,
 
 
 def _frozen_pool_groups(programs: list[str], profile: dict) -> list[list[str]]:
+    scheduler = profile.get("scheduler_profile", {})
+    if scheduler.get("allocation_mode") == "PHYSICAL":
+        operation_pools = scheduler.get("operation_pools", {})
+        pool_sets = {
+            program: {
+                pool for key, pool in operation_pools.items()
+                if key.rsplit("|", 1)[0] == program
+            }
+            for program in programs
+        }
+        parent = {program: program for program in programs}
+
+        def find(item):
+            while parent[item] != item:
+                parent[item] = parent[parent[item]]
+                item = parent[item]
+            return item
+
+        for index, left in enumerate(programs):
+            for right in programs[index + 1:]:
+                if pool_sets[left] & pool_sets[right]:
+                    parent[find(left)] = find(right)
+        groups = {}
+        for program in programs:
+            groups.setdefault(find(program), []).append(program)
+        return [sorted(group) for group in groups.values()]
+
     epoch_defs = profile["epochs"]
     route_by_program = {
         program: epoch_defs[program]["definition"]["definition"]["routing"]
@@ -365,7 +479,7 @@ async def replay_snapshot(db: AsyncSession, snapshot_id: int) -> ReplayVerificat
         raise ValueError("Simulation snapshot has no replay input/result envelope")
     profile = payload["profile"]
     replay = payload["replay"]
-    if replay.get("engine_version") != REPLAY_ENGINE_VERSION:
+    if replay.get("engine_version") not in SUPPORTED_REPLAY_ENGINE_VERSIONS:
         raise RuntimeError("Simulation replay engine version is not supported")
     if replay.get("serializer_version") != REPLAY_SERIALIZER_VERSION:
         raise RuntimeError("Simulation replay serializer version is not supported")
@@ -509,6 +623,8 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
         scheduler_profile = WRAPPER.simulation_profile()
     else:
         scheduler_profile = _scheduler_profile_base(programs)
+        scheduler_profile["resource_mode"] = mode
+        routing_wcs = _routing_work_centers(epoch_selections)
         pool_rows = (await db.execute(
             select(ResourcePool).where(ResourcePool.active.is_(True))
         )).scalars().all()
@@ -519,6 +635,8 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
                 OperationResourceBinding.status == "APPROVED",
             )
         )).scalars().all()
+        effort_pool_codes = set()
+        ambiguous_wc_keys = set()
         for binding in bindings:
             pool = pool_by_id.get(binding.pool_id)
             if pool is None:
@@ -526,8 +644,28 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
             key = f"{binding.program}:{binding.acquire_op}"
             requirements.setdefault(key, tuple())
             requirements[key] += (pool.code,)
-            if pool.work_center_no:
-                wc_to_pool[f"{binding.program}:{pool.work_center_no}"] = pool.code
+            if binding.requirement_mode == "EFFORT":
+                operation_key = (binding.program, int(binding.acquire_op))
+                prior = scheduler_profile["operation_pools"].get(operation_key)
+                if prior and prior != pool.code:
+                    unresolved.append(CoverageIssue(
+                        key, "resource_binding", "MISSING",
+                        f"Operation has multiple effort pools: {prior}, {pool.code}",
+                    ))
+                    continue
+                scheduler_profile["operation_pools"][operation_key] = pool.code
+                effort_pool_codes.add(pool.code)
+                operation_wc = routing_wcs.get(binding.program, {}).get(binding.acquire_op)
+                if operation_wc:
+                    wc_key = f"{binding.program}:{operation_wc}"
+                    if wc_key in ambiguous_wc_keys:
+                        continue
+                    existing_pool = wc_to_pool.get(wc_key)
+                    if existing_pool and existing_pool != pool.code:
+                        wc_to_pool.pop(wc_key, None)
+                        ambiguous_wc_keys.add(wc_key)
+                    elif wc_key not in wc_to_pool:
+                        wc_to_pool[wc_key] = pool.code
         used_pool_ids = {binding.pool_id for binding in bindings}
         for pool_id in sorted(used_pool_ids):
             pool = pool_by_id[pool_id]
@@ -546,6 +684,12 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
                 assumptions.add(version.assumption_id)
             schedule = (json.loads(version.capacity_schedule_json)
                         if version.capacity_schedule_json else None)
+            calendar_policy = json.loads(version.calendar_policy_json or "{}")
+            external_policy = json.loads(version.external_policy_json or "{}")
+            if not isinstance(calendar_policy, dict):
+                calendar_policy = {}
+            if not isinstance(external_policy, dict):
+                external_policy = {}
             pools[pool.code] = {
                 "site": pool.site, "name": pool.name, "resource_type": pool.resource_type,
                 "capacity_unit": pool.capacity_unit, "work_center_no": pool.work_center_no,
@@ -554,12 +698,101 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
                 "capacity_scope": version.capacity_scope,
                 "capacity_schedule": schedule, "slot_count": version.slot_count,
                 "assumption_id": version.assumption_id,
+                "calendar_policy": calendar_policy,
+                "external_policy": external_policy,
             }
-            if pool.capacity_unit == "HOURS" and pool.work_center_no and schedule:
+            pool_assumptions = []
+            if version.assumption_id:
+                pool_assumptions.append(version.assumption_id)
+            reserve_assumption_id = external_policy.get("assumption_id")
+            if reserve_assumption_id:
+                reserve_assumption_id = int(reserve_assumption_id)
+                assumptions.add(reserve_assumption_id)
+                pool_assumptions.append(reserve_assumption_id)
+            scheduler_profile["pool_assumption_ids"][pool.code] = tuple(
+                sorted(set(pool_assumptions)))
+            if pool.capacity_unit == "HOURS" and schedule:
+                scheduler_profile["pool_shift_budgets"][pool.code] = {
+                    int(shift): float(value) for shift, value in schedule.items()
+                }
+                scheduler_profile["pool_calendar_policies"][pool.code] = calendar_policy
+                if (version.capacity_scope == "GROSS_SITE"
+                        and external_policy.get("mode") == "STATIC_RESERVE"):
+                    scheduler_profile["pool_external_reserves"][pool.code] = _shift_values(
+                        external_policy, "shift_reserve")
                 for binding in (item for item in bindings if item.pool_id == pool_id):
-                    scheduler_profile["shift_budgets"][(binding.program, pool.work_center_no)] = {
-                        int(shift): float(value) for shift, value in schedule.items()
-                    }
+                    operation_wc = routing_wcs.get(binding.program, {}).get(binding.acquire_op)
+                    if operation_wc:
+                        scheduler_profile["shift_budgets"][(binding.program, operation_wc)] = {
+                            int(shift): float(value) for shift, value in schedule.items()
+                        }
+        if any(not code.startswith("LEGACY:") for code in effort_pool_codes):
+            scheduler_profile["allocation_mode"] = "PHYSICAL"
+            for pool_code in sorted(effort_pool_codes):
+                if pool_code.startswith("LEGACY:"):
+                    continue
+                pool_payload = pools.get(pool_code)
+                if not pool_payload:
+                    continue
+                calendar = pool_payload["calendar_policy"]
+                factors = calendar.get("factors") if isinstance(calendar, dict) else None
+                exceptions = (calendar.get("exceptions")
+                              if isinstance(calendar, dict) else None)
+                covered_until = (calendar.get("covered_until")
+                                 if isinstance(calendar, dict) else None)
+                covered_until_date = _policy_date(covered_until)
+                if (not isinstance(calendar, dict)
+                        or calendar.get("mode") != "WEEKDAY_FACTORS"
+                        or not isinstance(factors, dict)
+                        or any(str(day) not in factors for day in range(7))
+                        or not isinstance(exceptions, dict)
+                        or covered_until_date is None):
+                    unresolved.append(CoverageIssue(
+                        pool_code, "calendar_policy", "MISSING",
+                        "Physical labor pools require factors, exceptions, and a coverage end",
+                    ))
+                elif covered_until_date < horizon_end:
+                    unresolved.append(CoverageIssue(
+                        pool_code, "calendar_policy", "MISSING",
+                        "Physical labor-pool calendar does not cover the forecast horizon",
+                    ))
+                if pool_payload["capacity_scope"] != "GROSS_SITE":
+                    continue
+                policy = pool_payload["external_policy"]
+                policy_mode = policy.get("mode") if isinstance(policy, dict) else None
+                if policy_mode == "STATIC_RESERVE":
+                    reserve = _shift_values(policy, "shift_reserve")
+                    if any(value < 0 for value in reserve.values()):
+                        unresolved.append(CoverageIssue(
+                            pool_code, "external_reserve", "MISSING",
+                            "Static reserve values cannot be negative",
+                        ))
+                    reserve_id = policy.get("assumption_id")
+                    reserve_assumption = (await db.get(ModelAssumption, int(reserve_id))
+                                          if reserve_id else None)
+                    if (reserve_assumption is None
+                            or reserve_assumption.approval_status != "APPROVED"):
+                        unresolved.append(CoverageIssue(
+                            pool_code, "external_reserve", "MISSING",
+                            "Static external reserve requires an approved assumption",
+                        ))
+                    elif (reserve_assumption.commitment_grade == "INTERNAL_ONLY"
+                          or (reserve_assumption.review_due_at
+                              and reserve_assumption.review_due_at < _as_date(as_of))):
+                        unresolved.append(CoverageIssue(
+                            pool_code, "external_reserve", "PROVISIONAL",
+                            "Static external reserve is internal-only or past review",
+                        ))
+                elif policy_mode == "SNAPSHOT":
+                    unresolved.append(CoverageIssue(
+                        pool_code, "external_reserve", "MISSING",
+                        "Dynamic external reserve allocation remains gated to BCA-03c",
+                    ))
+                else:
+                    unresolved.append(CoverageIssue(
+                        pool_code, "external_reserve", "MISSING",
+                        "Gross-site capacity requires an explicit external reserve policy",
+                    ))
         for program in programs:
             unresolved.extend(await resource_coverage(db, program, _as_date(as_of)))
         if external_snapshot_id is not None:
@@ -569,8 +802,17 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
             external_load = assessment.payload
             assumptions.update(assessment.assumption_ids)
             unresolved.extend(assessment.issues)
+    unresolved = list(dict.fromkeys(unresolved))
     readiness = ("INCOMPLETE" if any(item.severity == "MISSING" for item in unresolved)
                  else "PROVISIONAL" if unresolved else "COMPLETE")
+    if mode == "DB_ACTIVE" and scheduler_profile.get("allocation_mode") != "PHYSICAL":
+        unresolved.append(CoverageIssue(
+            "RESOURCE_PROFILE", "physical_pool_activation", "MISSING",
+            "DB_ACTIVE requires at least one governed physical effort pool",
+        ))
+        readiness = "INCOMPLETE"
+    if mode == "DB_ACTIVE" and readiness != "COMPLETE":
+        raise ResourceProfileIncomplete(unresolved)
     snapshot_hash, snapshot_id = await _persist_snapshot(
         db, as_of=as_of, horizon_end=horizon_end, mode=mode, pools=pools,
         wc_to_pool=wc_to_pool, requirements=requirements,

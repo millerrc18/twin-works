@@ -70,6 +70,13 @@ def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _policy_date(value) -> date | None:
+    try:
+        return date.fromisoformat(value) if value else None
+    except (TypeError, ValueError):
+        return None
+
+
 def _require_choice(value: str, allowed: set[str], field: str, exc_type):
     if value not in allowed:
         raise exc_type(f"Invalid {field}: {value}")
@@ -314,6 +321,223 @@ async def add_binding(db: AsyncSession, *, program: str, pool_id: int,
     return row
 
 
+async def define_physical_labor_pool(
+        db: AsyncSession, *, code: str, site: str, name: str,
+        bindings: dict[str, set[int]], shift_capacity: dict[int, float],
+        weekday_factors: dict[int, float], calendar_exceptions: dict,
+        calendar_covered_until: date, effective_from: date,
+        owner: str, approver: str, evidence_source: str,
+        calculation_method: str, review_due_at: date,
+        capacity_scope: str = "GROSS_SITE",
+        external_reserve: dict[int, float] | None = None,
+        commitment_grade: str = "INTERNAL_ONLY",
+        work_center_no: str | None = None) -> dict:
+    """Create one reviewed physical labor pool and replace covered effort bindings.
+
+    This is intentionally create-only. Any later value change must use assumption and capacity
+    successors, preserving the exact inputs used by earlier shadow forecasts.
+    """
+    from app.engines.router_registry import registry
+
+    required_text = (code, site, name, owner, approver, evidence_source, calculation_method)
+    if not all((value or "").strip() for value in required_text):
+        raise ResourceRegistryError(
+            "Physical labor pools require identity, ownership, and evidence details")
+    _require_choice(
+        commitment_grade.upper(), COMMITMENT_GRADES,
+        "commitment grade", ResourceRegistryError)
+    if not bindings:
+        raise ResourceRegistryError("Physical labor pools require operation bindings")
+    if set(weekday_factors) != set(range(7)):
+        raise ResourceRegistryError("Physical labor pools require weekday factors 0 through 6")
+    if (not shift_capacity
+            or any(float(value) < 0 for value in shift_capacity.values())):
+        raise ResourceRegistryError("Shift capacity cannot be negative")
+    if any(float(value) < 0 for value in weekday_factors.values()):
+        raise ResourceRegistryError("Weekday factors cannot be negative")
+    if any(float(value) < 0 for value in calendar_exceptions.values()):
+        raise ResourceRegistryError("Calendar exception factors cannot be negative")
+    if calendar_covered_until < effective_from:
+        raise ResourceRegistryError("Calendar coverage cannot precede the effective date")
+    if review_due_at < effective_from:
+        raise ResourceRegistryError("Review date cannot precede the effective date")
+    capacity_scope = capacity_scope.upper()
+    if capacity_scope == "GROSS_SITE":
+        if external_reserve is None:
+            raise ResourceRegistryError(
+                "Gross-site capacity requires an explicit external reserve")
+        missing_shifts = set(shift_capacity) - set(external_reserve)
+        if missing_shifts or any(float(value) < 0 for value in external_reserve.values()):
+            raise ResourceRegistryError(
+                "External reserve must provide non-negative hours for every capacity shift")
+    elif capacity_scope != "NET_TRACKED":
+        raise ResourceRegistryError(f"Invalid capacity scope: {capacity_scope}")
+
+    normalized_bindings = {}
+    for program, operation_numbers in bindings.items():
+        program = program.upper()
+        valid_operations = {int(row[0]) for row in registry.ops(program)}
+        requested = {int(opno) for opno in operation_numbers}
+        unknown = requested - valid_operations
+        if unknown:
+            raise InvalidBinding(
+                f"{program} physical pool binding has unknown operations: {sorted(unknown)}")
+        normalized_bindings[program] = (requested, valid_operations)
+
+    existing = await db.scalar(select(ResourcePool).where(ResourcePool.code == code.strip()))
+    if existing is not None:
+        raise ResourceRegistryError(
+            "Physical pool codes are immutable; supersede its assumptions and capacity version")
+    pool = await create_pool(
+        db, code=code, site=site, name=name, resource_type="LABOR",
+        capacity_unit="HOURS", work_center_no=work_center_no,
+    )
+    capacity_assumption = await add_assumption(
+        db, subject_type="POOL", subject_key=pool.code, parameter="shift_capacity",
+        value={str(key): float(value) for key, value in shift_capacity.items()},
+        unit="HOURS_PER_SHIFT", basis="OWNER_CONFIRMED",
+        approval_status="APPROVED", commitment_grade=commitment_grade,
+        effective_from=effective_from, evidence_source=evidence_source,
+        calculation_method=calculation_method, owner=owner, approver=approver,
+        review_due_at=review_due_at,
+    )
+    external_policy = {"mode": "INCLUDED_IN_NET"}
+    reserve_assumption = None
+    if capacity_scope == "GROSS_SITE":
+        reserve_assumption = await add_assumption(
+            db, subject_type="POOL", subject_key=pool.code,
+            parameter="external_reserve",
+            value={str(key): float(value) for key, value in external_reserve.items()},
+            unit="HOURS_PER_SHIFT", basis="OWNER_CONFIRMED",
+            approval_status="APPROVED", commitment_grade=commitment_grade,
+            effective_from=effective_from, evidence_source=evidence_source,
+            calculation_method=calculation_method, owner=owner, approver=approver,
+            review_due_at=review_due_at,
+        )
+        external_policy = {
+            "mode": "STATIC_RESERVE",
+            "shift_reserve": {
+                str(key): float(value) for key, value in external_reserve.items()
+            },
+            "assumption_id": reserve_assumption.id,
+        }
+    capacity = await add_capacity_version(
+        db, pool_id=pool.id, effective_from=effective_from, status="APPROVED",
+        capacity_scope=capacity_scope,
+        capacity_schedule={str(key): float(value) for key, value in shift_capacity.items()},
+        calendar_policy={
+            "mode": "WEEKDAY_FACTORS",
+            "factors": {str(key): float(value) for key, value in weekday_factors.items()},
+            "exceptions": {
+                (key.isoformat() if isinstance(key, date) else str(key)): float(value)
+                for key, value in calendar_exceptions.items()
+            },
+            "covered_until": calendar_covered_until.isoformat(),
+        },
+        external_policy=external_policy, assumption_id=capacity_assumption.id,
+    )
+    created_bindings = []
+    for program, (requested, valid_operations) in sorted(normalized_bindings.items()):
+        prior_rows = (await db.execute(select(OperationResourceBinding).where(
+            OperationResourceBinding.program == program,
+            OperationResourceBinding.acquire_op.in_(requested),
+            OperationResourceBinding.requirement_mode == "EFFORT",
+            OperationResourceBinding.status == "APPROVED",
+        ))).scalars().all()
+        for prior in prior_rows:
+            prior.status = "SUPERSEDED"
+        for opno in sorted(requested):
+            created_bindings.append(await add_binding(
+                db, program=program, pool_id=pool.id, acquire_op=opno,
+                requirement_mode="EFFORT", quantity=1.0, demand_source="LABOR",
+                release_event="OP_COMPLETE", status="APPROVED",
+                valid_operations=valid_operations,
+            ))
+    await db.flush()
+    return {
+        "pool": pool,
+        "capacity": capacity,
+        "capacity_assumption": capacity_assumption,
+        "reserve_assumption": reserve_assumption,
+        "bindings": tuple(created_bindings),
+    }
+
+
+async def capacity_policy_coverage(db: AsyncSession, pool: ResourcePool,
+                                   version: ResourceCapacityVersion,
+                                   as_of: date) -> list[CoverageIssue]:
+    """Validate the calendar and external-reserve contract for one physical pool."""
+    if pool.capacity_unit != "HOURS" or pool.code.startswith("LEGACY:"):
+        return []
+    issues = []
+    calendar_policy = json.loads(version.calendar_policy_json or "{}")
+    calendar_factors = (calendar_policy.get("factors")
+                        if isinstance(calendar_policy, dict) else None)
+    calendar_exceptions = (calendar_policy.get("exceptions")
+                           if isinstance(calendar_policy, dict) else None)
+    covered_until = (calendar_policy.get("covered_until")
+                     if isinstance(calendar_policy, dict) else None)
+    covered_until_date = _policy_date(covered_until)
+    if (not isinstance(calendar_policy, dict)
+            or calendar_policy.get("mode") != "WEEKDAY_FACTORS"
+            or not isinstance(calendar_factors, dict)
+            or any(str(day) not in calendar_factors for day in range(7))
+            or not isinstance(calendar_exceptions, dict)
+            or covered_until_date is None):
+        issues.append(CoverageIssue(
+            pool.code, "calendar_policy", "MISSING",
+            "Physical labor pools require factors, exceptions, and a coverage end",
+        ))
+    elif covered_until_date < as_of:
+        issues.append(CoverageIssue(
+            pool.code, "calendar_policy", "MISSING",
+            "Physical labor-pool calendar does not cover this date",
+        ))
+    if version.capacity_scope != "GROSS_SITE":
+        return issues
+    external_policy = json.loads(version.external_policy_json or "{}")
+    policy_mode = (external_policy.get("mode")
+                   if isinstance(external_policy, dict) else None)
+    if policy_mode == "STATIC_RESERVE":
+        shift_reserve = external_policy.get("shift_reserve") or {}
+        capacity_schedule = json.loads(version.capacity_schedule_json or "{}")
+        if (not isinstance(shift_reserve, dict)
+                or any(str(shift) not in shift_reserve for shift in capacity_schedule)
+                or any(float(value) < 0 for value in shift_reserve.values())):
+            issues.append(CoverageIssue(
+                pool.code, "external_reserve", "MISSING",
+                "Static reserve must provide non-negative hours for each capacity shift",
+            ))
+            return issues
+        reserve_id = external_policy.get("assumption_id")
+        reserve_assumption = (await db.get(ModelAssumption, int(reserve_id))
+                              if reserve_id else None)
+        if (reserve_assumption is None
+                or reserve_assumption.approval_status != "APPROVED"):
+            issues.append(CoverageIssue(
+                pool.code, "external_reserve", "MISSING",
+                "Static external reserve requires an approved assumption",
+            ))
+        elif (reserve_assumption.commitment_grade == "INTERNAL_ONLY"
+              or (reserve_assumption.review_due_at
+                  and reserve_assumption.review_due_at < as_of)):
+            issues.append(CoverageIssue(
+                pool.code, "external_reserve", "PROVISIONAL",
+                "Static external reserve is internal-only or past review",
+            ))
+    elif policy_mode == "SNAPSHOT":
+        issues.append(CoverageIssue(
+            pool.code, "external_reserve", "MISSING",
+            "Dynamic external reserve allocation remains gated to BCA-03c",
+        ))
+    else:
+        issues.append(CoverageIssue(
+            pool.code, "external_reserve", "MISSING",
+            "Gross-site capacity requires an explicit external reserve policy",
+        ))
+    return issues
+
+
 async def resource_coverage(db: AsyncSession, program: str,
                             as_of: date) -> list[CoverageIssue]:
     bindings = (await db.execute(
@@ -382,4 +606,5 @@ async def resource_coverage(db: AsyncSession, program: str,
         if reasons:
             issues.append(CoverageIssue(pool.code, assumption.parameter, "PROVISIONAL",
                                         ", ".join(reasons)))
+        issues.extend(await capacity_policy_coverage(db, pool, version, as_of))
     return issues

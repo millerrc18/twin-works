@@ -60,6 +60,8 @@ def forecast_program(ds: DataSource, program: str, programs=None,
                      planning: PlanningContext | None = None,
                      plan_targets: dict[str, date] | None = None,
                      include_hidden: bool = False) -> list[UnitForecast]:
+    if not PSVC.is_active(program):
+        return []
     sim = simulation if simulation is not None else _pooled_sim(ds, programs)
     planning = planning or configured_context(program)
     spec = registry.spec(program)
