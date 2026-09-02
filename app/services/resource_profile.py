@@ -200,6 +200,7 @@ def _scheduler_profile_base(programs: list[str]) -> dict:
         "occupancy_requirements": {},
         "occupancy_pool_capacities": {},
         "occupancy_pool_instances": {},
+        "occupancy_unavailable_intervals": {},
         "cure_station_capacities": dict(R.CURE_STATION_CAPACITIES),
         "cure_station_rules": dict(R.CURE_STATION_RULES),
         "parallel_cure_gates": dict(R.PARALLEL_CURE_GATES),
@@ -251,6 +252,8 @@ def _jsonable_scheduler(profile: dict) -> dict:
             for pool, instances in sorted(
                 profile.get("occupancy_pool_instances", {}).items())
         },
+        "occupancy_unavailable_intervals": dict(sorted(
+            profile.get("occupancy_unavailable_intervals", {}).items())),
         "cure_station_capacities": dict(sorted(profile["cure_station_capacities"].items())),
         "cure_station_rules": [
             [program, opno, label, station]
@@ -303,6 +306,8 @@ def _scheduler_from_jsonable(profile: dict) -> dict:
             pool: list(instances)
             for pool, instances in profile.get("occupancy_pool_instances", {}).items()
         },
+        "occupancy_unavailable_intervals": dict(
+            profile.get("occupancy_unavailable_intervals", {})),
         "cure_station_capacities": dict(profile["cure_station_capacities"]),
         "cure_station_rules": {
             (program, int(opno), label): station
@@ -790,6 +795,10 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
                 if instance_codes:
                     scheduler_profile["occupancy_pool_instances"][pool.code] = list(
                         instance_codes)
+                unavailable = calendar_policy.get("unavailable", [])
+                if unavailable:
+                    scheduler_profile["occupancy_unavailable_intervals"][pool.code] = list(
+                        unavailable)
         if any(not code.startswith("LEGACY:") for code in effort_pool_codes):
             scheduler_profile["allocation_mode"] = "PHYSICAL"
             for pool_code in sorted(effort_pool_codes):
@@ -857,6 +866,23 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
                         pool_code, "external_reserve", "MISSING",
                         "Gross-site capacity requires an explicit external reserve policy",
                     ))
+        for pool_code in sorted(scheduler_profile["occupancy_pool_capacities"]):
+            if pool_code.startswith("LEGACY:"):
+                continue
+            policy = pools[pool_code]["calendar_policy"]
+            covered_until = _policy_date(policy.get("covered_until"))
+            if (policy.get("mode") != "OCCUPANCY_CALENDAR"
+                    or not isinstance(policy.get("unavailable"), list)
+                    or covered_until is None):
+                unresolved.append(CoverageIssue(
+                    pool_code, "occupancy_calendar", "MISSING",
+                    "Occupancy pools require maintenance intervals and a coverage end",
+                ))
+            elif covered_until < horizon_end:
+                unresolved.append(CoverageIssue(
+                    pool_code, "occupancy_calendar", "MISSING",
+                    "Occupancy calendar does not cover the forecast horizon",
+                ))
         for program in programs:
             unresolved.extend(await resource_coverage(db, program, _as_date(as_of)))
         if external_snapshot_id is not None:

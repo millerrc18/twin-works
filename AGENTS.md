@@ -16,7 +16,7 @@ exclude it without deleting history. RES-01 retains the generic physical-resourc
 The next modeling path is TOOL-01:
 generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
 PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
-**91 passing tests**; the run still emits existing Python 3.14
+**96 passing tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
 
 **Documentation roadmap:** DOC-01 adds a user-facing `/handbook` backed by version-controlled,
@@ -28,15 +28,15 @@ trim fixture (1), shell lamination molds (3), and core-forming mold set (1). All
 INTERNAL_ONLY, unbound, and mathematically inactive. Do not approve or bind them until the questions
 in `docs/validation/tool-01a-aeronose-inventory.md` are answered.
 
-**TOOL-01b core:** `app/engines/occupancy.py` provides atomic fixed reservations and active
-acquire/release leases; cure stations use it with exact parity. Approved synthetic occupancy
-bindings compile, execute, trace, and replay. Live Aeronose tools remain unbound. See
+**TOOL-01b complete:** `app/engines/occupancy.py` provides atomic reservations/leases, future
+maintenance windows, as-of hold reconstruction, deterministic same-shift retry, and fatal
+no-progress behavior. Cure stations retain exact parity; synthetic bindings compile, execute,
+trace, and replay. Live Aeronose tools remain unbound. See
 `docs/validation/tool-01b-occupancy-core.md`.
 
 **Current git state:** branch `codex/resource-assumption-registry`, tracking the matching origin
-branch. Remote: `https://github.com/millerrc18/twin-works.git`. The BCA-03b/generic physical-pool
-runtime and three-program tooling plan are currently uncommitted. Preserve the git-ignored live
-SQLite database and its backups.
+branch. Remote: `https://github.com/millerrc18/twin-works.git`. Preserve the git-ignored live SQLite
+database and its backups.
 
 **#81 completed:**
 - `program` table and migration `b4e2f7a1`; DB-or-routers source flag; seed-the-3; `create_program`; snapshots; IFS metadata, program ordering, names, thresholds, and pack operations routed through `program_service`.

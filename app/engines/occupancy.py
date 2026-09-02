@@ -90,6 +90,9 @@ class OccupancyAllocator:
         self._slots: dict[str, dict[str, datetime]] = {}
         self._active: dict[tuple[str, str], ActiveOccupancyLease] = {}
         self._history: list[OccupancyEvent] = []
+        self._unavailable: dict[
+            str, dict[str, list[tuple[datetime, datetime, str]]]
+        ] = {}
         instances = instances or {}
         for pool_code, raw_capacity in sorted(capacities.items()):
             capacity = int(raw_capacity)
@@ -106,6 +109,7 @@ class OccupancyAllocator:
                     f"Occupancy pool {pool_code} has duplicate instance codes")
             codes = named or [f"{pool_code}#{index}" for index in range(1, capacity + 1)]
             self._slots[pool_code] = {code: as_of for code in sorted(codes)}
+            self._unavailable[pool_code] = {code: [] for code in sorted(codes)}
 
     def availability(self) -> dict[str, tuple[tuple[str, datetime], ...]]:
         return {
@@ -119,19 +123,17 @@ class OccupancyAllocator:
         if duration_hours < 0:
             raise ResourceAllocationDeadlock("Occupancy duration cannot be negative")
         plan = self._plan(requests)
-        selected: dict[str, list[str]] = {}
         start = requested_start
-        for pool_code, item in plan.items():
-            slots = self._slots[pool_code]
-            chosen = list(item["specific"])
-            remaining = [
-                code for code, _available in sorted(
-                    slots.items(), key=lambda row: (row[1], row[0]))
-                if code not in chosen
-            ]
-            chosen.extend(remaining[:item["fungible_quantity"]])
-            selected[pool_code] = chosen
-            start = max(start, *(slots[code] for code in chosen))
+        selected = {}
+        for _iteration in range(1000):
+            selected, next_start = self._select_for_interval(
+                plan, start, float(duration_hours))
+            if next_start == start:
+                break
+            start = next_start
+        else:
+            raise ResourceAllocationDeadlock(
+                f"Occupancy request for {unit_key} made no scheduling progress")
 
         leases = []
         for pool_code, item in plan.items():
@@ -165,7 +167,9 @@ class OccupancyAllocator:
         for pool_code, item in plan.items():
             slots = self._slots[pool_code]
             chosen = list(item["specific"])
-            if any(slots[code] > at or (pool_code, code) in self._active
+            hold_hours = item["min_hold_hours"]
+            if any(self._next_gap(pool_code, code, at, hold_hours) != at
+                   or (pool_code, code) in self._active
                    for code in chosen):
                 return None
             remaining = [
@@ -173,6 +177,7 @@ class OccupancyAllocator:
                     slots.items(), key=lambda row: (row[1], row[0]))
                 if code not in chosen
                 and available <= at
+                and self._next_gap(pool_code, code, at, hold_hours) == at
                 and (pool_code, code) not in self._active
             ]
             if len(remaining) < item["fungible_quantity"]:
@@ -206,18 +211,30 @@ class OccupancyAllocator:
                           at: datetime) -> datetime:
         """Earliest instant all requested slots could be acquired, without mutation."""
         plan = self._plan(requests)
-        candidate = at
-        for pool_code, item in plan.items():
-            slots = self._slots[pool_code]
-            chosen = list(item["specific"])
-            remaining = [
-                code for code, _available in sorted(
-                    slots.items(), key=lambda row: (row[1], row[0]))
-                if code not in chosen
-            ]
-            chosen.extend(remaining[:item["fungible_quantity"]])
-            candidate = max(candidate, *(slots[code] for code in chosen))
+        _selected, candidate = self._select_for_interval(plan, at, 0.0)
         return candidate
+
+    def add_unavailability(self, pool_code: str, start: datetime, end: datetime,
+                           *, reason: str,
+                           instance_code: str | None = None) -> None:
+        """Add a reviewed future maintenance/unavailable interval before scheduling starts."""
+        if self._history or self._active:
+            raise ResourceAllocationDeadlock(
+                "Maintenance intervals must be loaded before reservations or leases")
+        if pool_code not in self._slots:
+            raise ResourceAllocationDeadlock(
+                f"Maintenance references unknown pool {pool_code}")
+        if end <= start or not (reason or "").strip():
+            raise ResourceAllocationDeadlock(
+                "Maintenance requires a positive interval and reason")
+        targets = ([instance_code] if instance_code else sorted(self._slots[pool_code]))
+        for code in targets:
+            if code not in self._slots[pool_code]:
+                raise ResourceAllocationDeadlock(
+                    f"Maintenance references unknown instance {code} in pool {pool_code}")
+        for code in targets:
+            self._unavailable[pool_code][code].append((start, end, reason.strip()))
+            self._unavailable[pool_code][code].sort()
 
     def release(self, unit_key: str, pool_code: str, at: datetime,
                 *, instance_code: str | None = None) -> datetime:
@@ -236,6 +253,16 @@ class OccupancyAllocator:
             for lease in matches
         )
         for lease in matches:
+            conflicts = [
+                (start, end, reason)
+                for start, end, reason in self._unavailable[lease.pool_code][lease.instance_code]
+                if lease.acquired_at < end and effective > start
+            ]
+            if conflicts:
+                raise ResourceAllocationDeadlock(
+                    f"Lease {lease.pool_code}/{lease.instance_code} for {unit_key} "
+                    "overlaps an unavailable interval")
+        for lease in matches:
             self._active.pop((lease.pool_code, lease.instance_code))
             self._slots[lease.pool_code][lease.instance_code] = effective
             self._history.append(OccupancyEvent(
@@ -253,6 +280,52 @@ class OccupancyAllocator:
 
     def history(self) -> tuple[OccupancyEvent, ...]:
         return tuple(self._history)
+
+    def unavailable_intervals(self) -> dict:
+        return {
+            pool: {
+                code: tuple(rows) for code, rows in sorted(instances.items())
+            }
+            for pool, instances in sorted(self._unavailable.items())
+        }
+
+    def _next_gap(self, pool_code: str, instance_code: str,
+                  requested_start: datetime, duration_hours: float) -> datetime:
+        candidate = max(requested_start, self._slots[pool_code][instance_code])
+        if candidate == datetime.max:
+            return candidate
+        duration = timedelta(hours=max(0.0, duration_hours))
+        for start, end, _reason in self._unavailable[pool_code][instance_code]:
+            if duration == timedelta(0) and start <= candidate < end:
+                candidate = end
+                continue
+            if candidate + duration <= start:
+                break
+            if candidate < end and candidate + duration > start:
+                candidate = end
+        return candidate
+
+    def _select_for_interval(self, plan: dict[str, dict], start: datetime,
+                             duration_hours: float) -> tuple[dict[str, list[str]], datetime]:
+        selected = {}
+        candidate = start
+        for pool_code, item in plan.items():
+            hold_hours = max(float(duration_hours), item["min_hold_hours"]) + item["lag_hours"]
+            specific = list(item["specific"])
+            ready = [
+                (self._next_gap(pool_code, code, start, hold_hours), code)
+                for code in self._slots[pool_code]
+                if code not in specific
+            ]
+            ready.sort()
+            chosen = specific + [
+                code for _available, code in ready[:item["fungible_quantity"]]
+            ]
+            selected[pool_code] = chosen
+            candidate = max(candidate, *(
+                self._next_gap(pool_code, code, start, hold_hours) for code in chosen
+            ))
+        return selected, candidate
 
     def _plan(self, requests: list[OccupancyRequest]) -> dict[str, dict]:
         if not requests:

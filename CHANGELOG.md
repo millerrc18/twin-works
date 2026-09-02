@@ -32,8 +32,9 @@ handoff.
 - Began TOOL-01b: added deterministic atomic occupancy reservations, named/active leases, minimum
   holds, release lag, fatal request/release errors, explicit queue ordering, and lease history.
   Migrated existing cure-station reservations through the allocator with exact golden parity;
-  approved synthetic bindings now compile, acquire/release, trace, and replay. Full suite: 91
-  passed.
+  approved synthetic bindings compile, acquire/release, trace, and replay. Added maintenance
+  windows, as-of hold reconstruction, same-shift retry, and fatal full-run no-progress handling.
+  Full suite: 96 passed.
 
 ## 2026-09-01 - Physical labor-pool shadow runtime (BCA-03b software gate)
 - Added pool-ID effort allocation so differently named work centers can consume one physical

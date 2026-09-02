@@ -182,7 +182,7 @@ from the execution sequence and retained only in the deferred evidence section.
    2026-09-02.**
 3. TOOL-01a create the governed Aeronose tooling inventory.
 4. TOOL-01b build the generic atomic occupancy allocator and migrate cure stations with exact
-   legacy parity.
+   legacy parity. **Complete 2026-09-02.**
 5. #32b confirm the Plant 3 electrical-seal station count in a distinct successor candidate epoch;
    do not alter the parity epoch.
 6. TOOL-01c approve and freeze Aeronose acquire/release bindings.
@@ -267,7 +267,7 @@ gates are complete. Full rationale and acceptance details are in
       consumers, and operation spans remain open. See
       `docs/validation/tool-01a-aeronose-inventory.md`.
 
-  - [ ] **TOOL-01b - Implement atomic occupancy leases and prove cure-station parity**
+  - [x] **TOOL-01b - Implement atomic occupancy leases and prove cure-station parity**
     - Acquire all required tools atomically; support fungible slots, named instances, multi-tool
       acquisition, minimum hold, lag, cleanup/changeover, maintenance exceptions, and explicit
       release events. Reject invalid release targets and fail loudly on deadlock/no progress.
@@ -282,9 +282,9 @@ gates are complete. Full rationale and acceptance details are in
     - Progress 2026-09-02: delivered deterministic fixed reservations, atomic multi-pool
       acquisition, named instances, minimum holds, release lag, explicit queue keys, fatal
       impossible-request/invalid-release errors, lease history, approved-binding/profile
-      compilation, all four release events, replayable occupancy traces, and exact cure-station/
-      golden parity. Remaining work is future maintenance intervals, initial WIP holdings,
-      same-shift priority retry, Why rendering, and full-run no-progress failure. See
+      compilation, all four release events, replayable occupancy traces, future maintenance
+      windows, initial WIP holdings, same-shift priority retry, fatal full-run no-progress handling,
+      and exact cure-station/golden parity. Why rendering follows real bindings in TOOL-01d. See
       `docs/validation/tool-01b-occupancy-core.md`.
 
   - [ ] **TOOL-01c - Approve Aeronose acquire/release bindings**

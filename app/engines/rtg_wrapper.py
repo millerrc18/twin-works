@@ -89,6 +89,7 @@ def _simulation_profile() -> dict:
         "occupancy_requirements": {},
         "occupancy_pool_capacities": {},
         "occupancy_pool_instances": {},
+        "occupancy_unavailable_intervals": {},
         "cure_station_capacities": dict(R.CURE_STATION_CAPACITIES),
         "cure_station_rules": dict(R.CURE_STATION_RULES),
         "parallel_cure_gates": dict(R.PARALLEL_CURE_GATES),

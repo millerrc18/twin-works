@@ -98,10 +98,11 @@ changeover, shared-consumer, and operation-span decisions. See
 
 #### TOOL-01b - Generic occupancy allocator and parity
 
-**Progress 2026-09-02:** core fixed reservations, active lease primitives, approved-binding profile
+**Delivered 2026-09-02:** core fixed reservations, active lease primitives, approved-binding profile
 compilation, operation/cure/route releases, and replayable occupancy traces are implemented;
 existing cure stations use the allocator with exact golden parity. Future maintenance intervals,
-initial WIP holdings, same-shift priority retry, Why rendering, and full-run deadlock handling remain. See
+initial WIP holdings, same-shift priority retry, and fatal no-progress handling are complete. Why
+rendering follows real Aeronose bindings in TOOL-01d. See
 `docs/validation/tool-01b-occupancy-core.md`.
 
 - Implement deterministic, atomic acquisition of all tooling needed at an operation.

@@ -2,8 +2,8 @@
 
 ## Status
 
-Core allocator and cure-station parity slice delivered 2026-09-02. The allocator is not yet wired
-to approved Aeronose operation-span bindings, and no Aeronose tooling affects forecasts.
+Allocator, scheduler integration, maintenance handling, and cure-station parity delivered
+2026-09-02. No Aeronose tooling affects forecasts because its operation spans remain unapproved.
 
 ## Delivered
 
@@ -21,27 +21,28 @@ to approved Aeronose operation-span bindings, and no Aeronose tooling affects fo
 - The scheduler acquires tools before the bound operation and releases on approved `OP_START`,
   `OP_COMPLETE`, `CURE_COMPLETE`, or `ROUTE_COMPLETE` events.
 - Occupancy acquire/wait/release events are included in traced results and exact replay envelopes.
+- Reviewed future maintenance intervals preserve earlier free windows and block overlapping holds.
+- Tools already held by as-of WIP are reconstructed conservatively from acquire/release spans.
+- Occupancy waiters retry deterministically within the same shift after a holder releases.
+- Over-capacity as-of holdings and 1,200-shift no-progress exhaustions fail the whole run.
 
 ## Parity
 
 The cure-station migration preserves the established reservation order and timestamps. Focused
 cure tests and the static golden forecast are exact.
 
-## Remaining Before TOOL-01b Closes
+## Post-Allocator Work
 
-1. Apply future maintenance/unavailable intervals without incorrectly blocking earlier free time.
-2. Reconstruct tools already held by units whose forecast starts between acquire and release ops.
-3. Revisit an occupancy-blocked higher-priority unit within the same shift when a lower-priority
-   holder releases later in that shift.
-4. Surface replayed lease events in Why explanations and prove fatal no-progress handling for a
-   complete multi-unit scheduler run.
+1. TOOL-01c must approve Aeronose tool identity, operation spans, and release events.
+2. TOOL-01d surfaces replayed lease events in Why and occupancy timeline views.
+3. Floor validation must confirm reconstructed as-of holdings against actual assigned tools.
 
 These remaining items do not require Aeronose operation spans, but Aeronose activation remains
 blocked until TOOL-01c approves those spans.
 
 ## Verification
 
-- Full regression suite: 91 passed.
+- Full regression suite: 96 passed.
 - Focused Ruff: passed.
 - Static golden forecast: exact.
 - Live Aeronose draft tooling pools remain unbound and have no forecast effect.

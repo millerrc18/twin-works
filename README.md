@@ -78,7 +78,8 @@ inactive and archived outside active ingress/navigation while its audit history 
 generic physical-resource shadow foundation is retained under RES-01. TOOL-01
 adds deterministic occupancy leases and Aeronose tooling as the first governed tooling pilot. The
 five tool counts are registered as unbound drafts, and the allocator core now carries the existing
-cure-station constraints with exact parity. Operation binding and maintenance integration remain.
+cure-station constraints with exact parity. Generic binding compilation, maintenance windows,
+as-of holdings, deterministic retry, and replay are complete; Aeronose operation bindings remain.
 No tooling candidate can change published dates until its shadow and approval gates pass.
 DOC-01 will add a searchable in-app `/handbook`; the initial shell and core operating content may
 proceed in parallel with TOOL-01.

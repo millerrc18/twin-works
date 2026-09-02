@@ -115,6 +115,34 @@ def test_invalid_release_fails_loudly():
         allocator.release("U1", "JIG", START)
 
 
+def test_future_maintenance_preserves_earlier_gap_and_delays_overlapping_hold():
+    allocator = OccupancyAllocator({"JIG": 1}, as_of=START)
+    allocator.add_unavailability(
+        "JIG", datetime(2026, 9, 2, 10), datetime(2026, 9, 2, 14),
+        reason="Preventive maintenance",
+    )
+
+    before = allocator.reserve_fixed("U1", [OccupancyRequest("JIG")], START, 4)
+    after = allocator.reserve_fixed("U2", [OccupancyRequest("JIG")], START, 6)
+
+    assert before.start == START
+    assert before.end == datetime(2026, 9, 2, 10)
+    assert after.start == datetime(2026, 9, 2, 14)
+
+
+def test_active_lease_cannot_silently_overrun_maintenance():
+    allocator = OccupancyAllocator({"JIG": 1}, as_of=START)
+    allocator.add_unavailability(
+        "JIG", datetime(2026, 9, 2, 10), datetime(2026, 9, 2, 14),
+        reason="Preventive maintenance",
+    )
+    assert allocator.acquire_atomic(
+        "U1", [OccupancyRequest("JIG", min_hold_hours=2)], START) is not None
+
+    with pytest.raises(ResourceAllocationDeadlock, match="overlaps"):
+        allocator.release("U1", "JIG", datetime(2026, 9, 2, 11))
+
+
 def test_queue_key_is_explicit_and_independent_of_input_order():
     units = [
         {"program": "RAD", "serial": "R2", "commit": date(2026, 9, 5)},
@@ -153,6 +181,7 @@ def _scheduler_profile(requirements, capacities):
         "occupancy_requirements": requirements,
         "occupancy_pool_capacities": capacities,
         "occupancy_pool_instances": {},
+        "occupancy_unavailable_intervals": {},
         "cure_station_capacities": {},
         "cure_station_rules": {},
         "parallel_cure_gates": {},
@@ -251,6 +280,86 @@ def test_scheduler_releases_tool_at_actual_cure_completion():
     assert result["U2"]["op_dt"][100] == datetime(2026, 9, 2, 11)
 
 
+def test_scheduler_reconstructs_as_of_holder_and_retries_waiter_same_shift():
+    from capacity_engine import simulate
+
+    profile = _scheduler_profile(
+        {("P1", 100): ({
+            "pool_code": "JIG", "quantity": 1, "instance_code": None,
+            "release_event": "OP_COMPLETE", "release_op": 200,
+            "min_hold_hours": 0.0, "lag_hours": 0.0,
+        },)},
+        {"JIG": 1},
+    )
+    units = [
+        {"serial": "WAITER", "so": "1", "maxop": 0,
+         "commit": date(2026, 9, 3), "program": "P1"},
+        {"serial": "HOLDER", "so": "2", "maxop": 100,
+         "commit": date(2026, 9, 4), "program": "P1"},
+    ]
+    ops = {"P1": [
+        (100, "Acquire", "WC", 1.0, "BUILD"),
+        (200, "Release", "WC", 2.0, "SHIP"),
+    ]}
+
+    result = simulate(
+        units, ops, {"P1": []}, START, profile=profile, trace_constraints=True)
+
+    assert result["HOLDER"]["op_dt"][200] == START
+    assert result["WAITER"]["op_dt"][100] == datetime(2026, 9, 2, 8)
+
+
+def test_as_of_hold_over_capacity_fails_the_run():
+    from capacity_engine import simulate
+
+    profile = _scheduler_profile(
+        {("P1", 100): ({
+            "pool_code": "JIG", "quantity": 1, "instance_code": None,
+            "release_event": "ROUTE_COMPLETE", "release_op": None,
+            "min_hold_hours": 0.0, "lag_hours": 0.0,
+        },)},
+        {"JIG": 1},
+    )
+    units = [
+        {"serial": "U1", "so": "1", "maxop": 100,
+         "commit": date(2026, 9, 3), "program": "P1"},
+        {"serial": "U2", "so": "2", "maxop": 100,
+         "commit": date(2026, 9, 4), "program": "P1"},
+    ]
+
+    with pytest.raises(ResourceAllocationDeadlock, match="As-of WIP"):
+        simulate(
+            units, {"P1": [(100, "Acquire", "WC", 1.0, "SHIP")]},
+            {"P1": []}, START, profile=profile)
+
+
+def test_scheduler_horizon_exhaustion_with_blocked_tool_is_fatal():
+    from capacity_engine import simulate
+
+    profile = _scheduler_profile(
+        {("P1", 100): ({
+            "pool_code": "JIG", "quantity": 1, "instance_code": None,
+            "release_event": "ROUTE_COMPLETE", "release_op": None,
+            "min_hold_hours": 0.0, "lag_hours": 0.0,
+        },)},
+        {"JIG": 1},
+    )
+    profile["occupancy_unavailable_intervals"] = {
+        "JIG": [{
+            "start": START.isoformat(),
+            "end": datetime(2030, 1, 1, 6).isoformat(),
+            "reason": "Long-term maintenance hold",
+        }],
+    }
+
+    with pytest.raises(ResourceAllocationDeadlock, match="1,200 shifts"):
+        simulate(
+            [{"serial": "U1", "so": "1", "maxop": 0,
+              "commit": date(2026, 9, 3), "program": "P1"}],
+            {"P1": [(100, "Acquire", "WC", 1.0, "SHIP")]},
+            {"P1": []}, START, profile=profile)
+
+
 def test_profile_compiles_only_approved_occupancy_bindings(tmp_path):
     from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -293,7 +402,17 @@ def test_profile_compiles_only_approved_occupancy_bindings(tmp_path):
             await add_capacity_version(
                 db, pool_id=pool.id, effective_from=date(2026, 8, 19),
                 status="APPROVED", capacity_scope="NET_TRACKED",
-                slot_count=1, assumption_id=assumption.id,
+                slot_count=1,
+                calendar_policy={
+                    "mode": "OCCUPANCY_CALENDAR",
+                    "covered_until": "2026-10-01",
+                    "unavailable": [{
+                        "start": "2026-09-15T06:00:00",
+                        "end": "2026-09-15T14:00:00",
+                        "reason": "Test maintenance",
+                    }],
+                },
+                assumption_id=assumption.id,
             )
             await add_binding(
                 db, program="RAD", pool_id=pool.id,
@@ -312,6 +431,13 @@ def test_profile_compiles_only_approved_occupancy_bindings(tmp_path):
 
             assert compiled.scheduler_profile["occupancy_pool_capacities"] == {
                 "TEST_RAD_TOOL": 1,
+            }
+            assert compiled.scheduler_profile["occupancy_unavailable_intervals"] == {
+                "TEST_RAD_TOOL": [{
+                    "start": "2026-09-15T06:00:00",
+                    "end": "2026-09-15T14:00:00",
+                    "reason": "Test maintenance",
+                }],
             }
             assert compiled.scheduler_profile["occupancy_requirements"][("RAD", 130)] == ({
                 "pool_code": "TEST_RAD_TOOL",

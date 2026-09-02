@@ -82,6 +82,7 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
     occupancy_requirements = profile.get("occupancy_requirements", {})
     occupancy_pool_capacities = profile.get("occupancy_pool_capacities", {})
     occupancy_pool_instances = profile.get("occupancy_pool_instances", {})
+    occupancy_unavailable_intervals = profile.get("occupancy_unavailable_intervals", {})
     finite_cure_stations = {
         station: int(capacity)
         for station, capacity in cure_station_capacities.items()
@@ -99,6 +100,16 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
         instances=occupancy_pool_instances,
         as_of=as_of,
     )
+    for pool_code, rows in sorted(occupancy_unavailable_intervals.items()):
+        for row in sorted(rows, key=lambda item: (
+                item["start"], item["end"], item.get("instance_code") or "")):
+            occupancy_allocator.add_unavailability(
+                pool_code,
+                DT.fromisoformat(row["start"]),
+                DT.fromisoformat(row["end"]),
+                reason=row["reason"],
+                instance_code=row.get("instance_code"),
+            )
     def crew_for(program, wc, opno):
         return float(crew_by_program.get(program, {}).get(opno, legacy_crew(wc, opno)))
 
@@ -210,6 +221,41 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
         return (0 if dpas_behind else 1, commit, u['serial'])
     order=sorted(units, key=prio)
     serial_order=[u['serial'] for u in order]
+
+    def held_at_as_of(row, acquire_op, maxop):
+        if maxop is None or maxop < acquire_op:
+            return False
+        event = row["release_event"]
+        release_op = row.get("release_op")
+        if event == "ROUTE_COMPLETE":
+            return True
+        if release_op is None:
+            return False
+        if event == "CURE_COMPLETE":
+            return maxop <= release_op
+        return maxop < release_op
+
+    # Reconstruct conservative leases for units already between acquire/release operations.
+    for serial in serial_order:
+        st = state[serial]
+        program = st["u"]["program"]
+        maxop = st["u"].get("maxop")
+        for (bound_program, acquire_op), rows in sorted(occupancy_requirements.items()):
+            if bound_program != program:
+                continue
+            held_rows = [
+                row for row in rows if held_at_as_of(row, acquire_op, maxop)
+            ]
+            if not held_rows:
+                continue
+            acquired = occupancy_allocator.acquire_atomic(
+                serial, occupancy_requests(held_rows), as_of)
+            if acquired is None:
+                pools = sorted({row["pool_code"] for row in held_rows})
+                raise ResourceAllocationDeadlock(
+                    f"As-of WIP requires unavailable occupancy pools for {serial}: {pools}")
+            st["occupancy_acquired_ops"].add(acquire_op)
+            st["occupancy_holds"].extend(held_rows)
 
     # ---- PER-SHIFT stepping ----
     # Each day = 3 shifts (1:0600-1400, 2:1400-2200, 3:2200-0600 next). Each shift has its
@@ -344,7 +390,11 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                     "allocated_hours": allocated_hours,
                 })
 
-            for s in serial_order:
+            # Extra deterministic passes let an earlier-priority waiter retry after a holder
+            # releases later in the same shift. Legacy runs retain their single pass exactly.
+            shift_order = (serial_order * (len(serial_order) + 1)
+                           if occupancy_pool_capacities else serial_order)
+            for s in shift_order:
                 st=state[s]
                 if st['finish'] is not None:
                     continue
@@ -491,6 +541,10 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                     st['finish']=st['clock']
         dd=dd+timedelta(days=1)
     unfinished = [serial for serial, item in state.items() if item['finish'] is None]
+    if unfinished and occupancy_pool_capacities:
+        raise ResourceAllocationDeadlock(
+            "Occupancy-constrained schedule made no complete progress within 1,200 shifts: "
+            + ", ".join(unfinished))
     if unfinished and allocation_mode == "PHYSICAL":
         raise InvalidPhysicalResourceProfile(
             "Physical resource profile made no complete schedule within 1,200 shifts: "

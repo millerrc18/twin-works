@@ -467,10 +467,45 @@ async def capacity_policy_coverage(db: AsyncSession, pool: ResourcePool,
                                    version: ResourceCapacityVersion,
                                    as_of: date) -> list[CoverageIssue]:
     """Validate the calendar and external-reserve contract for one physical pool."""
-    if pool.capacity_unit != "HOURS" or pool.code.startswith("LEGACY:"):
+    if pool.code.startswith("LEGACY:"):
         return []
     issues = []
     calendar_policy = json.loads(version.calendar_policy_json or "{}")
+    if pool.capacity_unit == "SLOTS":
+        unavailable = (calendar_policy.get("unavailable")
+                       if isinstance(calendar_policy, dict) else None)
+        covered_until = (calendar_policy.get("covered_until")
+                         if isinstance(calendar_policy, dict) else None)
+        covered_until_date = _policy_date(covered_until)
+        malformed = (
+            not isinstance(calendar_policy, dict)
+            or calendar_policy.get("mode") != "OCCUPANCY_CALENDAR"
+            or not isinstance(unavailable, list)
+            or covered_until_date is None
+        )
+        if not malformed:
+            try:
+                malformed = any(
+                    datetime.fromisoformat(row["end"])
+                    <= datetime.fromisoformat(row["start"])
+                    or not (row.get("reason") or "").strip()
+                    for row in unavailable
+                )
+            except (KeyError, TypeError, ValueError):
+                malformed = True
+        if malformed:
+            issues.append(CoverageIssue(
+                pool.code, "occupancy_calendar", "MISSING",
+                "Occupancy pools require valid maintenance intervals and a coverage end",
+            ))
+        elif covered_until_date < as_of:
+            issues.append(CoverageIssue(
+                pool.code, "occupancy_calendar", "MISSING",
+                "Occupancy calendar does not cover this date",
+            ))
+        return issues
+    if pool.capacity_unit != "HOURS":
+        return issues
     calendar_factors = (calendar_policy.get("factors")
                         if isinstance(calendar_policy, dict) else None)
     calendar_exceptions = (calendar_policy.get("exceptions")
