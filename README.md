@@ -76,7 +76,9 @@ reviewed and documented.
 See `TASKS.md`. Active product scope is Elevator, Aeronose, and Aegis. SCOPE-01 is complete: BCA is
 inactive and archived outside active ingress/navigation while its audit history remains. The
 generic physical-resource shadow foundation is retained under RES-01. TOOL-01
-then adds deterministic occupancy leases and Aeronose tooling as the first governed tooling pilot.
+adds deterministic occupancy leases and Aeronose tooling as the first governed tooling pilot. The
+five tool counts are registered as unbound drafts, and the allocator core now carries the existing
+cure-station constraints with exact parity. Operation binding and maintenance integration remain.
 No tooling candidate can change published dates until its shadow and approval gates pass.
 The Marion virtual factory is live for reviewed P2/P3 locations and remains visual-only. It must
 not change simulation inputs without a separate approved design. Follow-ons #82-1a, #82-4, and

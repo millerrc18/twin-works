@@ -10,8 +10,9 @@ Measured WC daily budgets (Aug 4-19 actuals, 11 working days) — real sustained
 throughput, which is the right bottleneck constraint given current staffing.
 """
 import datetime
-from heapq import heapify, heappop, heappush
 from datetime import datetime as DT, date, timedelta
+
+from app.engines.occupancy import OccupancyAllocator, OccupancyRequest
 
 # Per-WC daily labor-hour budget (measured sustained utilization). Floors applied
 # to low-volume gate WCs so inspections/pack never artificially block the line.
@@ -74,23 +75,22 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
     pool_shift_budgets = profile.get("pool_shift_budgets", {})
     pool_external_reserves = profile.get("pool_external_reserves", {})
     pool_calendar_policies = profile.get("pool_calendar_policies", {})
-    cure_station_slots = {}
-    for station, capacity in cure_station_capacities.items():
-        if int(capacity) > 0:
-            slots = [as_of] * int(capacity)
-            heapify(slots)
-            cure_station_slots[station] = slots
+    finite_cure_stations = {
+        station: int(capacity)
+        for station, capacity in cure_station_capacities.items()
+        if int(capacity) > 0
+    }
+    cure_station_allocator = OccupancyAllocator(
+        finite_cure_stations, as_of=as_of)
     def crew_for(program, wc, opno):
         return float(crew_by_program.get(program, {}).get(opno, legacy_crew(wc, opno)))
 
-    def reserve_cure_station(station, requested_start, dwell_hours):
-        if not station or station not in cure_station_slots:
-            return requested_start
-        slots = cure_station_slots[station]
-        available_at = heappop(slots)
-        start_at = max(requested_start, available_at)
-        heappush(slots, start_at + timedelta(hours=dwell_hours))
-        return start_at
+    def reserve_cure_station(unit_key, station, requested_start, dwell_hours):
+        if not station or station not in finite_cure_stations:
+            return requested_start, None
+        reservation = cure_station_allocator.reserve_fixed(
+            unit_key, [OccupancyRequest(station)], requested_start, dwell_hours)
+        return reservation.start, reservation
 
     def gate_op_for(label):
         for sub,gop in parallel_cure_gates.items():
@@ -346,7 +346,20 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                         st['idx']+=1
                     else:  # serial cure
                         _,clabel,_,dwell,_,station=item
-                        cs = reserve_cure_station(station, st['clock'], dwell)
+                        cs, occupancy = reserve_cure_station(
+                            s, station, st['clock'], dwell)
+                        if trace_constraints and occupancy and occupancy.wait_hours > 0:
+                            st["constraint_events"].append({
+                                "event_type": "OCCUPANCY_WAIT",
+                                "pool_code": station,
+                                "operation_no": None,
+                                "work_center_no": None,
+                                "wait_start": occupancy.requested_start,
+                                "wait_end": occupancy.start,
+                                "wait_hours": occupancy.wait_hours,
+                                "requested_slots": 1,
+                                "allocated_slots": 1,
+                            })
                         st['cure_dt'][clabel] = cs
                         st['cure_until'] = cs + timedelta(hours=dwell)
                         st['idx']+=1

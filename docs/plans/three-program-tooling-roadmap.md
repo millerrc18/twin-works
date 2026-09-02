@@ -98,6 +98,11 @@ changeover, shared-consumer, and operation-span decisions. See
 
 #### TOOL-01b - Generic occupancy allocator and parity
 
+**Progress 2026-09-02:** core fixed reservations and active lease primitives are implemented;
+existing cure stations use the allocator with exact golden parity. Scheduler binding/retry,
+maintenance intervals, replayable lease explanations, and full-run deadlock handling remain. See
+`docs/validation/tool-01b-occupancy-core.md`.
+
 - Implement deterministic, atomic acquisition of all tooling needed at an operation.
 - A unit acquires none unless every required slot is available.
 - Support fungible slots, named instances, multi-tool acquisition, minimum hold, lag,

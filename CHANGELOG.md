@@ -26,6 +26,10 @@ handoff.
 - Began TOOL-01a: registered five Aeronose tool families as visible DRAFT/INTERNAL_ONLY slot facts
   with counts `2/2/1/3/1`, zero operation bindings, and no forecast effect. Backup SHA-256:
   `B2AE370BCCB4936480F2275DF11C9351FAAA39024C59B03B5321C8D0AF581D56`.
+- Began TOOL-01b: added deterministic atomic occupancy reservations, named/active leases, minimum
+  holds, release lag, fatal request/release errors, explicit queue ordering, and lease history.
+  Migrated existing cure-station reservations through the allocator with exact golden parity.
+  Full suite: 87 passed.
 
 ## 2026-09-01 - Physical labor-pool shadow runtime (BCA-03b software gate)
 - Added pool-ID effort allocation so differently named work centers can consume one physical

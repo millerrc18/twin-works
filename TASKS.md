@@ -277,6 +277,12 @@ gates are complete. Full rationale and acceptance details are in
       same allocator before activating Aeronose tools.
     - Acceptance: deterministic results under input reordering, complete lease audit history,
       focused occupancy tests, exact cure-station behavior, and no static-golden drift.
+    - Progress 2026-09-02: delivered deterministic fixed reservations, atomic multi-pool
+      acquisition, named instances, minimum holds, release lag, explicit queue keys, fatal
+      impossible-request/invalid-release errors, lease history, and exact cure-station/golden
+      parity. Remaining work is scheduler binding/retry integration, future maintenance intervals,
+      replayable lease explanations, and full-run no-progress failure. See
+      `docs/validation/tool-01b-occupancy-core.md`.
 
   - [ ] **TOOL-01c - Approve Aeronose acquire/release bindings**
     - Review the frozen Aeronose routing and work instructions with manufacturing/process owners.
