@@ -1,5 +1,11 @@
 # Tooling Availability Control Plan
 
+## Status
+
+AVAIL-01 delivered 2026-09-03: schema, lifecycle fold, database concurrency/immutability guards,
+startup integrity, audit export, clean migration, and tests are complete. The live event table is
+empty. AVAIL-02 identity and authorization is next; no write route exists.
+
 ## Decision
 
 Add a governed, count-based tooling availability control to TwinWorks before the Aeronose tooling
@@ -62,7 +68,7 @@ Before confirmation, a preview shows the resulting availability timeline, named 
 conflicts, and shadow date movement. The preview carries a source-state hash; confirmation fails if
 the baseline, event stream, candidate, or WIP state changed after preview. The confirmation text
 explicitly states that published forecasts will not change. Early return requires one action and appends a return event effective at the chosen time.
-Corrections append a compensating event; prior history is never edited or deleted.
+Corrections append `VOID` or another compensating event; prior history is never edited or deleted.
 
 All users may view availability. Initially, only Ryan Miller and authenticated TwinWorks data
 administrators may author events. Actor and authority come from the authenticated server session,
@@ -78,9 +84,10 @@ the contract can later serve cure stations or spaces without creating a second e
 The event stream supports:
 
 - `OUTAGE_OPEN` - pool, unavailable quantity, effective start, expected end, reason, evidence;
-- `RETURN_EARLY` - closes an open outage at an earlier effective time;
+- `RETURN_TO_SERVICE` - records the actual early, on-time, or late return timestamp;
 - `EXTEND` - supplies a later expected end without changing the original event;
-- `CANCEL` - cancels a future outage before it becomes effective.
+- `CANCEL` - cancels a future outage before it becomes effective;
+- `VOID` - records a retrospective correction when the entered outage never occurred.
 
 Each event carries `event_key`, `outage_key`, monotonically increasing sequence, pool ID, optional
 future instance code, event type, unavailable quantity, effective timestamp, expected end, reason
@@ -171,12 +178,12 @@ availability at its effective timestamp, as requested.
 
 ## Implementation Sequence
 
-### AVAIL-01 - Schema and event fold
+### AVAIL-01 - Schema and event fold - Delivered 2026-09-03
 
 - Add the generic resource-availability-event table, migration, constraints, SQLite append-only/
   sequence triggers,
   and event service.
-- Add pure folding/validation for open, early-return, extension, cancellation, and overlap cases.
+- Add pure folding/validation for open, early-return, extension, future cancellation, retrospective void, and overlap cases.
 - Extend permanent audit export with availability events.
 
 ### AVAIL-02 - Identity and write authorization

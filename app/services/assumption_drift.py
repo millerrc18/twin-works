@@ -10,7 +10,12 @@ from sqlalchemy import select
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import AssumptionReview, ModelAssumption, ResourceCapacityVersion
+from app.models import (
+    AssumptionReview,
+    ModelAssumption,
+    ResourceAvailabilityEvent,
+    ResourceCapacityVersion,
+)
 from app.services.assumption_evidence import canonical_evidence
 from app.services.resource_registry import (
     InvalidAssumption,
@@ -312,6 +317,13 @@ async def export_assumption_audit(db: AsyncSession) -> dict:
     capacities = (await db.execute(
         select(ResourceCapacityVersion).order_by(ResourceCapacityVersion.id)
     )).scalars().all()
+    availability_events = (await db.execute(
+        select(ResourceAvailabilityEvent).order_by(
+            ResourceAvailabilityEvent.pool_id,
+            ResourceAvailabilityEvent.outage_key,
+            ResourceAvailabilityEvent.sequence,
+        )
+    )).scalars().all()
     return {
         "schema_version": 1,
         "retention_policy": AUDIT_RETENTION_POLICY,
@@ -327,5 +339,9 @@ async def export_assumption_audit(db: AsyncSession) -> dict:
         "capacity_versions": [
             {column.name: getattr(row, column.name) for column in row.__table__.columns}
             for row in capacities
+        ],
+        "availability_events": [
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in availability_events
         ],
     }

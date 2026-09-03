@@ -404,7 +404,10 @@ pilot criteria are in `docs/plans/three-program-tooling-roadmap.md`; evidence is
 count-based availability control defined in `docs/plans/tooling-availability-control.md`. It stores
 outage quantities, compiles aggregate pooled reductions, creates only shadow successors, and defers
 tool serials/PM scheduling. Open floor questions remain in
-`docs/validation/tool-01c-open-floor-questions.md`.
+`docs/validation/tool-01c-open-floor-questions.md`. AVAIL-01 is implemented through migration
+`0a1b2c3d4e5f` and `resource_availability.py`: outage lifecycles, pooled unavailable-quantity
+folding, SQLite concurrency/append-only guards, startup integrity, and audit export are complete.
+The live event table is empty; AVAIL-02 identity/authorization is the next gate.
 
 Forecast stamps point to schema-v3 simulation snapshots containing the complete schema-v2 profile,
 frozen WIP inputs, epoch routing definitions, canonical expected results, engine/serializer version,

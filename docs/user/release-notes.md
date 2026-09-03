@@ -12,6 +12,9 @@
   mid-operation release, jig-release, holding-fixture, and current-WIP gates.
 - Added the critic-reviewed plan for authenticated, append-only tooling availability controls and
   the consolidated floor-question handoff. The initial shell-mold outage remains shadow-only.
+- Added the AVAIL-01 event foundation: immutable outage lifecycle, pooled count folding, SQLite
+  concurrency guards, startup verification, and permanent audit export. No event or forecast effect
+  is active yet.
 
 ## 2026-09-02
 

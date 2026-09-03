@@ -381,6 +381,53 @@ class ResourceCapacityVersion(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
+class ResourceAvailabilityEvent(Base):
+    """Append-only lifecycle event for a finite resource outage."""
+    __tablename__ = "resource_availability_event"
+    __table_args__ = (
+        UniqueConstraint("outage_key", "sequence"),
+        CheckConstraint(
+            "event_type IN ('OUTAGE_OPEN','RETURN_TO_SERVICE','EXTEND','CANCEL','VOID')"),
+        CheckConstraint(
+            "reason_code IN ('TOOL_SHOP','MAINTENANCE','REPAIR','CALIBRATION','OTHER')"),
+        CheckConstraint("authority_role IN ('DATA_ADMIN','PROGRAM_OWNER')"),
+        CheckConstraint("unavailable_quantity > 0"),
+        CheckConstraint("length(trim(reason)) > 0"),
+        CheckConstraint("length(trim(actor)) > 0"),
+        CheckConstraint("json_valid(evidence_json)"),
+        CheckConstraint(
+            "(event_type = 'OUTAGE_OPEN' AND sequence = 1 "
+            "AND effective_at IS NOT NULL AND expected_end_at IS NOT NULL "
+            "AND expected_end_at > effective_at) OR "
+            "(event_type = 'EXTEND' AND sequence > 1 "
+            "AND effective_at IS NULL AND expected_end_at IS NOT NULL) OR "
+            "(event_type = 'RETURN_TO_SERVICE' AND sequence > 1 "
+            "AND effective_at IS NOT NULL AND expected_end_at IS NULL) OR "
+            "(event_type IN ('CANCEL','VOID') AND sequence > 1 "
+            "AND effective_at IS NULL AND expected_end_at IS NULL)"
+        ),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_key: Mapped[str] = mapped_column(String(180), unique=True, index=True)
+    outage_key: Mapped[str] = mapped_column(String(160), index=True)
+    sequence: Mapped[int] = mapped_column(Integer)
+    pool_id: Mapped[int] = mapped_column(ForeignKey("resource_pool.id"), index=True)
+    instance_code: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    event_type: Mapped[str] = mapped_column(String(20), index=True)
+    unavailable_quantity: Mapped[int] = mapped_column(Integer)
+    effective_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+    expected_end_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+    reason_code: Mapped[str] = mapped_column(String(24))
+    reason: Mapped[str] = mapped_column(Text)
+    actor: Mapped[str] = mapped_column(String(128))
+    authority_role: Mapped[str] = mapped_column(String(24))
+    evidence_json: Mapped[str] = mapped_column(Text)
+    occurred_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow)
+
+
 class OperationResourceBinding(Base):
     """Effort or occupancy requirement on a program routing operation/span."""
     __tablename__ = "operation_resource_binding"
@@ -605,6 +652,163 @@ BEGIN
 END
 """
 
+RESOURCE_AVAILABILITY_EVENT_VALIDATE_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_resource_availability_event_validate
+BEFORE INSERT ON resource_availability_event
+WHEN
+    NEW.sequence != COALESCE((
+        SELECT MAX(sequence) + 1 FROM resource_availability_event
+        WHERE outage_key = NEW.outage_key
+    ), 1)
+    OR NOT EXISTS (
+        SELECT 1 FROM resource_pool
+        WHERE id = NEW.pool_id AND resource_type = 'TOOL' AND capacity_unit = 'SLOTS'
+    )
+    OR length(trim(NEW.outage_key)) = 0
+    OR length(trim(NEW.event_key)) = 0
+    OR length(trim(NEW.reason)) = 0
+    OR length(trim(NEW.actor)) = 0
+    OR NOT EXISTS (SELECT 1 FROM json_each(NEW.evidence_json))
+    OR NEW.unavailable_quantity < 1
+    OR (NEW.instance_code IS NOT NULL AND (
+        NEW.unavailable_quantity != 1
+        OR NOT EXISTS (
+            SELECT 1 FROM resource_instance
+            WHERE pool_id = NEW.pool_id
+              AND instance_code = NEW.instance_code
+              AND active = 1
+        )
+    ))
+    OR (NEW.sequence = 1 AND (
+        NEW.event_type != 'OUTAGE_OPEN'
+        OR NEW.effective_at IS NULL OR NEW.expected_end_at IS NULL
+        OR NEW.expected_end_at <= NEW.effective_at
+        OR NEW.unavailable_quantity > COALESCE((
+            SELECT slot_count FROM resource_capacity_version
+            WHERE pool_id = NEW.pool_id
+              AND effective_from <= date(NEW.effective_at)
+            ORDER BY effective_from DESC, id DESC LIMIT 1
+        ), 0)
+    ))
+    OR (NEW.sequence > 1 AND NOT EXISTS (
+        SELECT 1 FROM resource_availability_event first
+        WHERE first.outage_key = NEW.outage_key AND first.sequence = 1
+          AND first.pool_id = NEW.pool_id
+          AND first.instance_code IS NEW.instance_code
+          AND first.unavailable_quantity = NEW.unavailable_quantity
+    ))
+    OR (NEW.sequence > 1 AND (
+        SELECT event_type FROM resource_availability_event
+        WHERE outage_key = NEW.outage_key ORDER BY sequence DESC LIMIT 1
+    ) NOT IN ('OUTAGE_OPEN','EXTEND'))
+    OR (NEW.event_type = 'EXTEND' AND (
+        NEW.expected_end_at IS NULL OR NEW.effective_at IS NOT NULL
+        OR NEW.expected_end_at <= (
+            SELECT expected_end_at FROM resource_availability_event
+            WHERE outage_key = NEW.outage_key AND expected_end_at IS NOT NULL
+            ORDER BY sequence DESC LIMIT 1
+        )
+    ))
+    OR (NEW.event_type = 'RETURN_TO_SERVICE' AND (
+        NEW.effective_at IS NULL OR NEW.expected_end_at IS NOT NULL
+        OR NEW.effective_at <= (
+            SELECT effective_at FROM resource_availability_event
+            WHERE outage_key = NEW.outage_key AND sequence = 1
+        )
+    ))
+    OR (NEW.event_type = 'CANCEL' AND (
+        NEW.effective_at IS NOT NULL OR NEW.expected_end_at IS NOT NULL
+        OR NEW.occurred_at > (
+            SELECT effective_at FROM resource_availability_event
+            WHERE outage_key = NEW.outage_key AND sequence = 1
+        )
+    ))
+    OR (NEW.event_type = 'VOID' AND (
+        NEW.effective_at IS NOT NULL OR NEW.expected_end_at IS NOT NULL
+    ))
+BEGIN
+    SELECT RAISE(ABORT, 'invalid resource availability transition');
+END
+"""
+
+RESOURCE_AVAILABILITY_CAPACITY_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS trg_resource_availability_capacity_validate
+BEFORE INSERT ON resource_availability_event
+WHEN NEW.event_type IN ('OUTAGE_OPEN','EXTEND','RETURN_TO_SERVICE')
+BEGIN
+    SELECT CASE WHEN EXISTS (
+        WITH latest AS (
+            SELECT event.outage_key, event.event_type, event.effective_at
+            FROM resource_availability_event event
+            WHERE event.sequence = (
+                SELECT MAX(candidate.sequence)
+                FROM resource_availability_event candidate
+                WHERE candidate.outage_key = event.outage_key
+            )
+        ), intervals AS (
+            SELECT first.outage_key,
+                   first.unavailable_quantity,
+                   first.effective_at AS start_at,
+                   CASE
+                       WHEN latest.event_type = 'RETURN_TO_SERVICE' THEN latest.effective_at
+                       ELSE (
+                           SELECT prior.expected_end_at
+                           FROM resource_availability_event prior
+                           WHERE prior.outage_key = first.outage_key
+                             AND prior.expected_end_at IS NOT NULL
+                           ORDER BY prior.sequence DESC LIMIT 1
+                       )
+                   END AS end_at
+            FROM resource_availability_event first
+            JOIN latest ON latest.outage_key = first.outage_key
+            WHERE first.sequence = 1
+              AND first.pool_id = NEW.pool_id
+              AND first.outage_key != NEW.outage_key
+              AND latest.event_type NOT IN ('CANCEL','VOID')
+        ), proposed AS (
+            SELECT
+                CASE WHEN NEW.event_type = 'OUTAGE_OPEN' THEN NEW.effective_at
+                     ELSE (
+                         SELECT prior.expected_end_at
+                         FROM resource_availability_event prior
+                         WHERE prior.outage_key = NEW.outage_key
+                           AND prior.expected_end_at IS NOT NULL
+                         ORDER BY prior.sequence DESC LIMIT 1
+                     )
+                END AS start_at,
+                CASE WHEN NEW.event_type = 'RETURN_TO_SERVICE' THEN NEW.effective_at
+                     ELSE NEW.expected_end_at
+                END AS end_at,
+                NEW.unavailable_quantity AS quantity
+        ), points AS (
+            SELECT start_at AS point_at FROM proposed
+            UNION
+            SELECT intervals.start_at
+            FROM intervals, proposed
+            WHERE intervals.start_at >= proposed.start_at
+              AND intervals.start_at < proposed.end_at
+        )
+        SELECT 1
+        FROM points, proposed
+        WHERE points.point_at < proposed.end_at
+          AND proposed.quantity + COALESCE((
+              SELECT SUM(intervals.unavailable_quantity)
+              FROM intervals
+              WHERE intervals.start_at <= points.point_at
+                AND intervals.end_at > points.point_at
+          ), 0) > COALESCE((
+              SELECT version.slot_count
+              FROM resource_capacity_version version
+              WHERE version.pool_id = NEW.pool_id
+                AND version.effective_from <= date(points.point_at)
+                AND (version.effective_to IS NULL
+                     OR version.effective_to >= date(points.point_at))
+              ORDER BY version.effective_from DESC, version.id DESC LIMIT 1
+          ), 0)
+    ) THEN RAISE(ABORT, 'resource availability exceeds effective baseline') END;
+END
+"""
+
 
 def _guard_approved_update(target, status_field: str) -> None:
     state = sa_inspect(target)
@@ -795,6 +999,7 @@ _EPOCH_RECORDS = (
     ExternalLoadSnapshot,
     ExternalLoadRow,
     ObservationQuarantineEvent,
+    ResourceAvailabilityEvent,
     SimulationSnapshot,
     SimulationSnapshotEpoch,
     ForecastConstraintEvent,
@@ -845,6 +1050,7 @@ for _epoch_table in (
     ExternalLoadSnapshot.__table__,
     ExternalLoadRow.__table__,
     ObservationQuarantineEvent.__table__,
+    ResourceAvailabilityEvent.__table__,
     SimulationSnapshot.__table__,
     SimulationSnapshotEpoch.__table__,
     ForecastConstraintEvent.__table__,
@@ -864,6 +1070,9 @@ _EPOCH_INSERT_IDENTITIES = {
     ObservationQuarantineEvent.__table__: (
         "id = NEW.id OR event_key = NEW.event_key OR "
         "(quarantine_key = NEW.quarantine_key AND sequence = NEW.sequence)"),
+    ResourceAvailabilityEvent.__table__: (
+        "id = NEW.id OR event_key = NEW.event_key OR "
+        "(outage_key = NEW.outage_key AND sequence = NEW.sequence)"),
     SimulationSnapshot.__table__: "id = NEW.id OR content_hash = NEW.content_hash",
     SimulationSnapshotEpoch.__table__: (
         "simulation_snapshot_id = NEW.simulation_snapshot_id AND program = NEW.program"),
@@ -878,6 +1087,14 @@ for _epoch_table, _identity_predicate in _EPOCH_INSERT_IDENTITIES.items():
 event.listen(
     ObservationQuarantineEvent.__table__, "after_create",
     DDL(QUARANTINE_EVENT_VALIDATE_TRIGGER),
+)
+event.listen(
+    ResourceAvailabilityEvent.__table__, "after_create",
+    DDL(RESOURCE_AVAILABILITY_EVENT_VALIDATE_TRIGGER),
+)
+event.listen(
+    ResourceAvailabilityEvent.__table__, "after_create",
+    DDL(RESOURCE_AVAILABILITY_CAPACITY_TRIGGER),
 )
 
 

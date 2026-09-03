@@ -84,8 +84,10 @@ owner/approver and all pools Aeronose-dedicated. Controlled WIs and live IFS tim
 molds, subring jigs, core-kit molds, and trim require distinct route or sub-operation boundaries.
 The allocator core retains the existing cure-station rules with exact parity, but op 775 has now been
 validated as dolly-based with no fixed station; that correction belongs in a successor candidate.
-The critic-reviewed tooling availability plan adds count-based outage/early-return controls; one
-shell mold is provisionally unavailable through 2026-09-25. No tooling candidate can change
+AVAIL-01 now provides the append-only, count-based outage lifecycle and database guards; the
+critic-reviewed plan continues with authenticated authoring, compiler integration, and UI. One shell
+mold is provisionally unavailable through 2026-09-25, but the live event table remains empty until
+identity controls pass. No tooling candidate can change
 published dates until its shadow and approval gates pass.
 The searchable in-app `/handbook` and nine-page core operating set are live. Contextual help links
 and formal documentation governance remain DOC-01c/DOC-01d.

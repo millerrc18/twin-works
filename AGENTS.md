@@ -16,7 +16,7 @@ exclude it without deleting history. RES-01 retains the generic physical-resourc
 The next modeling path is TOOL-01:
 generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
 PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
-**103 passing tests**; the run still emits existing Python 3.14
+**110 passing tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
 
 **Documentation roadmap:** DOC-01 adds a user-facing `/handbook` backed by version-controlled,
@@ -41,6 +41,13 @@ One shell mold is provisionally unavailable through 2026-09-25, restoring 3 / 3 
 immediately on early return. Availability authoring stays disabled until application identity,
 server-derived roles, secure cookie sessions, and CSRF are implemented. Events are append-only and
 shadow-only; persist unavailable quantity and never invent a physical tool serial.
+
+**AVAIL-01 complete:** migration `0a1b2c3d4e5f`, `ResourceAvailabilityEvent`, and
+`app/services/resource_availability.py` provide append-only outage lifecycles, UTC validation,
+pooled unavailable-quantity folding, SQLite aggregate concurrency protection, startup trigger
+verification, and audit export. The live event table is empty. AVAIL-02 authenticated identity and
+write authorization is next; do not add availability POST routes before it passes. See
+`docs/validation/tool-01c1-availability-foundation.md`.
 
 **TOOL-01b complete:** `app/engines/occupancy.py` provides atomic reservations/leases, future
 maintenance windows, as-of hold reconstruction, deterministic same-shift retry, and fatal

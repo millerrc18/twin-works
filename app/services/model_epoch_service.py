@@ -50,7 +50,8 @@ ALLOWED_TRANSITIONS = {
 IMMUTABLE_AUDIT_TABLES = {
     "model_epoch", "model_epoch_transition", "program_epoch_activation",
     "external_load_snapshot", "external_load_row", "simulation_snapshot",
-    "observation_quarantine_event", "simulation_snapshot_epoch", "forecast_constraint_event",
+    "observation_quarantine_event", "resource_availability_event",
+    "simulation_snapshot_epoch", "forecast_constraint_event",
 }
 
 
@@ -59,6 +60,8 @@ def expected_epoch_trigger_names() -> set[str]:
         "trg_model_epoch_transition_validate",
         "trg_program_epoch_activation_validate",
         "trg_observation_quarantine_transition_validate",
+        "trg_resource_availability_event_validate",
+        "trg_resource_availability_capacity_validate",
         "trg_model_assumption_approved_immutable",
         "trg_model_assumption_evidence_immutable",
         "trg_resource_capacity_approved_immutable",

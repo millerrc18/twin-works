@@ -323,6 +323,19 @@ gates are complete. Full rationale and acceptance details are in
     - Evidence: `docs/validation/tool-01c-aeronose-wi-review.md`.
 
   - [ ] **TOOL-01c1 - Add governed tooling availability controls**
+    - [x] **AVAIL-01 - Append-only event foundation:** added migration `0a1b2c3d4e5f`, generic
+      availability events, lifecycle/count folding, SQLite concurrency and immutability guards,
+      startup trigger verification, and permanent audit export. The live table is empty and no
+      forecast behavior changed. See `docs/validation/tool-01c1-availability-foundation.md`.
+    - [ ] **AVAIL-02 - Identity and write authorization:** validate application OIDC identity, bind
+      server-derived roles, secure cookie sessions, and CSRF before exposing write routes.
+    - [ ] **AVAIL-03 - Compiler and candidate succession:** compile pooled count reductions, detect
+      as-of WIP conflicts, freeze events into snapshots/replay, and create OBSERVE successors only
+      for consuming candidates.
+    - [ ] **AVAIL-04 - Operational UI:** add the tooling timeline, outage/early-return/extension
+      flows, stale-preview rejection, shadow impact, and permanent audit history.
+    - [ ] **AVAIL-05 - Aeronose seed and sensitivity:** append the provisional shell-mold outage,
+      reconstruct current shell/core holders, and run 0/2/4-hour turnaround candidates.
     - Implement the append-only, count-based availability event model and pooled capacity-reduction
       windows in `docs/plans/tooling-availability-control.md`.
     - Bind authoring to validated application identity. Ryan Miller and configured data
