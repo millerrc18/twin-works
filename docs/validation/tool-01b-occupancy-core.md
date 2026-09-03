@@ -46,3 +46,11 @@ blocked until TOOL-01c approves those spans.
 - Focused Ruff: passed.
 - Static golden forecast: exact.
 - Live Aeronose draft tooling pools remain unbound and have no forecast effect.
+
+## Subsequent Calibration
+
+The 2026-09-03 controlled-WI and IFS review confirmed that Radome op 775 has no fixed electrical-
+seal station. The one-slot reservation documented above remains valid only as parity history. Task
+#32c removes it in a distinct successor candidate while preserving the 40-hour part cure; the
+published and frozen parity epochs are not mutated. See
+`docs/validation/tool-01c-aeronose-wi-review.md`.

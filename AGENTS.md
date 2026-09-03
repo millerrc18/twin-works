@@ -8,7 +8,7 @@ have actually bitten us. For the full human-facing reference see **MASTER.md**.
 > plan files, legacy workbook artifacts, and the `RTG_` environment prefix.
 ---
 
-## HANDOFF (2026-09-02) - read first if you are picking this up
+## HANDOFF (2026-09-03) - read first if you are picking this up
 
 **Current status:** Active product scope is Elevator, Aeronose, and Aegis. SCOPE-01 is complete:
 `BCAFIN` is inactive, epoch 10 is `ARCHIVED`, and registry/sync/WIP/simulation/forecast surfaces
@@ -16,17 +16,31 @@ exclude it without deleting history. RES-01 retains the generic physical-resourc
 The next modeling path is TOOL-01:
 generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
 PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
-**100 passing tests**; the run still emits existing Python 3.14
+**103 passing tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
 
 **Documentation roadmap:** DOC-01 adds a user-facing `/handbook` backed by version-controlled,
 sanitized Markdown. DOC-01a/DOC-01b are complete with nine initial pages; contextual links wait for
 stable tooling views. FastAPI `/docs` remains the API reference.
 
-**TOOL-01a live inventory:** pools 25-29 record Aeronose assembly jigs (2), holding fixtures (2),
-trim fixture (1), shell lamination molds (3), and core-forming mold set (1). All are DRAFT,
-INTERNAL_ONLY, unbound, and mathematically inactive. Do not approve or bind them until the questions
-in `docs/validation/tool-01a-aeronose-inventory.md` are answered.
+**TOOL-01a/01c evidence:** pools 25-29 record Aeronose assembly jigs (2), holding fixtures (2), trim
+fixture (1), shell lamination molds (3), and core-forming mold set (1). Ryan Miller is the current
+owner/approver; all pools are Aeronose-dedicated; the multi-slot jig/holding/mold families are
+fungible. They remain DRAFT, INTERNAL_ONLY, unbound, and mathematically inactive. Controlled LAM F,
+COREKIT H, ASSY K, and PAINT B WIs plus live IFS timing were reviewed 2026-09-03. Shell mold has a
+candidate op-50-start to op-570-start span; the core set belongs to separate `3700COREKIT`; subring
+jig work belongs to separate `3700ED0001-101SUBRING`; trim release occurs inside op 580; top-level
+AF release remains absent from the WI; holding fixtures are confirmed separate from paint dollies
+but their identity/use spans remain unresolved; Dup-1 pin setup impact is unknown. See
+`docs/validation/tool-01c-aeronose-wi-review.md`.
+
+**TOOL-01c1 availability plan:** the approved design is
+`docs/plans/tooling-availability-control.md`; unresolved floor questions are in
+`docs/validation/tool-01c-open-floor-questions.md`. Phase 1 is count-based and defers serials/PM.
+One shell mold is provisionally unavailable through 2026-09-25, restoring 3 / 3 on 2026-09-26 or
+immediately on early return. Availability authoring stays disabled until application identity,
+server-derived roles, secure cookie sessions, and CSRF are implemented. Events are append-only and
+shadow-only; persist unavailable quantity and never invent a physical tool serial.
 
 **TOOL-01b complete:** `app/engines/occupancy.py` provides atomic reservations/leases, future
 maintenance windows, as-of hold reconstruction, deterministic same-shift retry, and fatal
@@ -53,8 +67,13 @@ database and its backups.
   valid published epoch.
 
 **Remaining work:**
-1. **#32b station calibration:** confirm the one-versus-two Plant 3 Radome electrical-seal station count. The allocator is live with a documented conservative value of one; see `TASKS.md`.
-2. **Three-program tooling pivot:** execute SCOPE-01, then RES-01 and TOOL-01 in the order defined
+1. **#32c op-775 successor correction:** floor ownership, ASSY Rev K, and live IFS clocking confirm
+   there is no fixed electrical-seal station. Keep the one-slot rule only in the frozen parity
+   epoch; remove it in a distinct Aeronose successor candidate while retaining the 40-hour cure.
+   See `TASKS.md` and `docs/validation/tool-01c-aeronose-wi-review.md`.
+2. **Three-program tooling pivot:** SCOPE-01, RES-01, TOOL-01a, and TOOL-01b are complete. Continue
+   TOOL-01c by completing the floor check first, then add component-route support and the reviewed
+   trim split/substep in the order defined
    by `TASKS.md` and `docs/plans/three-program-tooling-roadmap.md`. Do not start BCA capacity,
    external-demand, machine/dwell, or pilot work. Historical BCA facts are retained below only for
    audit and a possible future restart. BCA-01/02 are complete; live revision-3 discovery

@@ -46,7 +46,14 @@ def test_aeronose_tooling_seed_is_draft_visible_idempotent_and_unbound(tmp_path)
             assert all(row["assumption_status"] == "DRAFT" for row in inventory)
             assert all(row["commitment_grade"] == "INTERNAL_ONLY" for row in inventory)
             assert all(row["owner"] == "Ryan Miller, Program Manager" for row in inventory)
-            assert all(row["approver"] is None for row in inventory)
+            assert all(row["approver"] == "Ryan Miller, Program Manager" for row in inventory)
+            assert all(row["review_decisions"]["dedicated_program"] == "RAD"
+                       for row in inventory)
+            assert all(row["operating_rules"]["post_release_lag_hours"] == 0
+                       for row in inventory)
+            holding = next(row for row in inventory
+                           if row["code"] == "AERONOSE_HOLDING_FIXTURE")
+            assert "separate from paint dollies" in holding["review_decisions"]["identity"]
             assert all(row["binding_count"] == 0 for row in inventory)
 
             rows = await list_resource_rows(db, date(2026, 9, 2))
@@ -65,6 +72,14 @@ def test_aeronose_tooling_seed_is_draft_visible_idempotent_and_unbound(tmp_path)
                 "capacity": await db.scalar(select(func.count(ResourceCapacityVersion.id))),
                 "binding": await db.scalar(select(func.count(OperationResourceBinding.id))),
             }
+            legacy_shell = await db.scalar(select(ModelAssumption).where(
+                ModelAssumption.subject_key == "AERONOSE_SHELL_LAM_MOLD"))
+            legacy_shell.approver = None
+            legacy_shell.evidence_end = date(2026, 9, 2)
+            legacy_shell.evidence_json = "{}"
+            legacy_shell.calculation_method = "Legacy draft count"
+            await db.commit()
+
             second = await seed_aeronose_tooling_drafts(db)
             await db.commit()
             counts_after = {
@@ -75,12 +90,18 @@ def test_aeronose_tooling_seed_is_draft_visible_idempotent_and_unbound(tmp_path)
             }
             assert second["created"] == []
             assert second["retained"] == sorted(expected)
+            assert second["reviewed"] == ["AERONOSE_SHELL_LAM_MOLD"]
             assert counts_after == counts_before
 
             shell = await db.scalar(select(ModelAssumption).where(
                 ModelAssumption.subject_key == "AERONOSE_SHELL_LAM_MOLD"))
             assert json.loads(shell.value_json) == 3
-            assert "operation spans remain pending" in shell.calculation_method
+            assert "Candidate hold is op 50 start" in shell.calculation_method
+            evidence = json.loads(shell.evidence_json)
+            assert evidence["review_decisions"]["fungibility"] == "FUNGIBLE"
+            outage = evidence["operating_rules"]["provisional_availability"]
+            assert outage["unavailable_quantity"] == 1
+            assert outage["expected_end_exclusive"] == "2026-09-26T00:00:00-04:00"
 
         await engine.dispose()
 

@@ -388,13 +388,23 @@ enforces `Program.active` at registry loading, sync/data ingress, the WIP state 
 simulation, and forecast logging. BCA is inactive and archived; its immutable evidence remains.
 
 TOOL-01 makes Aeronose the first tooling pilot. Known counts are two assembly jigs, two holding
-fixtures, one trim fixture, three shell lamination molds, and one core-forming mold set. Counts are
-facts only. Schedule effects require approved identity/fungibility, calendars, acquire/release
-events, hold/changeover rules, and ownership. The generic allocator uses atomic acquisition and the
-deterministic queue `(ready_time, DPAS-behind priority, commit, program, serial, pool)`. Deadlock
-aborts the candidate run and opens a blocking review. Published and candidate UI/read-model contexts
-must remain separate. Full sequencing and pilot criteria are in
-`docs/plans/three-program-tooling-roadmap.md`.
+fixtures, one trim fixture, three shell lamination molds, and one core-forming mold set. Ryan Miller
+is the current owner/approver; all are Aeronose-dedicated, and the multi-slot families are fungible.
+Counts and those owner decisions remain draft facts only. The 2026-09-03 WI/IFS review found that
+subring and core tooling belong to separate component routes, trim releases inside op 580, the shell
+mold is held from op 50 through demold at op 570 start, and the top-assembly jig release remains
+unresolved. It also confirmed op 775 is a dolly-based 40-hour part cure with no fixed station; the
+legacy one-slot rule awaits removal in a successor candidate. Schedule effects still require
+approved route links, calendars, release events, WIP assignments, and unavailable intervals. The
+generic allocator uses atomic acquisition and the deterministic queue `(ready_time, DPAS-behind
+priority, commit, program, serial, pool)`. Deadlock aborts the candidate run and opens a blocking
+review. Published and candidate UI/read-model contexts must remain separate. Full sequencing and
+pilot criteria are in `docs/plans/three-program-tooling-roadmap.md`; evidence is in
+`docs/validation/tool-01c-aeronose-wi-review.md`. TOOL-01c1 adds the authenticated, append-only,
+count-based availability control defined in `docs/plans/tooling-availability-control.md`. It stores
+outage quantities, compiles aggregate pooled reductions, creates only shadow successors, and defers
+tool serials/PM scheduling. Open floor questions remain in
+`docs/validation/tool-01c-open-floor-questions.md`.
 
 Forecast stamps point to schema-v3 simulation snapshots containing the complete schema-v2 profile,
 frozen WIP inputs, epoch routing definitions, canonical expected results, engine/serializer version,
@@ -541,8 +551,9 @@ RTG_DATA_SOURCE=snapshot .venv/Scripts/python.exe -m pytest -q      # run all
   DB-vs-routers configuration parity.
 - `tests/test_pooling.py` - 4 tests for transitive shared-WC and plant-guard pooling.
 - `tests/test_cure_station_contention.py` - serial cure-slot allocation, concurrent-slot behavior,
-  validated seed rules, and wrapper profile propagation. The Radome electrical-seal station remains
-  conservatively configured at one until physical-process calibration confirms one or two stations.
+  validated seed rules, and wrapper profile propagation. The frozen parity model retains one Radome
+  electrical-seal slot; 2026-09-03 process evidence supersedes that as a physical assumption, and
+  #32c removes it only in a governed successor candidate while retaining the 40-hour cure.
 - `tests/test_program_onboarding.py` - isolated `TEST4` program creation, pooling, forecasting,
   active-registry forecast stamping, and no ELEV/RAD/AEGIS forecast drift from adding TEST4.
   It also verifies that dynamic shared capacity honors DB crew and DPAS metadata.

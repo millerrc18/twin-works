@@ -19,11 +19,18 @@ remains in `AGENTS.md`.
   - Acceptance: focused cure-station tests and the full static golden suite pass after the intentional
     40-unit baseline recapture.
 
-- [ ] **#32b - Calibrate Radome electrical-seal station count**
-  - Confirm whether the Plant 3 op775 electrical-seal process has one or two usable stations, then
-    update `P3_ELECTRICAL_SEAL` capacity if floor validation supersedes the current conservative value of one.
-  - Acceptance: capacity count is traceable to floor ownership or process authority and no default
-    station assumption remains undocumented.
+- [x] **#32b - Calibrate Radome electrical-seal station count**
+  - Floor ownership confirms op 775 is performed on a movable work dolly and has no fixed physical
+    station. ASSY Rev K identifies only cure-puck shop aid `SA0145`; read-only IFS clocking shows up
+    to four concurrent op-775 labor spans across 78 recent completed spans.
+  - Delivered 2026-09-03: the one-slot rule is rejected as a physical fact and retained only in the
+    frozen parity model. Evidence: `docs/validation/tool-01c-aeronose-wi-review.md`.
+
+- [ ] **#32c - Remove the op-775 station rule in a successor candidate**
+  - Create a distinct Aeronose candidate that retains the 40-hour part cure but removes the
+    `P3_ELECTRICAL_SEAL` occupancy reservation. Do not mutate the parity epoch or published model.
+  - Acceptance: baseline/candidate date changes are causal and replayable; the cure remains enforced;
+    no fixed-station capacity appears in candidate evidence; promotion still requires the integrated pilot.
 
 ## Platform-Wide Resource Adoption
 
@@ -180,23 +187,28 @@ from the execution sequence and retained only in the deferred evidence section.
 1. SCOPE-01 park BCA and prove three-program no-drift. **Complete 2026-09-02.**
 2. RES-01 reframe and commit the generic physical-resource shadow foundation. **Complete
    2026-09-02.**
-3. TOOL-01a create the governed Aeronose tooling inventory.
+3. TOOL-01a create and review the governed Aeronose tooling inventory. **Counts and owner review
+   recorded 2026-09-03; binding prerequisites remain open.**
 4. TOOL-01b build the generic atomic occupancy allocator and migrate cure stations with exact
    legacy parity. **Complete 2026-09-02.**
-5. #32b confirm the Plant 3 electrical-seal station count in a distinct successor candidate epoch;
-   do not alter the parity epoch.
-6. TOOL-01c approve and freeze Aeronose acquire/release bindings.
-7. TOOL-01d run the Aeronose tooling shadow and expose causal explanations.
-8. DOC-01a/DOC-01b add the in-app handbook shell and core user documentation. **Complete
+5. #32b confirm the Plant 3 electrical-seal physical constraint. **Complete 2026-09-03: no fixed
+   station.**
+6. TOOL-01c complete the floor check, then implement component routes/substeps and approve bindings.
+7. TOOL-01c1 implement governed, authenticated tooling availability controls in parallel with the
+   floor follow-up; it must finish before the tooling shadow.
+8. #32c remove the op-775 station rule in the governed Aeronose successor candidate; do not alter
+   the parity epoch.
+9. TOOL-01d run the Aeronose tooling shadow and expose causal explanations.
+10. DOC-01a/DOC-01b add the in-app handbook shell and core user documentation. **Complete
    2026-09-02.**
-9. UI-01d add the three-program resource/tooling pressure board from governed data.
-10. TOOL-02 survey and model Elevator tooling in its own candidate.
-11. TOOL-03 document and periodically review Aegis present-rate assumptions.
-12. DOC-01c add contextual documentation links after tooling views stabilize.
-13. PLAT-01d certify accepted physical/tooling candidate inputs without promoting them.
-14. UI-01e and DOC-01d complete integrated UX/documentation acceptance.
-15. TOOL-01e complete the 2-4 week Aeronose pilot.
-16. PLAT-01e promote only explicitly accepted replacement epochs; retain rollback.
+11. UI-01d add the three-program resource/tooling pressure board from governed data.
+12. TOOL-02 survey and model Elevator tooling in its own candidate.
+13. TOOL-03 document and periodically review Aegis present-rate assumptions.
+14. DOC-01c add contextual documentation links after tooling views stabilize.
+15. PLAT-01d certify accepted physical/tooling candidate inputs without promoting them.
+16. UI-01e and DOC-01d complete integrated UX/documentation acceptance.
+17. TOOL-01e complete the 2-4 week Aeronose pilot.
+18. PLAT-01e promote only explicitly accepted replacement epochs; retain rollback.
 
 **Phase gates:**
 - Gate 1 - foundation: authorized lifecycle transitions, immutable epoch snapshots, expiry/drift
@@ -263,9 +275,10 @@ gates are complete. Full rationale and acceptance details are in
     - Acceptance: counts are persisted as owner-supplied facts but cannot affect dates without
       approved operation bindings.
     - Progress 2026-09-02: five live draft pools now carry counts `2/2/1/3/1`, owner attribution,
-      internal-only status, and a 2026-10-02 review date. They have zero bindings and no forecast
-      effect. Floor/process approver, fungibility, named instances, maintenance, changeover, shared
-      consumers, and operation spans remain open. See
+      internal-only status, and a 2026-10-02 review date. The 2026-09-03 review records Ryan Miller
+      as current approver, Aeronose dedication, and family fungibility. They have zero bindings and
+      no forecast effect. Holding-fixture identity, physical release events, component-stream links,
+      current WIP assignments, and unavailable intervals remain open. See
       `docs/validation/tool-01a-aeronose-inventory.md`.
 
   - [x] **TOOL-01b - Implement atomic occupancy leases and prove cure-station parity**
@@ -289,10 +302,40 @@ gates are complete. Full rationale and acceptance details are in
       `docs/validation/tool-01b-occupancy-core.md`.
 
   - [ ] **TOOL-01c - Approve Aeronose acquire/release bindings**
-    - Review the frozen Aeronose routing and work instructions with manufacturing/process owners.
-    - Approve acquire/release spans for every tool; validate overlapping and multi-tool needs.
-    - Acceptance: every event exists in the frozen route, no span is guessed, and approved bindings
-      are frozen in an immutable Aeronose `OBSERVE` candidate.
+    - [x] Review controlled LAM F, COREKIT H, ASSY K, and PAINT B work instructions; reconcile their
+      routes with live IFS revision 16 top assembly, revision 5 subring, and revision 3 core kit.
+    - [x] Record owner/approver, Aeronose dedication, fungibility, op-775 no-station decision, and
+      read-only IFS clock-span evidence without creating bindings.
+    - [ ] Complete the floor check first: top-assembly AF release; the separate holding fixtures'
+      identity, purpose, and spans; Dup-1 pin setup; current WIP assignments; and real maintenance
+      unavailability.
+    - [ ] Confirm whether normal cleaning/setup is contained in the acquiring operation before
+      approving the owner-reported zero post-release lag; IFS idle gaps are not causal proof.
+    - [ ] Add candidate route events for top-level ops 50/90 so shell-mold acquisition is not late.
+    - [ ] Add component-stream linkage for `3700ED0001-101SUBRING` and `3700COREKIT` before their
+      assembly/core tooling can constrain the top-level forecast.
+    - [ ] Split op 580 at the reviewed trim-fixture release point, or add an equally explicit frozen
+      substep event; op-complete release would hold the fixture during dolly chamfer and create false waits.
+    - [ ] Freeze only the resulting approved bindings in an immutable Aeronose `OBSERVE` candidate.
+    - Acceptance: every event exists in a frozen top or linked component route, no span is guessed,
+      clocking is not treated as physical occupancy when it contradicts owner counts, and all
+      overlapping/multi-tool requirements acquire atomically.
+    - Evidence: `docs/validation/tool-01c-aeronose-wi-review.md`.
+
+  - [ ] **TOOL-01c1 - Add governed tooling availability controls**
+    - Implement the append-only, count-based availability event model and pooled capacity-reduction
+      windows in `docs/plans/tooling-availability-control.md`.
+    - Bind authoring to validated application identity. Ryan Miller and configured data
+      administrators may edit; all other users are read-only. No write route is enabled before the
+      identity, role, session-cookie, and CSRF gates pass.
+    - Add Resource Registry/detail controls for outage, early return, and extension with stale-
+      preview rejection, explicit candidate context, capacity-violation guidance, and permanent audit.
+    - Record one provisional shell-mold outage from 2026-09-03 through 2026-09-25, restoring 3 / 3
+      on 2026-09-26 or immediately on an early return. Persist unavailable quantity, not absolute
+      capacity; individual tool serials and PM scheduling are deferred.
+    - Acceptance: event history is immutable; pooled reductions never invent a tool serial; affected
+      OBSERVE candidates receive replayable successors; published forecasts remain exact; the UI
+      passes responsive, keyboard, light/dark, axe, authorization, and CSRF checks.
 
   - [ ] **TOOL-01d - Run and explain the Aeronose tooling shadow**
     - Compare identical WIP under the published legacy epoch and tooling candidate.

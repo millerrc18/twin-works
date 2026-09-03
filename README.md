@@ -62,6 +62,8 @@ reviewed and documented.
   Phase 1 delivery record.
 - `docs/plans/three-program-tooling-roadmap.md`: current product boundary and Aeronose-first
   tooling execution plan.
+- `docs/plans/tooling-availability-control.md`: critic-reviewed design for authenticated, append-only
+  tooling outage and early-return controls.
 - `docs/superpowers/specs/2026-08-27-resource-assumption-registry-design.md`: shared resources,
   external demand, tooling, and assumption-governance architecture.
 - `docs/superpowers/plans/2026-08-27-resource-assumption-registry-plan.md`: phased TDD execution plan.
@@ -77,10 +79,14 @@ See `TASKS.md`. Active product scope is Elevator, Aeronose, and Aegis. SCOPE-01 
 inactive and archived outside active ingress/navigation while its audit history remains. The
 generic physical-resource shadow foundation is retained under RES-01. TOOL-01
 adds deterministic occupancy leases and Aeronose tooling as the first governed tooling pilot. The
-five tool counts are registered as unbound drafts, and the allocator core now carries the existing
-cure-station constraints with exact parity. Generic binding compilation, maintenance windows,
-as-of holdings, deterministic retry, and replay are complete; Aeronose operation bindings remain.
-No tooling candidate can change published dates until its shadow and approval gates pass.
+five tool counts are registered as unbound drafts, with Ryan Miller recorded as current
+owner/approver and all pools Aeronose-dedicated. Controlled WIs and live IFS timing show that shell
+molds, subring jigs, core-kit molds, and trim require distinct route or sub-operation boundaries.
+The allocator core retains the existing cure-station rules with exact parity, but op 775 has now been
+validated as dolly-based with no fixed station; that correction belongs in a successor candidate.
+The critic-reviewed tooling availability plan adds count-based outage/early-return controls; one
+shell mold is provisionally unavailable through 2026-09-25. No tooling candidate can change
+published dates until its shadow and approval gates pass.
 The searchable in-app `/handbook` and nine-page core operating set are live. Contextual help links
 and formal documentation governance remain DOC-01c/DOC-01d.
 The Marion virtual factory is live for reviewed P2/P3 locations and remains visual-only. It must

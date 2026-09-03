@@ -1,5 +1,18 @@
 # Release Notes
 
+## 2026-09-03
+
+- Recorded the Aeronose tooling owner/approver, program dedication, and fungibility decisions while
+  retaining draft, internal-only status and zero schedule bindings.
+- Reconciled controlled LAM, COREKIT, ASSY, and PAINT work instructions to live top-assembly,
+  subring, and core-kit IFS routes.
+- Confirmed op 775 is a dolly-based 40-hour part cure with no fixed station; its legacy one-slot rule
+  now awaits removal in a governed successor candidate.
+- Added a repeatable read-only IFS timing audit and documented the remaining component-link,
+  mid-operation release, jig-release, holding-fixture, and current-WIP gates.
+- Added the critic-reviewed plan for authenticated, append-only tooling availability controls and
+  the consolidated floor-question handoff. The initial shell-mold outage remains shadow-only.
+
 ## 2026-09-02
 
 - Active TwinWorks scope is Elevator, Aeronose, and Aegis.

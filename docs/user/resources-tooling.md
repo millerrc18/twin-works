@@ -20,4 +20,21 @@ required slot atomically or wait without taking any.
 - `MISSING`: required evidence, capacity, calendar, or binding is absent.
 
 The current Aeronose counts are draft inventory facts only. They have no bindings and cannot affect
-forecasts. Operation spans will be approved under TOOL-01c.
+forecasts. Owner, approver, program dedication, and fungibility are recorded. Shell/core candidate
+spans have controlled-WI support, while assembly, holding, trim sub-operation, and component-link
+questions remain open under TOOL-01c.
+
+Op 775 remains a 40-hour part cure, but it is performed on a movable dolly rather than at a fixed
+electrical-seal station. The one-slot rule remains visible only as frozen parity history until a
+governed successor candidate demonstrates and explains its removal.
+## Availability Controls
+
+The critic-reviewed tooling control in `docs/plans/tooling-availability-control.md` shows current
+available count, future count changes, outage reason,
+expected return, shadow impact, and immutable history. Outage and early-return entries affect only a
+consuming candidate epoch until that model is explicitly promoted. The first release is pooled and
+count-based; it does not require tool serial numbers or schedule preventive maintenance.
+
+Availability editing will be enabled only after TwinWorks binds application identity and roles.
+Ryan Miller and configured data administrators will be initial editors; all other users remain
+read-only. Published dates are separated from candidate impact in every view.
