@@ -105,7 +105,7 @@ def test_portfolio_and_observe_workspace_are_registry_driven(tmp_path, monkeypat
             assert calls["capacity"] == 1
             pages = {
                 tab: client.get(f"/program/TEST4/{tab}")
-                for tab in ("overview", "flow", "units", "resources", "assumptions", "history")
+                for tab in ("overview", "flow", "units", "accuracy", "resources", "assumptions", "history")
             }
             schedule = client.get("/program/TEST4/schedule", follow_redirects=True)
 
@@ -124,6 +124,9 @@ def test_portfolio_and_observe_workspace_are_registry_driven(tmp_path, monkeypat
         assert "Operational evidence only" not in pages["overview"].text
         assert "Observed flow" in pages["flow"].text
         assert "T4 001" in pages["units"].text
+        assert "Forecast accuracy" in pages["accuracy"].text
+        assert "Headline withheld" in pages["accuracy"].text
+        assert "Physical pack-date performance" in pages["accuracy"].text
         assert "TEST-WC" in pages["resources"].text
         assert "No approved resource binding" in pages["assumptions"].text
         assert "CANDIDATE" in pages["history"].text
@@ -131,6 +134,7 @@ def test_portfolio_and_observe_workspace_are_registry_driven(tmp_path, monkeypat
             assert "Forecast P50" not in page.text
             assert 'href="/program/TEST4/overview"' in page.text
             assert 'href="/program/TEST4/history"' in page.text
+            assert 'href="/program/TEST4/accuracy"' in page.text
 
         assert schedule.status_code == 200
         assert "Schedule is not published" in schedule.text

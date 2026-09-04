@@ -21,3 +21,10 @@ records. Draft tooling counts do not affect scheduling until approved occupancy 
 
 Use a tested database backup and the published legacy epoch as rollback controls. Never delete audit
 events, model epochs, simulation snapshots, or deactivated program history to make a view look clean.
+## Accuracy summaries
+
+Processing a physical shipment now refreshes the model-maturity cohort and appends immutable
+Accuracy v1.0 summaries for all active programs. Same-day/post-pack forecasts, administrative
+close-only records, and forecasts outside the fixed horizon windows do not enter the score. Review
+each program's Accuracy tab after processing shipments; a missing headline means the evidence gate
+has not been met, not that the calculation failed.

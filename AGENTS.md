@@ -8,7 +8,7 @@ have actually bitten us. For the full human-facing reference see **MASTER.md**.
 > plan files, legacy workbook artifacts, and the `RTG_` environment prefix.
 ---
 
-## HANDOFF (2026-09-03) - read first if you are picking this up
+## HANDOFF (2026-09-04) - read first if you are picking this up
 
 **Current status:** Active product scope is Elevator, Aeronose, and Aegis. SCOPE-01 is complete:
 `BCAFIN` is inactive, epoch 10 is `ARCHIVED`, and registry/sync/WIP/simulation/forecast surfaces
@@ -16,8 +16,16 @@ exclude it without deleting history. RES-01 retains the generic physical-resourc
 The next modeling path is TOOL-01:
 generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
 PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
-**110 passing tests**; the run still emits existing Python 3.14
+**114 passing tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
+
+**ACC-01 complete:** `app/services/accuracy_score.py` computes critic-reviewed Accuracy v1.0 at
+fixed 7/14/21-day horizons using only `ifs-sync` physical pack dates. Same-day/post-pack forecasts
+are excluded; one latest build in each H..H+6 window is scored. Confidence is separate, P80 Wilson
+coverage is separate, and the headline is withheld until every horizon reaches n=5. Migration
+`1b2c3d4e5f60` adds immutable daily summaries with frozen cohorts. Current baseline: AEGIS 7-day
+11/n=1/Insufficient; ELEV/RAD have no eligible fixed-horizon cohort. Forward maturity counts are
+ELEV 3, RAD 1, AEGIS 1. See `docs/validation/acc-01-program-accuracy.md`.
 
 **Documentation roadmap:** DOC-01 adds a user-facing `/handbook` backed by version-controlled,
 sanitized Markdown. DOC-01a/DOC-01b are complete with nine initial pages; contextual links wait for
@@ -183,7 +191,7 @@ caveats, Δ measured vs the RTG target the team actually works to.
   `routers.py` (ops/cures/crew/shift constants — source of truth), `schedule_engine.py`,
   `build_tracker.py` (Excel builder — has module-level side effects, see gotcha), `backtest_accuracy.py`.
 - **`app/`** — FastAPI. `main.py`, `config.py` (pydantic-settings, `RTG_` env prefix),
-  `database.py` (async SQLAlchemy/aiosqlite), `models.py` (**25 tables**), `templating.py`.
+  `database.py` (async SQLAlchemy/aiosqlite), `models.py` (**27 application tables**), `templating.py`.
   - `app/engines/` — `router_registry.py` (`build_registry()` reads the `program` table via
     program_service, falls back to routers.py; `rebuild()` after add/edit), `rtg_wrapper.py`
     (`run_pooled(units_by_program, as_of)` + `pool_groups`/`shared_wcs` — plant-guarded transitive

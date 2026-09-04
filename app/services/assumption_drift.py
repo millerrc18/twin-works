@@ -11,6 +11,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import (
+    AccuracySummaryLog,
     AssumptionReview,
     ModelAssumption,
     ResourceAvailabilityEvent,
@@ -324,6 +325,14 @@ async def export_assumption_audit(db: AsyncSession) -> dict:
             ResourceAvailabilityEvent.sequence,
         )
     )).scalars().all()
+    accuracy_summaries = (await db.execute(
+        select(AccuracySummaryLog).order_by(
+            AccuracySummaryLog.as_of_date,
+            AccuracySummaryLog.program,
+            AccuracySummaryLog.horizon_days,
+            AccuracySummaryLog.id,
+        )
+    )).scalars().all()
     return {
         "schema_version": 1,
         "retention_policy": AUDIT_RETENTION_POLICY,
@@ -343,5 +352,9 @@ async def export_assumption_audit(db: AsyncSession) -> dict:
         "availability_events": [
             {column.name: getattr(row, column.name) for column in row.__table__.columns}
             for row in availability_events
+        ],
+        "accuracy_summaries": [
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in accuracy_summaries
         ],
     }

@@ -182,9 +182,12 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 - **`sync_service.py`** — **the IFS refresh loop** (see §5.1). `sync_positions` (Button 1),
   `preview_ships` / `process_ships_fast` / `process_ships_slow` (Button 2), `current_run`.
   Single-run lock via `sync_run`; IFS reads in `asyncio.to_thread`, never inside a DB tx.
-- **`accuracy_forward.py`** — `compute_forward_accuracy` (score real forward closes once per
-  serial at earliest logged forecast → `accuracy_forward.json`), `forward_counts` (per-program
-  forward-n — the number the train gate uses). Kept SEPARATE from the retrospective backtest.
+- **`accuracy_forward.py`** — model-maturity counts using one earliest valid pre-pack forecast per
+  program/shop order; same-day/post-pack and close-only records are excluded. Kept separate from
+  fixed-horizon scoring and the retrospective backtest.
+- **`accuracy_score.py`** — Accuracy v1.0 fixed 7/14/21-day cohorts, transparent 0-100 score,
+  independent confidence, P80 Wilson coverage, headline gating, immutable daily summaries, and
+  frozen cohort provenance.
 - **`model_history.py`** — `append_all` (write one `model_history` row per program each sync:
   mode/n/threshold/bias/mae), `history` (read for the admin trend chart).
 - **`model_units.py`** — `backtest_units()` / `forward_units()`: which program·SN·SO feed each
@@ -465,14 +468,16 @@ demand require governed approvals before onboarding. See `docs/validation/bca-06
 ---
 
 ## 7. The ML accuracy system (honesty model)
-Two accuracy tracks, **kept deliberately separate** (blending would double-count + corrupt the gate):
+Three accuracy tracks, **kept deliberately separate** (blending would double-count or misstate evidence):
 - **Retrospective backtest** → `accuracy_results.json` — 8 recent-production closes × 7/14/21d
   horizons; MAE 7.1d, all errors negative (systematically optimistic). PRELIMINARY, n≈8. Seeds
   the EMPIRICAL bias the live model applies today.
-- **Forward accuracy** → `accuracy_forward.json` — real prospective closes. Every "Refresh
-  positions" stamps forecasts (`forecast_log`); when a unit ships, "Process new ships" backfills
-  actual_close + error and `accuracy_forward.compute_forward_accuracy` scores each serial ONCE at
-  its earliest logged forecast. The un-gameable record that accrues over time.
+- **Forward maturity** → `accuracy_forward.json` — real physical shipments scored once at the
+  earliest valid pre-pack forecast. It controls the EMPIRICAL→TRAINED gate.
+- **Accuracy v1.0** → immutable `accuracy_summary_log` rows — the latest forecast in fixed 7-13,
+  14-20, and 21-27 day windows before physical pack. It reports score, confidence, MAE, bias, Hit7,
+  separate P80 calibration, exclusions, source IDs, and frozen cohort payloads. A headline is hidden
+  until every horizon has at least five eligible units.
 - **Threshold gate (per-program, forward-only):** models stay **EMPIRICAL** (apply the measured
   optimistic bias) until a program has enough **real FORWARD scored ships** — **ELEV 25, RAD 25,
   AEGIS 12** — then flip **TRAINED** (quantile P50/P80 on features). The count fed to the gate is
@@ -505,11 +510,12 @@ Applied app-wide via `base.html` tokens. Principle: **calm canvas, loud signal.*
 ---
 
 ## 9. Database (SQLite) & JSON files
-**DB (`data/rtg_app_migrated.db`, Alembic-managed) — 25 tables:** ten core forecast/runtime and
+**DB (`data/rtg_app_migrated.db`, Alembic-managed) — 27 application tables:** ten core forecast/runtime and
 program tables; ten resource/assumption/snapshot tables; four epoch-governance tables, and one
 append-only observation-quarantine event table:
 `model_epoch`, `model_epoch_transition`, `program_epoch_activation`, and
-`simulation_snapshot_epoch`.
+`simulation_snapshot_epoch`; append-only `resource_availability_event` and
+`accuracy_summary_log` retain tooling and accuracy evidence.
 **JSON (repo root, reference/computed):** accuracy_results.json (retrospective backtest),
 accuracy_forward.json (real forward closes — separate on purpose), backtest_timeline.json,
 forecast_log.json (legacy; the DB `forecast_log` table is authoritative), rtg_data.json,
@@ -521,7 +527,8 @@ rtg_targets.json, wi_signals.json, _rad_std.json.
 `d8ea03f5` approved-record protection · `e6a1b2c3` model epochs · `f7b2c3d4` audit hardening ·
 `a8c3d4e5` clean-install slot schema reconciliation · `b9d4e5f6` planning basis ·
 `cad0e1f2` assumption evidence/recertification · `dbe1f2a3` review-integrity hardening ·
-`ecf2a3b4` external-snapshot integrity · `fdb4c5d6` observation quarantine.
+`ecf2a3b4` external-snapshot integrity · `fdb4c5d6` observation quarantine ·
+`0a1b2c3d4e5f` resource availability events · `1b2c3d4e5f60` Accuracy v1.0 summaries.
 Migration `a3f1c9d4e5b6_add_refresh_loop_tables` adds the three refresh-loop tables (also created
 idempotently by `create_all` at startup).
 

@@ -89,6 +89,8 @@ critic-reviewed plan continues with authenticated authoring, compiler integratio
 mold is provisionally unavailable through 2026-09-25, but the live event table remains empty until
 identity controls pass. No tooling candidate can change
 published dates until its shadow and approval gates pass.
+Accuracy v1.0 is live in the portfolio and each program workspace with fixed horizons, confidence,
+P80 calibration, and immutable cohort provenance; immature programs remain visibly calibrating.
 The searchable in-app `/handbook` and nine-page core operating set are live. Contextual help links
 and formal documentation governance remain DOC-01c/DOC-01d.
 The Marion virtual factory is live for reviewed P2/P3 locations and remains visual-only. It must

@@ -32,6 +32,7 @@ WORKSPACE_TABS = (
     ("schedule", "Schedule"),
     ("flow", "Flow"),
     ("units", "Units"),
+    ("accuracy", "Accuracy"),
     ("resources", "Resources"),
     ("assumptions", "Assumptions"),
     ("history", "History"),
@@ -115,6 +116,9 @@ async def build_portfolio(db: AsyncSession, ds) -> dict:
         AssumptionReview.status == "OPEN")) or 0)
     quarantine_count = (len(await active_quarantines(db, "BCALAY"))
                         if PROGRAMS.is_active("BCAFIN") else 0)
+    from app.services import accuracy_score as ACCURACY
+    accuracy = await ACCURACY.compute_accuracy_scores(
+        db, programs=codes, as_of=ds.as_of().date())
 
     rows = []
     maturity = []
@@ -166,6 +170,12 @@ async def build_portfolio(db: AsyncSession, ds) -> dict:
         latest = await EPOCHS.latest_epoch(db, code)
         candidate = latest if latest and (not published or latest.epoch.id != published.epoch.id) else None
 
+        program_accuracy = accuracy["programs"][code]
+        display_accuracy = next((
+            program_accuracy["horizons"][horizon]
+            for horizon in (7, 14, 21)
+            if program_accuracy["horizons"][horizon]["score"] is not None
+        ), None)
         row = {
             "code": code,
             "name": PROGRAMS.name(code),
@@ -191,6 +201,8 @@ async def build_portfolio(db: AsyncSession, ds) -> dict:
             "published_epoch": published.epoch.epoch_key if published else None,
             "candidate_epoch": candidate.epoch.epoch_key if candidate else None,
             "candidate_state": candidate.state if candidate else None,
+            "accuracy": program_accuracy,
+            "accuracy_display": display_accuracy,
         }
         rows.append(row)
         total_wip += row["wip"]
@@ -337,6 +349,10 @@ async def build_program_workspace(db: AsyncSession, ds, program: str, tab: str) 
     )
     eligible = [row for row in forecast_rows
                 if row.p50_date and row.comparison_target_date and not row.stalled]
+    from app.services import accuracy_score as ACCURACY
+    accuracy = (await ACCURACY.compute_accuracy_scores(
+        db, programs=[program], as_of=ds.as_of().date()))["programs"][program]
+    accuracy_history = await ACCURACY.accuracy_trend(db, program)
     fresh = max((row.synced_at for row in state_rows), default=None)
     fresh_label, fresh_state = _freshness_label(fresh, ds.as_of().date())
     return {
@@ -358,5 +374,7 @@ async def build_program_workspace(db: AsyncSession, ds, program: str, tab: str) 
                          for wc, count in wc_counts.most_common()],
         "resources": resources,
         "history": history,
+        "accuracy": accuracy,
+        "accuracy_history": accuracy_history,
         "next_gate": _next_gate(planning.lifecycle_state, readiness["readiness"]),
     }

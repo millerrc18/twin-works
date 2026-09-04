@@ -49,6 +49,7 @@ ALLOWED_TRANSITIONS = {
 
 IMMUTABLE_AUDIT_TABLES = {
     "model_epoch", "model_epoch_transition", "program_epoch_activation",
+    "accuracy_summary_log",
     "external_load_snapshot", "external_load_row", "simulation_snapshot",
     "observation_quarantine_event", "resource_availability_event",
     "simulation_snapshot_epoch", "forecast_constraint_event",

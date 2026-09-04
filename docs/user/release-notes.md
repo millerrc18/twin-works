@@ -1,5 +1,14 @@
 # Release Notes
 
+## 2026-09-04
+
+- Added critic-reviewed Accuracy v1.0 scores at fixed 7-, 14-, and 21-day horizons using only IFS
+  physical pack dates.
+- Added confidence tiers, headline gating, separate P80 Wilson coverage, immutable daily score
+  summaries, and frozen cohort provenance.
+- Added portfolio Accuracy signals and a responsive program Accuracy workspace.
+- Removed same-day/post-pack and administrative-close-only records from forward model-maturity
+  counts; current eligible counts are Elevator 3, Aeronose 1, and Aegis 1.
 ## 2026-09-03
 
 - Recorded the Aeronose tooling owner/approver, program dedication, and fungibility decisions while

@@ -32,6 +32,24 @@ remains in `AGENTS.md`.
   - Acceptance: baseline/candidate date changes are causal and replayable; the cure remains enforced;
     no fixed-station capacity appears in candidate evidence; promotion still requires the integrated pilot.
 
+## Program Forecast Accuracy
+
+- [x] **ACC-01 - Add honest per-program Accuracy v1.0 scoring**
+  - [x] **ACC-01a - Eligibility and anti-leakage:** use IFS physical pack dates only; reject
+    same-day/post-pack forecasts; select one latest forecast per unit in fixed 7/14/21-day windows.
+  - [x] **ACC-01b - Score and immutable provenance:** implement the critic-reviewed 0-100 formula,
+    independent confidence tiers, separate P80 Wilson coverage, headline gating, and append-only
+    daily summary rows with frozen source cohorts and hashes.
+  - [x] **ACC-01c - Portfolio and program UX:** add the portfolio Accuracy signal and a responsive
+    program Accuracy tab with horizon detail, exclusions, evidence contract, and score history.
+  - [ ] **ACC-01d - Accumulate and validate forward evidence:** continue daily forecast stamping and
+    physical shipment processing; do not rank programs or publish a headline until all horizons have
+    at least five eligible units. Revisit weights/SLA only through a new formula version.
+  - Delivered 2026-09-04: first baseline shows Aegis 7-day score 11 with n=1/Insufficient;
+    Elevator and Aeronose have no eligible standardized horizon cohort; all headlines are withheld.
+    Existing maturity counts were corrected to ELEV 3, RAD 1, AEGIS 1. See
+    `docs/validation/acc-01-program-accuracy.md`.
+
 ## Platform-Wide Resource Adoption
 
 **Status:** Revised 2026-09-02. Active product scope is Elevator, Aeronose, and Aegis. The migration

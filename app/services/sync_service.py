@@ -318,6 +318,9 @@ async def process_ships_slow(db: AsyncSession, run_id: int) -> dict:
         await db.execute(update(SyncRun).where(SyncRun.id == run_id).values(stage="rescoring"))
         await db.commit()
         forward = AF.compute_forward_accuracy()
+        from app.services import accuracy_score as ACCURACY
+        accuracy = await ACCURACY.capture_accuracy_summaries(
+            db, programs=PROGRAMS(), as_of=date.today())
 
         await db.execute(update(SyncRun).where(SyncRun.id == run_id).values(stage="training"))
         await db.commit()
@@ -326,7 +329,11 @@ async def process_ships_slow(db: AsyncSession, run_id: int) -> dict:
         reg = await refresh_registry(db)
 
         await MH.append_all(db, source="ships")
-        result = dict(forward=forward.get("counts", {}), train=train, registry=reg)
+        result = dict(
+            forward=forward.get("counts", {}),
+            accuracy_summaries=accuracy["created"],
+            train=train, registry=reg,
+        )
         await _finish(db, run_id, result=result)
         return result
     except Exception as e:

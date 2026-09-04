@@ -75,27 +75,37 @@ def backtest_units() -> list[dict]:
 
 
 def forward_units() -> list[dict]:
-    """Distinct forward-scored ships from ForecastLog (one per serial, earliest build):
-    {program, serial, so, close, error_days, build_date}. Empty if none scored yet."""
+    """Eligible maturity cohort: one earliest pre-pack forecast per program/shop order."""
     path = _db_path()
     if not Path(path).exists():
         return []
     try:
         con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
         con.row_factory = sqlite3.Row
-        rows = con.execute(
-            "SELECT program, serial, so, build_date, actual_close, error_days "
-            "FROM forecast_log WHERE actual_close IS NOT NULL "
-            "ORDER BY serial, build_date").fetchall()
+        rows = con.execute("""
+            SELECT f.program, f.serial, f.so, f.build_date, f.p50_date,
+                   p.pack AS actual_pack
+            FROM forecast_log f
+            JOIN position_state p ON p.program = f.program AND p.so = f.so
+            WHERE p.pack IS NOT NULL AND p.source = 'ifs-sync'
+              AND f.p50_date IS NOT NULL
+              AND date(f.build_date) < date(p.pack)
+            ORDER BY f.program, f.so, f.build_date, f.id
+        """).fetchall()
         con.close()
     except sqlite3.OperationalError:
         return []
     earliest = {}
-    for r in rows:
-        if r["serial"] not in earliest:
-            earliest[r["serial"]] = dict(program=r["program"], serial=r["serial"], so=r["so"],
-                                         close=r["actual_close"], error_days=r["error_days"],
-                                         build_date=r["build_date"])
+    for row in rows:
+        key = (row["program"], row["so"])
+        if key not in earliest:
+            pack = __import__("datetime").date.fromisoformat(row["actual_pack"])
+            p50 = __import__("datetime").date.fromisoformat(row["p50_date"])
+            earliest[key] = {
+                "program": row["program"], "serial": row["serial"], "so": row["so"],
+                "close": row["actual_pack"], "error_days": (p50 - pack).days,
+                "build_date": row["build_date"],
+            }
     out = list(earliest.values())
-    out.sort(key=lambda r: (r["program"] or "", r["serial"] or ""))
+    out.sort(key=lambda row: (row["program"] or "", row["serial"] or ""))
     return out

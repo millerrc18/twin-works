@@ -48,6 +48,46 @@ class ForecastLog(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
+class AccuracySummaryLog(Base):
+    """Immutable per-program, fixed-horizon forward-accuracy snapshot."""
+    __tablename__ = "accuracy_summary_log"
+    __table_args__ = (
+        CheckConstraint("horizon_days IN (7,14,21)"),
+        CheckConstraint(
+            "confidence IN ('INSUFFICIENT','PRELIMINARY','DEVELOPING','ESTABLISHED')"),
+        CheckConstraint("sample_size >= 0"),
+        CheckConstraint("observed_unit_count >= sample_size"),
+        CheckConstraint("missing_window_count >= 0"),
+        CheckConstraint("post_ship_record_count >= 0"),
+        CheckConstraint("p80_sample_size >= 0 AND p80_sample_size <= sample_size"),
+        CheckConstraint("score IS NULL OR (score >= 0 AND score <= 100)"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    as_of_date: Mapped[date] = mapped_column(Date, index=True)
+    captured_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+    program: Mapped[str] = mapped_column(String(8), index=True)
+    horizon_days: Mapped[int] = mapped_column(Integer)
+    formula_version: Mapped[str] = mapped_column(String(24))
+    score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    confidence: Mapped[str] = mapped_column(String(16))
+    sample_size: Mapped[int] = mapped_column(Integer)
+    observed_unit_count: Mapped[int] = mapped_column(Integer)
+    missing_window_count: Mapped[int] = mapped_column(Integer)
+    post_ship_record_count: Mapped[int] = mapped_column(Integer)
+    mae_days: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    bias_days: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    hit3_pct: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    hit7_pct: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    p80_sample_size: Mapped[int] = mapped_column(Integer, default=0)
+    p80_coverage_pct: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    p80_wilson_low_pct: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    p80_wilson_high_pct: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    source_forecast_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    cohort_json: Mapped[str] = mapped_column(Text, default="[]")
+    cohort_hash: Mapped[str] = mapped_column(String(64), index=True)
+    content_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+
+
 class MLTrainingRow(Base):
     """One row per closed unit per snapshot: features + residual target."""
     __tablename__ = "ml_training_row"
@@ -995,6 +1035,7 @@ def _append_only_delete(_mapper, _connection, _target) -> None:
 _EPOCH_RECORDS = (
     ModelEpoch,
     ModelEpochTransition,
+    AccuracySummaryLog,
     ProgramEpochActivation,
     ExternalLoadSnapshot,
     ExternalLoadRow,
@@ -1046,6 +1087,7 @@ event.listen(ProgramEpochActivation.__table__, "after_create",
 for _epoch_table in (
     ModelEpoch.__table__,
     ModelEpochTransition.__table__,
+    AccuracySummaryLog.__table__,
     ProgramEpochActivation.__table__,
     ExternalLoadSnapshot.__table__,
     ExternalLoadRow.__table__,
@@ -1064,6 +1106,7 @@ _EPOCH_INSERT_IDENTITIES = {
         "OR (program = NEW.program AND definition_hash = NEW.definition_hash)"),
     ModelEpochTransition.__table__: (
         "id = NEW.id OR (epoch_id = NEW.epoch_id AND sequence = NEW.sequence)"),
+    AccuracySummaryLog.__table__: "id = NEW.id OR content_hash = NEW.content_hash",
     ProgramEpochActivation.__table__: "id = NEW.id",
     ExternalLoadSnapshot.__table__: "id = NEW.id OR content_hash = NEW.content_hash",
     ExternalLoadRow.__table__: "id = NEW.id",
