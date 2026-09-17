@@ -13,9 +13,11 @@ explicit sensitivity studies.
 | --- | --- | --- | --- | --- |
 | AF-01 | At what exact event is the top-level radome removed from assembly fixture `3700AF0001` and the fixture reusable? | An assembly-jig lease cannot be released safely without a physical event. | ASSY Rev K pins the shell to the AF in op 625 and removes only the drill basket in op 630. A second review of the source DOCX XML and figures found no radome-removal instruction. | Manufacturing/process owner identifies the physical release step and the corresponding route or modeled substep. |
 | AF-02 | Does the larger drill-basket pin arrangement on `3700AF0001 Dup 1` add setup time or restrict compatibility? | The two jigs are owner-confirmed interchangeable, but a setup penalty or compatibility rule may still be required. | ASSY Rev K documents larger pins on Dup 1. Ryan does not know the operational impact. | Manufacturing confirms no impact or supplies the setup/compatibility rule. |
-| HF-01 | What are the two Aeronose holding fixtures, what condition do they hold, and when are they acquired and released? | Their identity and span are required before they can constrain the model. | Ryan confirms they are Aeronose-dedicated, interchangeable, and separate from paint dollies. No numbered holding fixture appears in the reviewed WIs. | Floor owner identifies the fixtures and physical hold boundaries. |
-| MAINT-01 | Is one shell lamination mold currently at the tool shop, and what was its actual removal date? | The shadow will provisionally use two available molds, but the source condition must be confirmed. | Ryan believes one mold may be out for a new core/plug locating template. | Confirm actual status and effective outage start. |
-| MAINT-02 | When does the shell mold actually return to service? | The provisional calendar restores the third mold after 2026-09-25; an early return should be recorded immediately. | Expected back on or before 2026-09-25. | Record actual return through the tooling availability control. |
+| HF-01 | What condition does the wooden blue holding fixture `3700HF0001` support, and when is it acquired and released? | Its identity/count are resolved, but its span is required before it can constrain the model. | Ryan confirms one Aeronose-dedicated holding fixture, separate from both dolly families. | Floor owner identifies the physical hold boundaries. |
+| PD-01 | Are all six listed paint dollies serviceable/interchangeable, and when does a radome acquire and release one? | Count alone does not establish available capacity or occupancy duration. | Tooling list identifies six records; paint dollies move radomes from assembly through paint. | Floor owner confirms compatibility, current serviceability, and physical boundaries. |
+| HD-01 | What work do the nine `3700HD0003-DUP0` through `DUP8` handling dollies support, and when are they acquired/released? | Their purpose and span are required before deciding whether they constrain flow. | Tooling list confirms nine handling dollies. | Floor owner confirms purpose, compatibility, serviceability, and physical boundaries. |
+| MAINT-01 | What was the shell lamination mold's actual removal date? | The shadow uses two available molds during the outage, so its effective start must be auditable. | Ryan confirms one mold is in the tool shop as a fabrication aid for the new core/plug locating template; no work is being performed on the mold. | Confirm effective outage start. |
+| MAINT-02 | When does the shell mold actually return to service? | The third slot must not restore before physical return. | Ryan will confirm return; the mold can be used immediately once back. | Record actual return through the tooling availability control. |
 | TURN-01 | What turnaround allowance best represents normal mold reuse after release? | Immediate reuse is possible in the engine but may overstate practical cadence. | No separate cleanup operation is clocked; observed idle gaps are non-causal. Ryan expects some practical padding. | Run 0-, 2-, and 4-hour shell/core shadow sensitivities and select a value from reviewed observations. |
 
 ## Questions Assigned to Data Validation
@@ -29,14 +31,14 @@ These do not require Ryan to inventory tools manually:
 
 ## Resolved Clarifications
 
-- All five tooling families are dedicated to Aeronose.
-- Assembly jigs, holding fixtures, and shell molds are fungible within their families.
-- Holding fixtures are not the paint dollies. Paint dollies move each part from assembly through
-  paint work centers.
+- All seven tooling families are dedicated to Aeronose.
+- Assembly jigs and shell molds are fungible within their families; `3700HF0001` is a singleton.
+- The one holding fixture is wooden, painted blue, and separate from both dolly families.
+- Six paint-dolly and nine handling-dolly identifiers are recorded from the tooling list.
 - The core-forming capacity is one atomic set consisting of `3700LM0002`, `3700LM0003`, and the
   nose-forming mold.
 - Op 775 is performed on a dolly and has no fixed electrical-seal station.
-- For the current shell-mold shadow, available count is two through 2026-09-25 and three beginning
-  2026-09-26, with immediate early return-to-service entry if the mold comes back sooner.
+- One shell mold is confirmed in the tool shop as a template-fabrication aid. It is immediately
+  production-ready upon owner-confirmed return; actual removal and return dates remain open.
 - Individual tooling serials and preventive-maintenance scheduling are deferred. Availability is
   count-based in the first release.

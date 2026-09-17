@@ -2,26 +2,28 @@
 
 ## Status
 
-Accuracy v1.0 delivered 2026-09-04. TwinWorks now computes a transparent 0-100 forward accuracy
-score for each active program at fixed 7-, 14-, and 21-day horizons. The portfolio shows an honest
-calibration state or the first eligible horizon; each program has a dedicated Accuracy workspace.
+Accuracy v1.0 delivered 2026-09-04; the terminal-operation correction is v1.1 as of 2026-09-09.
+TwinWorks computes a transparent 0-100 forward accuracy score for each active program at fixed 7-,
+14-, and 21-day horizons. The portfolio shows an honest calibration state or the first eligible
+horizon; each program has a dedicated Accuracy workspace.
 
 No retrospective backtest row is blended into the forward score. No score changes a forecast,
 model epoch, planning target, or publication state.
 
 ## Truth and Eligibility
 
-- Truth is the IFS physical pack-operation date persisted in `PositionState.pack` by an `ifs-sync`.
+- Truth is the latest finish clock on the configured IFS Pack & Ship operation after that operation
+  reaches status 90 (closed), persisted in `PositionState.pack` by an `ifs-sync`.
 - Administrative close-only and bootstrap rows are excluded from the headline score.
-- Same-day and post-pack forecasts are rejected.
-- For horizon `H`, the eligible window is physical pack minus `H+6` through pack minus `H`,
+- Same-day and post-ship forecasts are rejected.
+- For horizon `H`, the eligible window is physical shipment minus `H+6` through shipment minus `H`,
   inclusive. The latest P50 within that window is selected.
 - Each program/shop-order contributes at most one forecast per horizon.
 - Missing windows remain visible as coverage debt instead of substituting a stale forecast.
 
-The existing model-maturity track was corrected to use one earliest valid pre-pack forecast per
-program/shop order. Its current eligible counts are Elevator 3, Aeronose 1, and Aegis 1. This track
-remains separate from fixed-horizon Accuracy v1.0 and the retrospective backtest.
+The existing model-maturity track was corrected to use one earliest valid pre-ship forecast per
+program/shop order. Its current eligible counts are Elevator 4, Aeronose 3, and Aegis 1. This track
+remains separate from fixed-horizon Accuracy v1.1 and the retrospective backtest.
 
 ## Formula
 
@@ -51,6 +53,24 @@ eligible, it is `20% * 7-day + 35% * 14-day + 45% * 21-day`, with the weakest ho
 
 P80 coverage is displayed separately with a 95% Wilson interval and is not part of the 0-100 score.
 
+## Shipment Truth Correction
+
+`TW-ACC-1.1` prevents an early labor clock from masquerading as shipment. If IFS later reports a
+different terminal completion date for a known shop order, TwinWorks previews it as a correction,
+updates mutable ship state and forecast residuals by shop order, and appends new immutable accuracy
+evidence without rewriting the v1.0 history. RAD SN 0511 / SO 1451436 was the validating case:
+packing began September 4, physical shipment completed September 8, and the SO closed September 9.
+The repaired live row now records operation 790, last clock September 8, and effective ship date
+September 8. All nine forecast rows for SO 1451436 were reconciled by shop order, including the
+legacy zero-padded `0511` row. RAD v1.1 is 81/n=2 at seven days and 84/n=1 at fourteen days; its
+headline remains withheld.
+
+Pre-reconciliation database backup:
+`data/rtg_app_migrated.pre_ship_reconcile_20260909.bak`
+
+SHA-256:
+`DD821C01C5C2143C3EC38695EA321336A00737BFE4E32750720A8511C2554AA9`
+
 ## First Live Baseline
 
 As of 2026-09-04:
@@ -69,7 +89,7 @@ horizon evidence. The UI does not rank programs while confidence is insufficient
 Migration `1b2c3d4e5f60` adds append-only `accuracy_summary_log`. Every daily program/horizon row
 freezes:
 
-- formula version `TW-ACC-1.0`;
+- formula version (`TW-ACC-1.0` historical or corrected `TW-ACC-1.1`);
 - as-of date and horizon;
 - score, confidence, n, MAE, bias, Hit3, and Hit7;
 - P80 coverage and Wilson interval;
@@ -98,9 +118,11 @@ SHA-256:
 ## AI Critic Record
 
 Gemini 3.1 Pro reviewed the scoring contract before implementation. The implementation adopts its
-material recommendations: standardized horizon windows, physical pack truth, strict leakage
+material recommendations: standardized horizon windows, physical shipment truth, strict leakage
 rejection, separate confidence, withheld headline until all horizons reach n=5, separate P80
-calibration, and no cross-program ranking at immature confidence.
+calibration, and no cross-program ranking at immature confidence. The v1.1 terminal-status
+requirement was added from subsequent live IFS evidence showing that a finished labor clock can
+precede operation completion.
 
 ## Remaining Operational Work
 
@@ -111,7 +133,7 @@ through a formula-version successor after sufficient forward evidence exists.
 
 Gemini 3.1 Pro reviewed the completed scoring and provenance design. It found no material
 statistical, leakage, or UI-honesty issue. Verified controls include P50/P80 selection from the same
-forecast row, explicit empty-cohort handling, strict physical-pack provenance, and disabled ranking
+forecast row, explicit empty-cohort handling, strict terminal-operation provenance, and disabled ranking
 at immature confidence.
 
 The critic raised potential growth from frozen cohorts. TwinWorks captures summaries once per
@@ -124,10 +146,11 @@ Desktop, 390px mobile, light-theme layout, page-level overflow, and WCAG A/AA ax
 zero violations. The accuracy-history table scrolls locally on narrow screens.
 ## Verification
 
-- Full regression suite: 114 passed.
+- Full regression suite: 117 passed.
 - Focused Ruff: passed.
 - Static golden forecast: exact.
 - Clean Alembic upgrade through `1b2c3d4e5f60`: passed.
-- Live database: nine immutable 2026-09-04 program/horizon summaries with frozen cohort JSON.
+- Live database: 15 retained v1.0 summaries and nine corrected v1.1 program/horizon summaries with
+  frozen cohort JSON.
 - Desktop and 390px mobile browser checks: passed; no page-level horizontal overflow.
 - WCAG 2 A/AA axe scan: zero violations and zero incomplete checks.

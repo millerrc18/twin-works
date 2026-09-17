@@ -60,7 +60,7 @@ async def _run_slow(run_id: int):
 
 @router.post("/process-ships")
 async def process_ships(bg: BackgroundTasks, db: AsyncSession = Depends(get_db)):
-    """Button 2 — FAST: record new closes + backfill accuracy (sync feedback);
+    """Button 2 — FAST: record new or corrected shipments and reconcile accuracy;
     SLOW: rescore + retrain in the background, polled via /sync-status."""
     try:
         fast = await SYNC.process_ships_fast(db)

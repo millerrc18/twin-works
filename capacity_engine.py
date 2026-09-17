@@ -154,10 +154,15 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
     state={}
     for u in units:
         q=build_queue(u['program'], u['maxop'])
+        release_at = u.get('release_at')
+        if isinstance(release_at, date) and not isinstance(release_at, DT):
+            release_at = DT.combine(release_at, datetime.time(SHIFT_START))
+        release_at = release_at or as_of
         state[u['serial']]=dict(u=u, queue=q, idx=0,
                                 cure_until=None,  # datetime a cure finishes
                                 cure_trigger_op=None,
-                                clock=as_of,      # per-unit intra-day work clock
+                                release_at=release_at,
+                                clock=max(as_of, release_at),
                                 gate_nb={},       # gate_op -> datetime the op cannot start before
                                 op_dt={}, cure_dt={}, finish=None,
                                 constraint_events=[],
@@ -399,6 +404,8 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                 if st['finish'] is not None:
                     continue
                 prog=unit_prog[s]
+                if st['release_at'] >= sh_close:
+                    continue
                 fac=(1.0 if allocation_mode == "PHYSICAL" else day_fac(prog, dd))
                 if fac<=0:  # program not working this day (e.g. elevator off-weekend)
                     continue
@@ -413,7 +420,7 @@ def simulate(units, ops_map, cures_map, as_of, profile=None, trace_constraints=F
                     else:
                         continue  # still curing through this shift
                 else:
-                    st['clock']=max(sh_open, as_of, st['clock'])
+                    st['clock']=max(sh_open, as_of, st['release_at'], st['clock'])
                 if st['clock']>=sh_close:
                     continue
                 # advance through queue within this shift

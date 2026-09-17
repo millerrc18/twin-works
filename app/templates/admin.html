@@ -49,7 +49,7 @@
       title="Pull each in-process unit's current operation, last-clock, and due date from IFS and update the tracker. Also stamps today's forecast (needed for week-over-week slip). Run daily.">
       <template x-if="busy && kind==='positions'"><span class="spin"></span></template>Refresh positions</button>
     <button class="btn sec" @click="previewShips()" :disabled="busy"
-      title="Detect units that shipped since the last sync (pack-op complete or SO closed), preview them, then record their actual ship + score the forecast. Run when units close.">Process new ships…</button>
+      title="Detect new shipments and corrected terminal-operation ship dates, then update forecast accuracy. Run when the Pack & Ship operation or shop order closes.">Process new ships…</button>
     <span style="font-size:11px;color:var(--faint)">positions = daily · ships = when a unit closes</span>
     <span style="margin-left:auto;">
       <button class="linkbtn" @click="seedPositions()"
@@ -62,13 +62,13 @@
   <!-- ship preview -> confirm -->
   <template x-if="preview">
     <div class="previewbox">
-      <div x-text="preview.new_count + ' new close(s) detected' + (preview.would_train.length ? '; would train: ' + preview.would_train.join(', ') : '; none reach the train gate yet')"></div>
+      <div x-text="preview.new_count + ' ship record(s) ready (' + preview.new_ship_count + ' new, ' + preview.corrected_count + ' corrected)' + (preview.would_train.length ? '; would train: ' + preview.would_train.join(', ') : '; none reach the train gate yet')"></div>
       <template x-for="(rows,prog) in preview.new_by_program" :key="prog">
-        <div style="margin-top:3px;"><b x-text="prog"></b>: <span x-text="rows.map(r=>r.serial).join(', ')"></span></div>
+        <div style="margin-top:3px;"><b x-text="prog"></b>: <span x-text="rows.map(r=>r.action==='corrected' ? r.serial+' ('+r.previous_ship+' -> '+r.ship+')' : r.serial+' ('+r.ship+')').join(', ')"></span></div>
       </template>
       <div style="margin-top:6px;font-size:10.5px;color:var(--faint);">
         Units already recorded as shipped (baseline / previously processed) are intentionally skipped —
-        only closes new since the last sync appear here.
+        unchanged records do not appear; corrected terminal ship dates do.
       </div>
       <div style="margin-top:8px;">
         <button class="btn pri" @click="processShips()" :disabled="busy || preview.new_count===0"
@@ -247,7 +247,7 @@
         const {ok,body}=await this._post('/admin/process-ships');
         this.busy=false;
         if(!ok){ this.show(body.reason||'Failed','err'); return; }
-        this.show('Recorded '+body.recorded+' ship(s). '+body.status,'ok');
+        this.show('Processed '+body.recorded+' ship record(s). '+body.status,'ok');
         this.pollStatus();
       },
       async pollStatus(){

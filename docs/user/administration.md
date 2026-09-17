@@ -24,7 +24,9 @@ events, model epochs, simulation snapshots, or deactivated program history to ma
 ## Accuracy summaries
 
 Processing a physical shipment now refreshes the model-maturity cohort and appends immutable
-Accuracy v1.0 summaries for all active programs. Same-day/post-pack forecasts, administrative
-close-only records, and forecasts outside the fixed horizon windows do not enter the score. Review
-each program's Accuracy tab after processing shipments; a missing headline means the evidence gate
+Accuracy v1.1 summaries for all active programs. Same-day/post-ship forecasts and forecasts outside
+the fixed horizon windows do not enter the score. A terminal-operation labor clock is accepted only
+after the IFS operation is closed; later date corrections reconcile the shop order and retain the
+older immutable summary under its original formula version. Review each program's Accuracy tab
+after processing shipments; a missing headline means the evidence gate
 has not been met, not that the calculation failed.

@@ -20,9 +20,11 @@ required slot atomically or wait without taking any.
 - `MISSING`: required evidence, capacity, calendar, or binding is absent.
 
 The current Aeronose counts are draft inventory facts only. They have no bindings and cannot affect
-forecasts. Owner, approver, program dedication, and fungibility are recorded. Shell/core candidate
-spans have controlled-WI support, while assembly, holding, trim sub-operation, and component-link
-questions remain open under TOOL-01c.
+forecasts. The inventory includes two assembly jigs, one wooden blue holding fixture `3700HF0001`,
+one trim fixture, three shell molds, one core-forming set, six paint dollies, and nine handling
+dollies. Shell/core candidate spans have controlled-WI support, while assembly, holding/dolly,
+trim sub-operation, compatibility/serviceability, and component-link questions remain open under
+TOOL-01c.
 
 Op 775 remains a 40-hour part cure, but it is performed on a movable dolly rather than at a fixed
 electrical-seal station. The one-slot rule remains visible only as frozen parity history until a

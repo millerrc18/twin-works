@@ -182,10 +182,10 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 - **`sync_service.py`** — **the IFS refresh loop** (see §5.1). `sync_positions` (Button 1),
   `preview_ships` / `process_ships_fast` / `process_ships_slow` (Button 2), `current_run`.
   Single-run lock via `sync_run`; IFS reads in `asyncio.to_thread`, never inside a DB tx.
-- **`accuracy_forward.py`** — model-maturity counts using one earliest valid pre-pack forecast per
-  program/shop order; same-day/post-pack and close-only records are excluded. Kept separate from
+- **`accuracy_forward.py`** — model-maturity counts using one earliest valid pre-ship forecast per
+  program/shop order; same-day/post-ship and close-only records are excluded. Kept separate from
   fixed-horizon scoring and the retrospective backtest.
-- **`accuracy_score.py`** — Accuracy v1.0 fixed 7/14/21-day cohorts, transparent 0-100 score,
+- **`accuracy_score.py`** — Accuracy v1.1 fixed 7/14/21-day cohorts, transparent 0-100 score,
   independent confidence, P80 Wilson coverage, headline gating, immutable daily summaries, and
   frozen cohort provenance.
 - **`model_history.py`** — `append_all` (write one `model_history` row per program each sync:
@@ -193,6 +193,10 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 - **`model_units.py`** — `backtest_units()` / `forward_units()`: which program·SN·SO feed each
   track (retrospective backtest vs real forward closes), for the admin "Units in the model" panel.
   Resolves clean serials via SO (guards against SO-fragment placeholders).
+- **`rate_readiness.py`** — RATE-01a/b pure planning contracts: monthly/annual/profile demand
+  canonicalization, deterministic product-mix and working-day releases, scenario-only scheduler
+  inputs, readiness/tool/staffing gates, and measurement-window sustainability. Solver, persistence,
+  calibration, and UI remain gated to later RATE phases.
 - **`program_service.py`** — the DB-backed program config source (see §5.2). Sync cached
   `load_specs()` (DB row or {} → routers fallback), `program_order`/`names`/`name`/`ifs_meta`/
   `threshold`, `seed_from_routers` (one-time copy of the 3), `create_program` (validated write +
@@ -220,10 +224,11 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
   `app/data/serial_resolver.py` is the shared parser for direct live reads and sync. Resolution order
   is live NOTE_TEXT, last persisted PositionState mapping, then curated bootstrap mapping. Current-
   WIP slot queries hide completed slots without deleting their assignment history.
-- **Ship detection is pack-op-driven, not close-only.** A unit is "shipped" when its pack op
-  (ELEV 4200 / RAD 790 / AEGIS 380) is clocked OR the SO is closed. `CLOSE_DATE` lags physical
-  ship by days (S/N 0515 packed 8/21, SO still `Started`), so `SQL_CLOSED` LEFT JOINs the pack-op
-  clock and `ship` = pack date preferred, else close. `SHIP_SINCE = 2026-08-01` floors the window.
+- **Ship detection requires terminal-operation closure, not merely a finished labor clock.** A unit
+  is shipped when its configured Pack & Ship operation (ELEV 4200 / RAD 790 / AEGIS 380) has IFS
+  status 90; TwinWorks then uses the latest finish clock on that operation. `CLOSE_DATE` is the
+  fallback. A changed completion date reopens the SO for reconciliation instead of being skipped.
+  `SHIP_SINCE = 2026-08-01` floors the history window.
 
 ### 4.6 `ml/`
 - **`wi/extractor.py`** — `extract_docx_text` (proven), model-agnostic `LLMWIExtractor`
@@ -296,9 +301,9 @@ upserts `position_state`, and stamps today's `forecast_log` build (idempotent). 
 the matrix's week-over-week slip arrows work (they need ≥2 distinct build_dates). Does NOT retrain.
 
 **Button 2 — Process new ships** (`/admin/process-ships`, on close): a preview→confirm, fast→slow
-flow. **Preview** (`GET .../preview`, read-only) reports newly-closed SOs + which programs would
-cross their train gate. **Fast** (synchronous) records each new close into `position_state`
-(`closed`+pack → drops from WIP into shipped) and backfills its `forecast_log` accuracy — instant
+flow. **Preview** (`GET .../preview`, read-only) reports new shipments and corrected terminal dates,
+plus which programs would cross their train gate. **Fast** (synchronous) reconciles `position_state`
+(`closed`+pack → drops from WIP into shipped) and backfills `forecast_log` by shop order — instant
 feedback. **Slow** (FastAPI BackgroundTask, polled via `GET /admin/sync-status`) recomputes
 `accuracy_forward.json`, rebuilds training rows, retrains any program at/over its threshold,
 reloads the registry, and appends a `model_history` point. Partial-failure safe: each stage is
@@ -390,9 +395,10 @@ The 2026-09-02 product decision limits active scope to Elevator, Aeronose, and A
 enforces `Program.active` at registry loading, sync/data ingress, the WIP state matrix, pooled
 simulation, and forecast logging. BCA is inactive and archived; its immutable evidence remains.
 
-TOOL-01 makes Aeronose the first tooling pilot. Known counts are two assembly jigs, two holding
-fixtures, one trim fixture, three shell lamination molds, and one core-forming mold set. Ryan Miller
-is the current owner/approver; all are Aeronose-dedicated, and the multi-slot families are fungible.
+TOOL-01 makes Aeronose the first tooling pilot. Known/listed counts are two assembly jigs, one wooden
+blue holding fixture `3700HF0001`, one trim fixture, three shell lamination molds, one core-forming
+mold set, six paint dollies, and nine handling dollies. Ryan Miller is the current owner/approver;
+all are Aeronose-dedicated. Dolly compatibility and serviceability remain unapproved.
 Counts and those owner decisions remain draft facts only. The 2026-09-03 WI/IFS review found that
 subring and core tooling belong to separate component routes, trim releases inside op 580, the shell
 mold is held from op 50 through demold at op 570 start, and the top-assembly jig release remains
@@ -473,9 +479,9 @@ Three accuracy tracks, **kept deliberately separate** (blending would double-cou
   horizons; MAE 7.1d, all errors negative (systematically optimistic). PRELIMINARY, n≈8. Seeds
   the EMPIRICAL bias the live model applies today.
 - **Forward maturity** → `accuracy_forward.json` — real physical shipments scored once at the
-  earliest valid pre-pack forecast. It controls the EMPIRICAL→TRAINED gate.
-- **Accuracy v1.0** → immutable `accuracy_summary_log` rows — the latest forecast in fixed 7-13,
-  14-20, and 21-27 day windows before physical pack. It reports score, confidence, MAE, bias, Hit7,
+  earliest valid pre-ship forecast. It controls the EMPIRICAL→TRAINED gate.
+- **Accuracy v1.1** → immutable `accuracy_summary_log` rows — the latest forecast in fixed 7-13,
+  14-20, and 21-27 day windows before completed terminal shipment. It reports score, confidence, MAE, bias, Hit7,
   separate P80 calibration, exclusions, source IDs, and frozen cohort payloads. A headline is hidden
   until every horizon has at least five eligible units.
 - **Threshold gate (per-program, forward-only):** models stay **EMPIRICAL** (apply the measured

@@ -75,7 +75,7 @@ def backtest_units() -> list[dict]:
 
 
 def forward_units() -> list[dict]:
-    """Eligible maturity cohort: one earliest pre-pack forecast per program/shop order."""
+    """Eligible maturity cohort: one earliest pre-ship forecast per program/shop order."""
     path = _db_path()
     if not Path(path).exists():
         return []

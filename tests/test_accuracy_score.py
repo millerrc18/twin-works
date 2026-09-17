@@ -150,7 +150,7 @@ def test_daily_accuracy_snapshots_are_idempotent_append_only_and_provenanced(tmp
         ))
         assert h7.score == 27
         assert h7.sample_size == 1
-        assert h7.formula_version == "TW-ACC-1.0"
+        assert h7.formula_version == "TW-ACC-1.1"
         assert h7.source_forecast_ids_json == "[1]"
         cohort = __import__("json").loads(h7.cohort_json)
         assert cohort[0]["so"] == "SO-A"
@@ -208,7 +208,10 @@ def test_forward_accuracy_counts_only_pre_ship_physical_pack_forecasts(tmp_path,
         asyncio.run(prepare())
         monkeypatch.setattr(settings, "database_url", database_url)
         monkeypatch.setattr(accuracy_forward, "FORWARD_JSON", tmp_path / "accuracy_forward.json")
+        assert accuracy_forward.forward_counts() == {"RAD": 1}
+        assert not accuracy_forward.FORWARD_JSON.exists()
         result = accuracy_forward.compute_forward_accuracy()
+        assert accuracy_forward.FORWARD_JSON.exists()
         assert result["counts"] == {"RAD": 1}
         assert result["by_program"]["RAD"]["mae"] == 5
         assert result["exclusions"]["post_or_same_day_records"] == 2

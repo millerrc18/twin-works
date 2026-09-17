@@ -15,11 +15,13 @@ not require tool serial numbers or create a preventive-maintenance system.
 For the current Aeronose shell-mold case, the shadow assumption is:
 
 - baseline physical count: 3 shell lamination molds;
-- one mold unavailable from 2026-09-03 through 2026-09-25, yielding 2 / 3 available;
-- the outage ends at 2026-09-26 00:00 America/New_York, restoring 3 / 3;
-- if the mold returns sooner, record an immediate return-to-service event;
-- outage reason: tool-shop work for the new core and plug locating template;
-- source status: owner-confirmed provisional until actual tool-shop status is verified.
+- one mold unavailable from an unconfirmed removal date until owner-confirmed return, yielding
+  2 / 3 available during the modeled outage;
+- the prior return estimate was on or before 2026-09-25, but it does not automatically restore capacity;
+- the mold is a physical fabrication aid for the new core and plug locating template; no work is
+  being performed on the mold;
+- record the return-to-service event when Ryan confirms it is physically back; it is immediately
+  production-ready at that point.
 
 The change remains shadow-only until an Aeronose replacement epoch is explicitly promoted.
 
@@ -155,7 +157,7 @@ Initial occupancy should come from IFS rather than manual serial entry:
 
 - shell mold: acquire when op 50/90 begins; release at op 570 demold start;
 - core-forming set: acquire at COREKIT op 600; release after op 700 removal;
-- assembly/holding fixtures: defer until their physical spans are approved.
+- assembly/holding fixture and both dolly families: defer until their physical spans are approved.
 
 Reconstruction records the unit as holding an anonymous fungible slot. Conflicts between inferred
 holders and available count are surfaced for review and block the shadow; they are not resolved by
@@ -209,19 +211,19 @@ availability at its effective timestamp, as requested.
 
 ### AVAIL-05 - Aeronose seed and shadow scenarios
 
-- Record the provisional shell-mold outage as two available through 2026-09-25, three afterward.
+- Record the provisional shell-mold outage as two available until owner-confirmed return, then three.
 - Reconcile current shell/core holders from IFS.
 - Run 0/2/4-hour shell/core turnaround sensitivities.
-- Keep all five tooling pools unbound until the applicable TOOL-01c floor questions are resolved.
+- Keep all seven tooling pools unbound until the applicable TOOL-01c floor questions are resolved.
 
 ## Test and Acceptance Gates
 
 - Event history is append-only at ORM and database levels.
 - Invalid counts, timestamps, sequences, overlaps, identities, and CSRF requests fail closed.
 - An unauthorized viewer cannot submit or replay an authoring request.
-- A one-tool shell-mold outage resolves to 2 / 3 through 2026-09-25 and 3 / 3 from
-  2026-09-26 local time, while remaining correct if baseline capacity later changes.
-- Early return immediately restores the third pooled slot in a successor candidate.
+- A one-tool shell-mold outage resolves to 2 / 3 until an owner-confirmed return event restores
+  3 / 3, while remaining correct if baseline capacity later changes.
+- Owner-confirmed return immediately restores the third pooled slot in a successor candidate.
 - Aggregate capacity reduction is deterministic under input and database-row reordering and never
   invents a physical tool serial.
 - As-of holdings above available count produce a blocking review, never partial output.

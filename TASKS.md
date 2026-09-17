@@ -26,29 +26,94 @@ remains in `AGENTS.md`.
   - Delivered 2026-09-03: the one-slot rule is rejected as a physical fact and retained only in the
     frozen parity model. Evidence: `docs/validation/tool-01c-aeronose-wi-review.md`.
 
-- [ ] **#32c - Remove the op-775 station rule in a successor candidate**
-  - Create a distinct Aeronose candidate that retains the 40-hour part cure but removes the
-    `P3_ELECTRICAL_SEAL` occupancy reservation. Do not mutate the parity epoch or published model.
-  - Acceptance: baseline/candidate date changes are causal and replayable; the cure remains enforced;
-    no fixed-station capacity appears in candidate evidence; promotion still requires the integrated pilot.
+- [ ] **#32c - Govern the op-775 physical and accelerated-cure successors**
+  - [x] **#32c1 - No-station physical correction:** epoch 11 is an `OBSERVE` successor that retains
+    the 40-hour cure and removes `P3_ELECTRICAL_SEAL`. The published `RAD:LEGACY` epoch is unchanged.
+    Baseline/candidate snapshots 30/31 replay exactly; six current units move, including one small
+    adverse queue redistribution that remains visible rather than being hidden.
+  - [ ] **#32c2 - DRDI accelerated cure:** epoch 12 contains sequential 2-hour flashoff and 8-hour
+    cure gates with no fixed station, but remains `DRAFT` while DRDI approval is pending. Transition
+    to `OBSERVE` requires DRDI identifier(s), authorized approver, approval timestamp, and effective
+    date. Never infer approval from verbal progress or replace the 40-hour published/parity route.
+  - Acceptance: both paths are immutable and replayable; accelerated dates are unavailable before
+    complete DRDI evidence; no successor changes publication; final promotion still requires the
+    integrated pilot. See `docs/validation/32c-aeronose-cure-successors.md`.
 
 ## Program Forecast Accuracy
 
-- [x] **ACC-01 - Add honest per-program Accuracy v1.0 scoring**
-  - [x] **ACC-01a - Eligibility and anti-leakage:** use IFS physical pack dates only; reject
-    same-day/post-pack forecasts; select one latest forecast per unit in fixed 7/14/21-day windows.
+- [x] **ACC-01 - Add honest per-program Accuracy v1.1 scoring**
+  - [x] **ACC-01a - Eligibility and anti-leakage:** use completed IFS terminal-operation dates;
+    reject same-day/post-ship forecasts; select one latest forecast per unit in fixed 7/14/21-day windows.
   - [x] **ACC-01b - Score and immutable provenance:** implement the critic-reviewed 0-100 formula,
     independent confidence tiers, separate P80 Wilson coverage, headline gating, and append-only
     daily summary rows with frozen source cohorts and hashes.
   - [x] **ACC-01c - Portfolio and program UX:** add the portfolio Accuracy signal and a responsive
     program Accuracy tab with horizon detail, exclusions, evidence contract, and score history.
+  - [x] **ACC-01e - Reconcile terminal shipment truth:** require the configured Pack & Ship
+    operation to be closed before accepting its latest finish clock; surface changed ship dates as
+    corrections; reconcile forecast history by shop order across zero-padded serial variants.
   - [ ] **ACC-01d - Accumulate and validate forward evidence:** continue daily forecast stamping and
     physical shipment processing; do not rank programs or publish a headline until all horizons have
     at least five eligible units. Revisit weights/SLA only through a new formula version.
-  - Delivered 2026-09-04: first baseline shows Aegis 7-day score 11 with n=1/Insufficient;
+  - Delivered 2026-09-04 and corrected 2026-09-09: first baseline shows Aegis 7-day score 11 with
+    n=1/Insufficient;
     Elevator and Aeronose have no eligible standardized horizon cohort; all headlines are withheld.
-    Existing maturity counts were corrected to ELEV 3, RAD 1, AEGIS 1. See
+    Current maturity counts are ELEV 4, RAD 3, AEGIS 1. See
     `docs/validation/acc-01-program-accuracy.md`.
+
+## Rate Readiness Planning
+
+- [ ] **RATE-01 - Backsolve labor and tooling required to support a target production rate**
+  - Design: `docs/plans/rate-readiness-planner.md`. Critic status: Gemini 3.1 Pro returned
+    `SATISFIED` after joint-vector search, learning/retention cohorts, pre-solver calibration,
+    explicit Pareto dimensions, and measurement-only sustainability were added.
+  - [ ] **RATE-01a - Define demand, staffing, readiness, and feasibility contracts**
+    - Canonicalize monthly/annual rate, product mix, ramp, calendar, shift/overtime, reserve policy,
+      explicit published-or-candidate baseline, skill pools, productive hours/FTE, learning curves,
+      retention yield, and READY/PROVISIONAL/UNRESOLVED behavior.
+    - Acceptance: inactive BCA and mixed contexts are rejected; missing tooling spans cannot produce
+      zero-tool recommendations; missing labor denominators cannot produce headcount.
+    - Progress 2026-09-17: pure contracts now validate active programs, monthly/annual/profile
+      demand, product mix, readiness, tool uncertainty, and productive-hours staffing evidence.
+      Explicit persisted baseline-context selection and governed skill/learning records remain open.
+  - [ ] **RATE-01b - Build deterministic synthetic demand and steady-state measurement**
+    - Generate scenario-only releases; combine inherited WIP, shared-program demand, and governed
+      external load without double counting. Add warm-up, measurement, cool-down, censoring, and
+      measurement-only throughput/backlog stability.
+    - Acceptance: synthetic units never enter operational tables; analytical fixtures match; input
+      order is irrelevant; cooldown backlog clearing cannot make an undersized scenario pass.
+    - Progress 2026-09-17: deterministic fractional accumulation, balanced product-mix allocation,
+      working-day release calendars, future `release_at` enforcement in the scheduler, and strict
+      measurement-window backlog checks are implemented. WIP/demand netting, shared/external demand
+      integration, and sustainable-rate search remain open.
+  - [ ] **RATE-01c - Calibrate throughput, labor productivity, and ramp evidence**
+    - Backtest releases, WIP, completions, labor hours, staffing, cycle time, productive-hours/FTE,
+      learning curves, and retention yield. Review Aeronose and Elevator intervals with IE/floor owners.
+    - Acceptance: owner-approved error thresholds pass before solver recommendations or production UI.
+  - [ ] **RATE-01d - Implement the bounded joint labor/tool package solver**
+    - Search integer capacity vectors with coupled labor/tool clusters, componentwise dominance,
+      hard per-pool/global bounds, result caching, and deterministic stress cases.
+    - Return the FTE/tool-slot/time Pareto frontier, named anchor packages, bottleneck sequence,
+      shared-capacity effects, and `SEARCH INCOMPLETE` when bounds are exhausted.
+    - Acceptance: no worker is double-counted across WCs; isolated zero-gain additions cannot stop
+      coupled search; every feasible package replays; unresolved resources remain unresolved.
+  - [ ] **RATE-01e - Persist immutable scenario versions, runs, replay, and audit exports**
+    - Freeze demand, WIP, epoch definition, transition state, resources, policies, engine version,
+      diagnostics, and hashes. Saving/sharing requires identity, authorization, secure sessions,
+      and CSRF; operational WIP, forecasts, plans, IFS, and published epochs remain untouched.
+  - [ ] **RATE-01f - Add the Rate Planner and Saved Runs workspaces**
+    - Extend Scenarios with monthly/annual inputs, demand profile, results, throughput/backlog,
+      skill-pool hires with WC allocations, tooling, package comparison, readiness, audit export,
+      progress/cancellation, and required-date/requisition-date risk.
+    - Acceptance: provisional/unresolved results are never labeled feasible; responsive, keyboard,
+      light/dark, print, WCAG A/AA, stale-input, cancellation, and performance gates pass.
+  - [ ] **RATE-01g - Complete forward validation and owner acceptance**
+    - Compare recommendations with owner judgment and observed rate performance; document false and
+      missed constraints plus shared-capacity spillover.
+    - Acceptance: approved resource-gap/time-to-rate thresholds pass. Tool recommendations remain
+      gated by TOOL-01d, TOOL-02, and TOOL-03; the feature remains scenario-only.
+  - Sequence: RATE-01a/b may begin from current foundations. RATE-01c must pass before RATE-01d or
+    owner-facing RATE-01f. AVAIL-02 gates saved scenarios. RATE-01g follows program tooling evidence.
 
 ## Platform-Wide Resource Adoption
 
@@ -214,8 +279,8 @@ from the execution sequence and retained only in the deferred evidence section.
 6. TOOL-01c complete the floor check, then implement component routes/substeps and approve bindings.
 7. TOOL-01c1 implement governed, authenticated tooling availability controls in parallel with the
    floor follow-up; it must finish before the tooling shadow.
-8. #32c remove the op-775 station rule in the governed Aeronose successor candidate; do not alter
-   the parity epoch.
+8. #32c1 no-station successor is complete. Finish #32c2 only after DRDI approval evidence is
+   available; do not alter the parity or published epoch.
 9. TOOL-01d run the Aeronose tooling shadow and expose causal explanations.
 10. DOC-01a/DOC-01b add the in-app handbook shell and core user documentation. **Complete
    2026-09-02.**
@@ -251,6 +316,9 @@ critical path. The legacy resource fallback remains until the accepted pilot and
 gates are complete. Full rationale and acceptance details are in
 `docs/plans/three-program-tooling-roadmap.md`.
 
+RATE-01a/b may also proceed as a parallel architecture track. RATE-01c calibration must precede its
+solver and production UI; definitive tool recommendations remain blocked on TOOL-01d/02/03.
+
 ## Three-Program Tooling Adoption
 
 - [x] **SCOPE-01 - Park BCA and restore the three-program product boundary**
@@ -284,19 +352,20 @@ gates are complete. Full rationale and acceptance details are in
   - Design and execution reference: `docs/plans/three-program-tooling-roadmap.md`.
 
   - [ ] **TOOL-01a - Register the Aeronose tooling inventory and authority**
-    - Create internal-only draft pools for two assembly jigs, two holding fixtures, one trim
-      fixture, three shell lamination molds, and one core-forming mold set.
+    - Create internal-only draft pools for two assembly jigs, one holding fixture, one trim
+      fixture, three shell lamination molds, one core-forming mold set, six paint dollies, and nine
+      handling dollies.
     - Record fungibility/named-instance rules, owner, approver, evidence, effective date, review
       date, maintenance calendar, and changeover/cleanup assumptions.
     - Classify each pool as dedicated or physically shared and identify every known consumer. Shared
       demand is modeled honestly; it is never hidden as nonblocking or ghost demand.
     - Acceptance: counts are persisted as owner-supplied facts but cannot affect dates without
       approved operation bindings.
-    - Progress 2026-09-02: five live draft pools now carry counts `2/2/1/3/1`, owner attribution,
-      internal-only status, and a 2026-10-02 review date. The 2026-09-03 review records Ryan Miller
-      as current approver, Aeronose dedication, and family fungibility. They have zero bindings and
-      no forecast effect. Holding-fixture identity, physical release events, component-stream links,
-      current WIP assignments, and unavailable intervals remain open. See
+    - Progress through 2026-09-14: seven live draft pools carry counts `2/1/1/3/1/6/9`, owner
+      attribution, internal-only status, and zero bindings. Holding fixture `3700HF0001` is a single
+      wooden blue fixture. Six paint-dolly and nine handling-dolly identifiers are preserved as
+      evidence, not scheduling instances. Physical spans, component links, current WIP assignments,
+      dolly compatibility/serviceability, and the shell mold's actual return date remain open. See
       `docs/validation/tool-01a-aeronose-inventory.md`.
 
   - [x] **TOOL-01b - Implement atomic occupancy leases and prove cure-station parity**
@@ -324,9 +393,9 @@ gates are complete. Full rationale and acceptance details are in
       routes with live IFS revision 16 top assembly, revision 5 subring, and revision 3 core kit.
     - [x] Record owner/approver, Aeronose dedication, fungibility, op-775 no-station decision, and
       read-only IFS clock-span evidence without creating bindings.
-    - [ ] Complete the floor check first: top-assembly AF release; the separate holding fixtures'
-      identity, purpose, and spans; Dup-1 pin setup; current WIP assignments; and real maintenance
-      unavailability.
+    - [ ] Complete the floor check first: top-assembly AF release; holding fixture `3700HF0001`'s
+      purpose and span; paint/handling dolly spans and compatibility; Dup-1 pin setup; current WIP
+      assignments; shell-mold removal and actual return dates.
     - [ ] Confirm whether normal cleaning/setup is contained in the acquiring operation before
       approving the owner-reported zero post-release lag; IFS idle gaps are not causal proof.
     - [ ] Add candidate route events for top-level ops 50/90 so shell-mold acquisition is not late.
@@ -361,8 +430,9 @@ gates are complete. Full rationale and acceptance details are in
       identity, role, session-cookie, and CSRF gates pass.
     - Add Resource Registry/detail controls for outage, early return, and extension with stale-
       preview rejection, explicit candidate context, capacity-violation guidance, and permanent audit.
-    - Record one provisional shell-mold outage from 2026-09-03 through 2026-09-25, restoring 3 / 3
-      on 2026-09-26 or immediately on an early return. Persist unavailable quantity, not absolute
+    - Record one provisional shell-mold outage from 2026-09-03 until owner-confirmed return. The
+      mold is being used as a fabrication aid, has no work performed on it, and is immediately
+      production-ready on return. Persist unavailable quantity, not absolute
       capacity; individual tool serials and PM scheduling are deferred.
     - Acceptance: event history is immutable; pooled reductions never invent a tool serial; affected
       OBSERVE candidates receive replayable successors; published forecasts remain exact; the UI

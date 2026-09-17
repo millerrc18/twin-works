@@ -6,9 +6,9 @@ Evidence review completed 2026-09-03. No live occupancy binding was created or a
 Aeronose pools remain `DRAFT` / `INTERNAL_ONLY`, carry zero bindings, and cannot affect published
 or shadow forecasts yet.
 
-Ryan Miller is recorded as owner and current approver. All five pools are Aeronose-dedicated.
-Assembly jigs, holding fixtures, and shell lamination molds are owner-confirmed fungible within
-their families. The trim fixture is a singleton. The core-forming capacity is represented as one
+Ryan Miller is recorded as owner and current approver. Seven pools are Aeronose-dedicated.
+Assembly jigs and shell lamination molds are owner-confirmed fungible within their families. The
+holding and trim fixtures are singletons. Paint- and handling-dolly compatibility remains open. The core-forming capacity is represented as one
 coordinated set pending component-stream integration.
 
 ## Controlled Sources
@@ -58,14 +58,19 @@ spans reached three, and the combined spans reached five. Those contradictions s
 clocking spans include queueing, pauses, or off-fixture work. They do not disprove the count, but
 they prohibit deriving occupancy from raw clock duration.
 
-### Holding fixtures: two slots
+### Holding fixture: `3700HF0001`, one slot
 
-The reviewed WIs do not identify a numbered `holding fixture`. ASSY says the radome is moved to a
-`work dolly` during op 580, and no fixed station is identified at op 775. Ryan confirms the two
-holding fixtures are Aeronose-dedicated, interchangeable, and separate from the paint dollies that
-move parts from assembly through paint work centers. Their controlled identity, purpose, and
-physical acquire/release steps remain unresolved. Dolly movements must not be used as proxy
-holding-fixture events, and no binding is permitted until the actual fixture use is explicit.
+The reviewed WIs do not identify a numbered holding fixture. Ryan confirms one Aeronose-dedicated,
+wooden, blue fixture, tool `3700HF0001`. It is separate from both the paint and handling dollies.
+Its purpose and physical acquire/release steps remain unresolved, so no binding is permitted until
+the actual fixture use is explicit.
+
+### Dolly inventory: six paint, nine handling
+
+The tooling list identifies six paint dollies (`3700HD0001`, `SN4`, `SN5`, `SN6`, `-2`, `-3`) and
+nine handling dollies (`3700HD0003-DUP0` through `DUP8`). Paint dollies move radomes from assembly
+through paint. Compatibility, current serviceability, exact occupancy spans, and the handling
+dollies' purpose are not yet approved. Both pools therefore remain count-only and unbound.
 
 ### Trim fixture: `3700TF0001-A01`, one slot
 
@@ -111,13 +116,15 @@ radome.
 ## Op 775 Electrical Sealing
 
 The ASSY WI identifies only shop aid `SA0145` for a cure puck. The puck remains with the part, while
-the radome receives a minimum 40-hour cure. No fixed electrical-seal station is identified, and Ryan
-confirms the work is performed on a dolly wherever inspection needs permit.
+the currently published/parity route receives a minimum 40-hour cure. No fixed electrical-seal
+station is identified, and Ryan confirms the work is performed on a dolly wherever inspection needs
+permit. DRDI approval is now being pursued for a separate 2-hour flashoff plus 8-hour cure path.
 
 IFS reinforces that conclusion: 78 recent op-775 labor spans reached four concurrent units. Labor
 clock spans are not the 40-hour cure, but the observed concurrency is incompatible with one exclusive
-station. The current one-slot `P3_ELECTRICAL_SEAL` rule remains only as frozen parity history; remove
-it in a distinct successor candidate and compare the resulting date changes before promotion.
+station. Epoch 11 removes `P3_ELECTRICAL_SEAL` while retaining 40 hours and is in `OBSERVE`.
+Epoch 12 freezes the proposed 2+8-hour process but remains `DRAFT` pending complete DRDI evidence.
+Neither changes the published `RAD:LEGACY` epoch.
 
 ## Changeover and Maintenance
 
@@ -126,10 +133,9 @@ separate cleanup operation and supports short observed reuse for shell/core mold
 granularity cannot validate zero lag for trim or assembly fixtures. Keep zero lag as an
 owner-confirmed draft, not an approved measured fact.
 
-One shell mold is provisionally treated as completely unavailable from 2026-09-03 through
-2026-09-25 for tool-shop work on a new core and plug locating template. The shadow restores the
-third mold beginning 2026-09-26, or immediately when an earlier return is recorded. Actual tool-shop
-status and removal/return times remain follow-up evidence. Other maintenance exists but no
+One shell mold is confirmed in the tool shop as a physical aid for fabrication of the new core and
+plug locating template; no work is being performed on the mold. It can return to production use
+immediately when Ryan confirms it is back. Actual removal and return times remain follow-up evidence. Other maintenance exists but no
 production-impacting intervals are known; do not invent additional dates. Current shell/core holders
 will be reconstructed from IFS rather than manually entered.
 
@@ -137,15 +143,15 @@ will be reconstructed from IFS rather than manually entered.
 
 Before freezing the Aeronose tooling candidate:
 
-1. Complete the floor check: confirm the top-assembly AF release, the separate holding fixtures'
-   purpose and spans, the Dup-1 pin setup, current WIP assignments, and unavailable intervals.
+1. Complete the floor check: confirm the top-assembly AF release, `3700HF0001` and dolly spans,
+   dolly compatibility/serviceability, Dup-1 pin setup, current WIP assignments, and outage dates.
 2. Confirm whether routine cleaning/setup is contained in the acquiring operation before approving
    zero post-release lag. Do not treat observed idle gaps as cleanup duration.
 3. Split op 580 at the reviewed trim-fixture release point, or add an equally explicit frozen
    substep. A generic op-complete release is known to be wrong.
 4. Add component-stream modeling for `3700ED0001-101SUBRING` and `3700COREKIT`.
 5. Add ops 50 and 90 to the RAD candidate route before binding the shell mold.
-6. Create the no-fixed-station op-775 successor candidate separately from the parity epoch.
+6. Record complete DRDI approval evidence before advancing the accelerated epoch from `DRAFT`.
 
 Until all applicable gates are resolved, the registry must retain zero approved Aeronose tooling
 bindings and published dates must remain unchanged.

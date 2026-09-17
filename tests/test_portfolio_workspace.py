@@ -126,7 +126,7 @@ def test_portfolio_and_observe_workspace_are_registry_driven(tmp_path, monkeypat
         assert "T4 001" in pages["units"].text
         assert "Forecast accuracy" in pages["accuracy"].text
         assert "Headline withheld" in pages["accuracy"].text
-        assert "Physical pack-date performance" in pages["accuracy"].text
+        assert "Completed Pack & Ship operation performance" in pages["accuracy"].text
         assert "TEST-WC" in pages["resources"].text
         assert "No approved resource binding" in pages["assumptions"].text
         assert "CANDIDATE" in pages["history"].text

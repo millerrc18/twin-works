@@ -1,4 +1,4 @@
-"""Fixed-horizon, physical-ship forecast accuracy for TwinWorks."""
+"""Fixed-horizon, terminal-operation shipment accuracy for TwinWorks."""
 from __future__ import annotations
 
 import hashlib
@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import AccuracySummaryLog, ForecastLog, PositionState
 
 
-FORMULA_VERSION = "TW-ACC-1.0"
+FORMULA_VERSION = "TW-ACC-1.1"
 HORIZONS = (7, 14, 21)
 WINDOW_EXTRA_DAYS = 6
 MAE_SLA_DAYS = 14.0
@@ -146,7 +146,7 @@ async def _accuracy_rows(
 
 async def compute_accuracy_scores(
         db: AsyncSession, *, programs: list[str], as_of: date | None = None) -> dict:
-    """Compute Accuracy v1.0 without mutating the score history."""
+    """Compute Accuracy v1.1 without mutating the score history."""
     as_of = as_of or date.today()
     program_codes = [program.upper() for program in programs]
     positions, forecasts = await _accuracy_rows(db, program_codes, as_of)
@@ -244,7 +244,7 @@ async def compute_accuracy_scores(
         "programs": output,
         "headline_weights": HEADLINE_WEIGHTS,
         "mae_sla_days": MAE_SLA_DAYS,
-        "truth": "PHYSICAL_PACK_DATE_ONLY",
+        "truth": "COMPLETED_TERMINAL_SHIP_OPERATION",
     }
 
 
@@ -332,6 +332,7 @@ async def accuracy_trend(
         "as_of_date": row.as_of_date.isoformat(),
         "captured_at": row.captured_at.isoformat(),
         "horizon_days": row.horizon_days,
+        "formula_version": row.formula_version,
         "score": row.score,
         "confidence": row.confidence,
         "sample_size": row.sample_size,

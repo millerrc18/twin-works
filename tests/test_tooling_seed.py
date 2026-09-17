@@ -34,7 +34,7 @@ def test_aeronose_tooling_seed_is_draft_visible_idempotent_and_unbound(tmp_path)
         async with sessions() as db:
             first = await seed_aeronose_tooling_drafts(db)
             await db.commit()
-            assert len(first["created"]) == 5
+            assert len(first["created"]) == 7
             assert first["retained"] == []
             assert first["binding_count"] == 0
 
@@ -53,7 +53,17 @@ def test_aeronose_tooling_seed_is_draft_visible_idempotent_and_unbound(tmp_path)
                        for row in inventory)
             holding = next(row for row in inventory
                            if row["code"] == "AERONOSE_HOLDING_FIXTURE")
-            assert "separate from paint dollies" in holding["review_decisions"]["identity"]
+            assert holding["slot_count"] == 1
+            assert "3700HF0001" in holding["review_decisions"]["identity"]
+            paint = next(row for row in inventory
+                         if row["code"] == "AERONOSE_PAINT_DOLLY")
+            handling = next(row for row in inventory
+                            if row["code"] == "AERONOSE_HANDLING_DOLLY")
+            assert paint["slot_count"] == 6
+            assert handling["slot_count"] == 9
+            assert len(paint["inventory_identifiers"]) == 6
+            assert handling["inventory_identifiers"] == [
+                f"3700HD0003-DUP{number}" for number in range(9)]
             assert all(row["binding_count"] == 0 for row in inventory)
 
             rows = await list_resource_rows(db, date(2026, 9, 2))
@@ -78,6 +88,13 @@ def test_aeronose_tooling_seed_is_draft_visible_idempotent_and_unbound(tmp_path)
             legacy_shell.evidence_end = date(2026, 9, 2)
             legacy_shell.evidence_json = "{}"
             legacy_shell.calculation_method = "Legacy draft count"
+            legacy_holding = await db.scalar(select(ResourceCapacityVersion).join(
+                ResourcePool, ResourceCapacityVersion.pool_id == ResourcePool.id
+            ).where(ResourcePool.code == "AERONOSE_HOLDING_FIXTURE"))
+            legacy_holding.slot_count = 2
+            legacy_holding_assumption = await db.get(
+                ModelAssumption, legacy_holding.assumption_id)
+            legacy_holding_assumption.value_json = "2"
             await db.commit()
 
             second = await seed_aeronose_tooling_drafts(db)
@@ -90,8 +107,15 @@ def test_aeronose_tooling_seed_is_draft_visible_idempotent_and_unbound(tmp_path)
             }
             assert second["created"] == []
             assert second["retained"] == sorted(expected)
-            assert second["reviewed"] == ["AERONOSE_SHELL_LAM_MOLD"]
+            assert second["corrected"] == ["AERONOSE_HOLDING_FIXTURE"]
+            assert second["reviewed"] == [
+                "AERONOSE_HOLDING_FIXTURE", "AERONOSE_SHELL_LAM_MOLD"]
             assert counts_after == counts_before
+
+            holding_after = await db.scalar(select(ResourceCapacityVersion).join(
+                ResourcePool, ResourceCapacityVersion.pool_id == ResourcePool.id
+            ).where(ResourcePool.code == "AERONOSE_HOLDING_FIXTURE"))
+            assert holding_after.slot_count == 1
 
             shell = await db.scalar(select(ModelAssumption).where(
                 ModelAssumption.subject_key == "AERONOSE_SHELL_LAM_MOLD"))
@@ -101,7 +125,9 @@ def test_aeronose_tooling_seed_is_draft_visible_idempotent_and_unbound(tmp_path)
             assert evidence["review_decisions"]["fungibility"] == "FUNGIBLE"
             outage = evidence["operating_rules"]["provisional_availability"]
             assert outage["unavailable_quantity"] == 1
-            assert outage["expected_end_exclusive"] == "2026-09-26T00:00:00-04:00"
+            assert outage["expected_end_exclusive"] is None
+            assert outage["prior_return_estimate"] == "on_or_before_2026-09-25"
+            assert outage["return_control"] == "OWNER_CONFIRMATION_REQUIRED"
 
         await engine.dispose()
 

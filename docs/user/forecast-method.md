@@ -22,11 +22,12 @@ forward-scored shipments support a trained correction.
 - Delta is measured against the effective planning basis.
 
 Tooling candidates remain shadow-only until their assumptions and operation spans pass review.
-## Accuracy v1.0
+## Accuracy v1.1
 
-Accuracy uses only IFS physical pack dates and never scores against RTG targets, contract dates, or
-administrative closes. For each shipped unit, TwinWorks selects the latest forecast captured in the
-7-13, 14-20, and 21-27 day windows before physical shipment.
+Accuracy uses the latest IFS finish clock on a closed terminal Pack & Ship operation and never scores
+against RTG targets or contract dates. Administrative close is a fallback only when no qualifying
+terminal-operation date exists. For each shipped unit, TwinWorks selects the latest forecast
+captured in the 7-13, 14-20, and 21-27 day windows before physical shipment.
 
 Each horizon reports a 0-100 score built from MAE, percentage within seven days, and absolute bias.
 Confidence is separate: fewer than five eligible units is `Insufficient`, 5-11 is `Preliminary`,
@@ -34,5 +35,5 @@ Confidence is separate: fewer than five eligible units is `Insufficient`, 5-11 i
 three horizons have at least five eligible units. P80 coverage is a separate calibration measure
 with an uncertainty interval; it does not inflate or reduce the accuracy score.
 
-Retrospective backtesting, model-training maturity, and Accuracy v1.0 remain distinct evidence
+Retrospective backtesting, model-training maturity, and Accuracy v1.1 remain distinct evidence
 tracks. They are never summed or blended.

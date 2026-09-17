@@ -461,6 +461,11 @@ async def assert_candidate_definition_current(
             current = await _candidate_definition(db, program)
         elif purpose == "physical_pool_shadow":
             current = await _physical_candidate_definition(db, program)
+        elif purpose in {
+                "aeronose_op775_no_station_shadow",
+                "aeronose_op775_accelerated_drdi_shadow"}:
+            from app.services.aeronose_cure_candidate import current_cure_definition
+            current = await current_cure_definition(db, stored)
         else:
             continue
         if _canonical_json(stored) != _canonical_json(current):

@@ -166,7 +166,7 @@ class PositionState(Base):
     last_clock: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     due: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     closed: Mapped[Optional[date]] = mapped_column(Date, nullable=True)      # ship/close date
-    pack: Mapped[Optional[date]] = mapped_column(Date, nullable=True)        # physical pack-op clock
+    pack: Mapped[Optional[date]] = mapped_column(Date, nullable=True)  # terminal-op completion
     source: Mapped[str] = mapped_column(String(12), default="baseline")      # baseline | ifs-sync
     synced_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
 

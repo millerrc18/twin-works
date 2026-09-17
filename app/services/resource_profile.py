@@ -91,6 +91,31 @@ def _routing_work_centers(epoch_selections) -> dict[str, dict[int, str]]:
     return result
 
 
+def _frozen_routing_maps(epoch_selections) -> tuple[dict, dict]:
+    ops = {}
+    cures = {}
+    for program, selection in epoch_selections.items():
+        definition = json.loads(selection.epoch.definition_json)["definition"]
+        routing = definition.get("routing") or {}
+        ops[program] = [tuple(row) for row in routing.get("ops", registry.ops(program))]
+        cures[program] = [tuple(row) for row in routing.get("cures", registry.cures(program))]
+    return ops, cures
+
+
+def _apply_process_overrides(scheduler_profile: dict, epoch_selections) -> None:
+    rules = scheduler_profile["cure_station_rules"]
+    for program, selection in epoch_selections.items():
+        definition = json.loads(selection.epoch.definition_json)["definition"]
+        change = definition.get("process_change") or {}
+        if change.get("station_constraint") == "NONE":
+            operation = int(change["operation"])
+            scheduler_profile["cure_station_rules"] = {
+                key: value for key, value in rules.items()
+                if not (key[0] == program and int(key[1]) == operation)
+            }
+            rules = scheduler_profile["cure_station_rules"]
+
+
 def _shift_values(payload: dict | None, field: str) -> dict[int, float]:
     if not payload:
         return {}
@@ -892,6 +917,10 @@ async def compile_profile(db: AsyncSession, programs, as_of: datetime,
             external_load = assessment.payload
             assumptions.update(assessment.assumption_ids)
             unresolved.extend(assessment.issues)
+    routing_ops, routing_cures = _frozen_routing_maps(epoch_selections)
+    scheduler_profile["routing_ops_map"] = routing_ops
+    scheduler_profile["routing_cures_map"] = routing_cures
+    _apply_process_overrides(scheduler_profile, epoch_selections)
     unresolved = list(dict.fromkeys(unresolved))
     readiness = ("INCOMPLETE" if any(item.severity == "MISSING" for item in unresolved)
                  else "PROVISIONAL" if unresolved else "COMPLETE")

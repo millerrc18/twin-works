@@ -150,6 +150,10 @@ def run_pooled(units_by_program: dict, as_of: datetime, profile=None,
     merge results into one {serial: result} dict. Programs with no shared WC run alone."""
     merged = {}
     profile = profile or _simulation_profile()
+    if ops_map is None:
+        ops_map = profile.get("routing_ops_map")
+    if cures_map is None:
+        cures_map = profile.get("routing_cures_map")
     codes = [c for c in units_by_program if units_by_program.get(c)]
     for group in pool_groups(codes, profile=profile):
         pooled_in = []

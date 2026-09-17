@@ -8,7 +8,7 @@ have actually bitten us. For the full human-facing reference see **MASTER.md**.
 > plan files, legacy workbook artifacts, and the `RTG_` environment prefix.
 ---
 
-## HANDOFF (2026-09-04) - read first if you are picking this up
+## HANDOFF (2026-09-09) - read first if you are picking this up
 
 **Current status:** Active product scope is Elevator, Aeronose, and Aegis. SCOPE-01 is complete:
 `BCAFIN` is inactive, epoch 10 is `ARCHIVED`, and registry/sync/WIP/simulation/forecast surfaces
@@ -16,37 +16,61 @@ exclude it without deleting history. RES-01 retains the generic physical-resourc
 The next modeling path is TOOL-01:
 generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
 PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
-**114 passing tests**; the run still emits existing Python 3.14
+**133 passing tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
 
-**ACC-01 complete:** `app/services/accuracy_score.py` computes critic-reviewed Accuracy v1.0 at
-fixed 7/14/21-day horizons using only `ifs-sync` physical pack dates. Same-day/post-pack forecasts
-are excluded; one latest build in each H..H+6 window is scored. Confidence is separate, P80 Wilson
+**ACC-01 complete:** `app/services/accuracy_score.py` computes critic-reviewed Accuracy v1.1 at
+fixed 7/14/21-day horizons using only `ifs-sync` completed terminal-operation dates. Same-day and
+post-ship forecasts are excluded; one latest build in each H..H+6 window is scored. Confidence is separate, P80 Wilson
 coverage is separate, and the headline is withheld until every horizon reaches n=5. Migration
 `1b2c3d4e5f60` adds immutable daily summaries with frozen cohorts. Current baseline: AEGIS 7-day
-11/n=1/Insufficient; ELEV/RAD have no eligible fixed-horizon cohort. Forward maturity counts are
-ELEV 3, RAD 1, AEGIS 1. See `docs/validation/acc-01-program-accuracy.md`.
+11/n=1/Insufficient; corrected v1.1 evidence now includes ELEV 7-day 89/n=1 and RAD 7-day
+81/n=2 plus 14-day 84/n=1. All remain Insufficient. Forward maturity counts are ELEV 4, RAD 3,
+AEGIS 1. See `docs/validation/acc-01-program-accuracy.md`.
+
+**Shipment reconciliation correction:** a finished labor clock on the terminal operation is not
+itself proof of shipment. Ship detection now requires the configured Pack & Ship operation to have
+IFS status 90 (closed), then uses that operation's latest finish clock. Previously processed shop
+orders reappear when IFS reports a changed terminal completion date; forecast rows reconcile by shop
+order so zero-padded serial variants cannot strand evidence. RAD SN 0511 / SO 1451436 established
+the case: packing began 2026-09-04, physical shipment completed 2026-09-08, and IFS closed the shop
+order 2026-09-09. Historical immutable summaries remain preserved under `TW-ACC-1.0`; corrected
+evidence is labeled `TW-ACC-1.1`.
 
 **Documentation roadmap:** DOC-01 adds a user-facing `/handbook` backed by version-controlled,
 sanitized Markdown. DOC-01a/DOC-01b are complete with nine initial pages; contextual links wait for
 stable tooling views. FastAPI `/docs` remains the API reference.
 
-**TOOL-01a/01c evidence:** pools 25-29 record Aeronose assembly jigs (2), holding fixtures (2), trim
-fixture (1), shell lamination molds (3), and core-forming mold set (1). Ryan Miller is the current
-owner/approver; all pools are Aeronose-dedicated; the multi-slot jig/holding/mold families are
-fungible. They remain DRAFT, INTERNAL_ONLY, unbound, and mathematically inactive. Controlled LAM F,
+**RATE-01 approved plan:** `docs/plans/rate-readiness-planner.md` defines the scenario-only Rate
+Readiness Planner and is tracked as RATE-01a through RATE-01g in `TASKS.md`. Gemini 3.1 Pro returned
+`SATISFIED` after the design added bounded joint labor/tool vector search, dated new-hire
+learning/retention cohorts, calibration before recommendations, explicit Pareto dimensions, and
+measurement-only sustainability. RATE-01a/b may proceed in parallel; RATE-01c must pass before the
+solver or owner-facing UI. Definitive tooling recommendations remain gated by TOOL-01d/02/03.
+The first RATE foundation is implemented in `app/services/rate_readiness.py`: active-program and
+mix validation, monthly/annual/profile canonicalization, deterministic working-day releases,
+future `release_at` scheduler enforcement, readiness/tool/headcount gating, and measurement-only
+backlog sustainability. It remains non-persistent and non-user-facing pending the rest of 01a/b.
+
+**TOOL-01a/01c evidence:** pools 25-31 record Aeronose assembly jigs (2), one wooden blue holding
+fixture `3700HF0001`, trim fixture (1), shell lamination molds (3), core-forming mold set (1), paint
+dollies (6), and handling dollies (9). Ryan Miller is the current owner/approver; all pools are
+Aeronose-dedicated. Dolly compatibility is not yet approved. They remain DRAFT, INTERNAL_ONLY,
+unbound, and mathematically inactive. Controlled LAM F,
 COREKIT H, ASSY K, and PAINT B WIs plus live IFS timing were reviewed 2026-09-03. Shell mold has a
 candidate op-50-start to op-570-start span; the core set belongs to separate `3700COREKIT`; subring
 jig work belongs to separate `3700ED0001-101SUBRING`; trim release occurs inside op 580; top-level
-AF release remains absent from the WI; holding fixtures are confirmed separate from paint dollies
-but their identity/use spans remain unresolved; Dup-1 pin setup impact is unknown. See
+AF release remains absent from the WI; the holding-fixture identity/count is resolved but its use
+span remains open; paint/handling dolly spans and serviceability remain open; Dup-1 pin setup impact
+is unknown. See
 `docs/validation/tool-01c-aeronose-wi-review.md`.
 
 **TOOL-01c1 availability plan:** the approved design is
 `docs/plans/tooling-availability-control.md`; unresolved floor questions are in
 `docs/validation/tool-01c-open-floor-questions.md`. Phase 1 is count-based and defers serials/PM.
-One shell mold is provisionally unavailable through 2026-09-25, restoring 3 / 3 on 2026-09-26 or
-immediately on early return. Availability authoring stays disabled until application identity,
+One shell mold is confirmed in the tool shop as a fabrication aid for the new core/plug locating
+template; no work is being performed on the mold, and it is production-ready immediately upon Ryan's
+return confirmation. The actual return date remains open. Availability authoring stays disabled until application identity,
 server-derived roles, secure cookie sessions, and CSRF are implemented. Events are append-only and
 shadow-only; persist unavailable quantity and never invent a physical tool serial.
 
@@ -82,10 +106,11 @@ database and its backups.
   valid published epoch.
 
 **Remaining work:**
-1. **#32c op-775 successor correction:** floor ownership, ASSY Rev K, and live IFS clocking confirm
-   there is no fixed electrical-seal station. Keep the one-slot rule only in the frozen parity
-   epoch; remove it in a distinct Aeronose successor candidate while retaining the 40-hour cure.
-   See `TASKS.md` and `docs/validation/tool-01c-aeronose-wi-review.md`.
+1. **#32c op-775 cure successors:** epoch 11 is `OBSERVE`, retains the 40-hour cure, and removes the
+   false fixed-station reservation. Snapshots 30/31 replay exactly and publication remains
+   `RAD:LEGACY`. Epoch 12 contains the proposed 2-hour flashoff plus 8-hour accelerated cure but is
+   `DRAFT`; it cannot enter OBSERVE until DRDI identifiers, approver, approval timestamp, and
+   effective date are recorded. See `docs/validation/32c-aeronose-cure-successors.md`.
 2. **Three-program tooling pivot:** SCOPE-01, RES-01, TOOL-01a, and TOOL-01b are complete. Continue
    TOOL-01c by completing the floor check first, then add component-route support and the reviewed
    trim split/substep in the order defined
@@ -273,10 +298,11 @@ caveats, Δ measured vs the RTG target the team actually works to.
    the last persisted `PositionState` mapping before bootstrap data. Never label a known S/N with
    its SO number. `slot_service.get_slots` returns current-WIP slots only while retaining completed
    assignment rows as history.
-4b. **Ship detection = pack-op clocked OR SO closed, not close-only.** `CLOSE_DATE` lags the
-   physical ship by days (a unit packs Friday, the SO closes the next week). `SQL_CLOSED` LEFT
-   JOINs the pack-op clock (ELEV 4200 / RAD 790 / AEGIS 380); ship date = pack preferred, else
-   close. `SHIP_SINCE=2026-08-01` floors the window so it doesn't pull all history.
+4b. **Ship detection = terminal Pack & Ship operation CLOSED OR SO closed.** A finished labor
+   clock can occur while packing is still underway, so `SQL_CLOSED` requires IFS operation status
+   90 before accepting the latest terminal-operation finish (ELEV 4200 / RAD 790 / AEGIS 380).
+   `CLOSE_DATE` remains the fallback. Previously recorded SOs are reconciled when that completion
+   date changes. `SHIP_SINCE=2026-08-01` floors the history window.
 5. **Python can't call the IFS/ai-critic MCP** — only the assistant can. Scripts read pre-pulled JSON.
 6. **Console is cp1252** on this box — Δ/▲/✓/• chars crash `print`; write to a UTF-8 file or use PYTHONIOENCODING=utf-8.
 7. **Kill Excel before rebuilding** the workbook: `powershell Get-Process EXCEL | Stop-Process -Force`, remove `~$` lock.

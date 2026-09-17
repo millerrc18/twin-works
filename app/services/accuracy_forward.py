@@ -1,8 +1,8 @@
-"""Forward forecast accuracy from real prospective forecasts and physical pack dates.
+"""Forward forecast accuracy from prospective forecasts and terminal shipment dates.
 
-This maturity track remains separate from the fixed-horizon Accuracy v1.0 score and from the
-retrospective backtest. Each physical shipment is scored once at its earliest valid pre-pack
-forecast. Same-day/post-pack logs and administrative-close-only units never count toward training.
+This maturity track remains separate from the fixed-horizon Accuracy v1.1 score and from the
+retrospective backtest. Each physical shipment is scored once at its earliest valid pre-ship
+forecast. Same-day/post-ship logs and administrative-close-only units never count toward training.
 """
 import json
 import sqlite3
@@ -25,8 +25,8 @@ def _date(value):
     return date.fromisoformat(str(value)) if value else None
 
 
-def compute_forward_accuracy() -> dict:
-    """Score one earliest valid pre-pack P50 per physical shipment."""
+def compute_forward_accuracy(*, persist: bool = True) -> dict:
+    """Score one earliest valid pre-ship P50 per physical shipment."""
     path = _db_path()
     if not Path(path).exists():
         return _empty()
@@ -88,13 +88,14 @@ def compute_forward_accuracy() -> dict:
             "missing_physical_pack_units": len(missing_pack_units),
         },
         "note": (
-            "Physical pack dates only; one earliest valid pre-pack forecast per program/shop "
-            "order. Same-day/post-pack records are rejected. Kept separate from fixed-horizon "
-            "Accuracy v1.0 and the retrospective backtest."
+            "Completed terminal-operation dates only; one earliest valid pre-ship forecast per "
+            "program/shop order. Same-day/post-ship records are rejected. Kept separate from "
+            "fixed-horizon Accuracy v1.1 and the retrospective backtest."
         ),
     }
-    with FORWARD_JSON.open("w", encoding="utf-8") as handle:
-        json.dump(result, handle, indent=2)
+    if persist:
+        with FORWARD_JSON.open("w", encoding="utf-8") as handle:
+            json.dump(result, handle, indent=2)
     return result
 
 
@@ -124,5 +125,5 @@ def _empty():
 
 
 def forward_counts() -> dict:
-    """Per-program count of eligible physical-pack forward ships."""
-    return compute_forward_accuracy().get("counts", {})
+    """Per-program count of eligible terminal-operation forward ships."""
+    return compute_forward_accuracy(persist=False).get("counts", {})

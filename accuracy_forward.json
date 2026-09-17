@@ -7,32 +7,32 @@
       "hit7": 0
     },
     "ELEV": {
-      "n": 3,
-      "mae": 4.3,
-      "bias": 4.3,
+      "n": 6,
+      "mae": 2.7,
+      "bias": 1.7,
       "hit7": 100
     },
     "RAD": {
-      "n": 1,
-      "mae": 7,
-      "bias": 7,
+      "n": 5,
+      "mae": 5,
+      "bias": -1,
       "hit7": 100
     }
   },
   "counts": {
     "AEGIS": 1,
-    "ELEV": 3,
-    "RAD": 1
+    "ELEV": 6,
+    "RAD": 5
   },
   "overall": {
-    "n": 5,
-    "mae": 5.8,
-    "bias": 5.8,
-    "hit7": 80
+    "n": 12,
+    "mae": 4.2,
+    "bias": 1.2,
+    "hit7": 92
   },
   "exclusions": {
-    "post_or_same_day_records": 11,
-    "missing_physical_pack_units": 1
+    "post_or_same_day_records": 13,
+    "missing_physical_pack_units": 2
   },
-  "note": "Physical pack dates only; one earliest valid pre-pack forecast per program/shop order. Same-day/post-pack records are rejected. Kept separate from fixed-horizon Accuracy v1.0 and the retrospective backtest."
+  "note": "Completed terminal-operation dates only; one earliest valid pre-ship forecast per program/shop order. Same-day/post-ship records are rejected. Kept separate from fixed-horizon Accuracy v1.1 and the retrospective backtest."
 }

@@ -91,17 +91,22 @@ async def stamp_build(db: AsyncSession, ds, programs=None,
                 skipped_programs=[p for p in programs if p not in active_programs])
 
 
-async def backfill_close(db: AsyncSession, serial: str, actual_close: date) -> int:
-    """Set actual_close + error_days (p50 - actual; + = pessimistic/late) on every prior
-    un-backfilled log row for this serial. Returns rows touched. Idempotent."""
-    rows = (await db.execute(
-        select(ForecastLog).where(ForecastLog.serial == serial,
-                                  ForecastLog.actual_close.is_(None)))).scalars().all()
+async def backfill_close(
+        db: AsyncSession, serial: str, actual_close: date, *, so: str | None = None) -> int:
+    """Reconcile actual ship and error on every forecast for a shop order.
+
+    Shop order is the stable identity because legacy rows may retain zero-padded serials. The
+    serial-only path remains for older callers that do not have a shop order.
+    """
+    identity = ForecastLog.so == so if so else ForecastLog.serial == serial
+    rows = (await db.execute(select(ForecastLog).where(identity))).scalars().all()
     n = 0
     for r in rows:
-        r.actual_close = actual_close
-        r.error_days = (r.p50_date - actual_close).days if r.p50_date else None
-        n += 1
+        error_days = (r.p50_date - actual_close).days if r.p50_date else None
+        if r.actual_close != actual_close or r.error_days != error_days:
+            r.actual_close = actual_close
+            r.error_days = error_days
+            n += 1
     await db.commit()
     return n
 

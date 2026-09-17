@@ -37,10 +37,12 @@ The program manager has identified the following physical counts:
 | Tool pool | Count | Current status |
 | --- | ---: | --- |
 | Assembly jigs | 2 | Dedicated/fungible; split subring/top-level spans, final release pending |
-| Holding fixtures | 2 | Dedicated/fungible; separate from paint dollies; identity/use pending |
+| Holding fixture | 1 | Wooden blue `3700HF0001`; purpose/use span pending |
 | Trim fixture | 1 | `3700TF0001-A01`; release occurs inside op 580 |
 | Shell lamination molds | 3 | Dedicated/fungible; candidate op 50 to op 570-start |
 | Core-forming mold set | 1 | Coordinated set on separate `3700COREKIT` route |
+| Paint dollies | 6 | Exact listed identifiers recorded; compatibility/span pending |
+| Handling dollies | 9 | `3700HD0003-DUP0` through `DUP8`; purpose/span pending |
 
 Counts alone do not authorize schedule impact. Each pool also requires instance/fungibility review,
 acquire and release events, minimum hold and cleanup/changeover time, maintenance exceptions,
@@ -84,16 +86,17 @@ three-program platform infrastructure. No BCA physical pool was created.
 
 #### TOOL-01a - Inventory and authority
 
-**Progress 2026-09-03:** all five counts remain visible `DRAFT` / `INTERNAL_ONLY` slot pools with
-zero bindings. Ryan Miller is recorded as current owner/approver; every pool is Aeronose-dedicated;
-assembly jigs, holding fixtures, and shell molds are fungible. Controlled WIs and read-only IFS
-clocking resolved the shell/core candidate boundaries and disproved the fixed op-775 station, but
-holding-fixture identity/use, the top-assembly AF release, trim's mid-op release event, component links,
-current WIP assignments, and real unavailable intervals remain open. See
+**Progress through 2026-09-14:** seven inventory families are visible `DRAFT` / `INTERNAL_ONLY`
+with zero bindings. Ryan Miller is recorded as current owner/approver. The holding-fixture count and
+identity are corrected to one wooden blue `3700HF0001`; six paint dollies and nine handling dollies
+are recorded from the tooling list. Controlled WIs and read-only IFS clocking resolved the
+shell/core candidate boundaries and disproved the fixed op-775 station, but holding/dolly use spans,
+top-assembly AF release, trim's mid-op release event, component links, current WIP assignments, and
+the shell mold's actual return date remain open. See
 `docs/validation/tool-01a-aeronose-inventory.md` and
 `docs/validation/tool-01c-aeronose-wi-review.md`.
 
-- Create draft `TOOL` pools for the five known tool families and their confirmed counts.
+- Create draft `TOOL` pools for the seven known tool families and their confirmed/listed counts.
 - Record whether instances are fungible or individually constrained.
 - Classify every pool as dedicated or physically shared. A shared tool must identify every known
   consuming program; demand is never hidden or treated as a nonblocking ghost record.
@@ -126,9 +129,9 @@ rendering follows real Aeronose bindings in TOOL-01d. See
 
 - Controlled-WI and live-IFS review completed 2026-09-03. Top assembly uses routing revision 16;
   subring and core-kit tooling live on separate revision-5 and revision-3 component routes.
-- Complete the floor check before route engineering: confirm the top-assembly AF release; identify
-  the separate holding fixtures and their use spans; validate Dup-1 pin setup; capture current WIP
-  assignments and actual unavailable windows.
+- Complete the floor check before route engineering: confirm the top-assembly AF release; establish
+  `3700HF0001` and dolly use spans; validate Dup-1 pin setup; capture current WIP assignments and
+  actual unavailable windows.
 - Confirm whether normal cleaning/setup belongs inside the acquiring operation before approving zero
   post-release lag; do not derive lag from idle gaps or raw clock spans.
 - Add top-level candidate events for ops 50/90 before binding the shell mold from op 50 start through
@@ -136,8 +139,9 @@ rendering follows real Aeronose bindings in TOOL-01d. See
 - Link `3700ED0001-101SUBRING` and `3700COREKIT` component streams to the consuming top-level unit.
 - Split op 580 at the reviewed trim-fixture release point, or add an equally explicit frozen substep;
   full-op clocking includes dolly chamfer and overstates the one trim fixture's occupancy.
-- Freeze only approved spans and the no-fixed-station op-775 correction in a successor Aeronose
-  candidate epoch. Never alter the frozen parity epoch or published model.
+- Epoch 11 now freezes the no-fixed-station op-775 correction with the existing 40-hour cure in
+  `OBSERVE`. Epoch 12 contains the proposed 2-hour flashoff plus 8-hour cure but remains `DRAFT`
+  until complete DRDI approval evidence is recorded. Never alter the parity epoch or published model.
 
 #### TOOL-01c1 - Governed tooling availability controls
 
@@ -146,8 +150,8 @@ rendering follows real Aeronose bindings in TOOL-01d. See
 - Initially authorize Ryan Miller and configured data administrators; all other users are read-only.
 - Persist unavailable quantity and compile aggregate pooled capacity reductions without inventing
   physical tool serials.
-- Record the provisional one-shell-mold outage through 2026-09-25, with immediate early return and
-  3 / 3 restored beginning 2026-09-26.
+- Record the provisional one-shell-mold outage until Ryan confirms return. The mold is a fabrication
+  aid for the new locating template and returns to production availability immediately.
 - Run in parallel with the TOOL-01c floor follow-up, but complete before TOOL-01d shadow evaluation.
 
 #### TOOL-01d - Shadow evaluation and explainability
@@ -198,7 +202,7 @@ rendering follows real Aeronose bindings in TOOL-01d. See
    station; keep the old one-slot rule only as frozen parity history.
 6. TOOL-01c complete the floor check, then add candidate route/component events and approve bindings.
 7. TOOL-01c1 implement authenticated tooling availability controls in parallel with the floor follow-up.
-8. #32c remove the op-775 station reservation in the governed successor candidate.
+8. #32c1 no-station successor is complete; advance #32c2 only after DRDI approval evidence.
 9. TOOL-01d run the Aeronose tooling shadow and expose explanations.
 10. DOC-01a/DOC-01b add the in-app handbook shell and core user documentation.
 11. UI-01d add the three-program resource/tooling pressure board from governed data.

@@ -2,7 +2,7 @@
 
 Button 1  sync_positions : pull current op position + last-clock + due for every live WIP unit
                            from IFS, upsert PositionState, stamp today's ForecastLog build.
-Button 2  process_ships   : (fast) detect newly-closed SOs, mark them shipped + backfill their
+Button 2  process_ships   : (fast) detect new or corrected shipments and reconcile their
                            ForecastLog accuracy; (slow) re-score forward accuracy, rebuild
                            training rows, retrain if a program hit its threshold, reload registry.
 
@@ -37,10 +37,9 @@ def _pack_op(program: str) -> int:
 # history (already covered by the retrospective backtest); pulling them all floods the forward set.
 SHIP_SINCE = "2026-08-01"
 
-# SHIPPED SOs for a program since SHIP_SINCE. "Shipped" = the pack op was clocked (PHYSICAL ship)
-# OR the SO was administratively closed. Pack-op completion is the true ship signal — the shop
-# order CLOSE_DATE often lags days behind the physical ship (e.g. S/N 0515 packed 8/21, SO still
-# 'Started'). We join the pack-op clock so a packed-but-not-closed unit is still detected.
+# SHIPPED SOs for a program since SHIP_SINCE. "Shipped" requires the terminal Pack & Ship
+# operation to be closed, or the SO to be administratively closed. A finished labor clock alone is
+# not enough because packing can begin days before the terminal operation is complete.
 SQL_CLOSED = """
 SELECT s.ORDER_NO AS SO,
        TO_CHAR(s.REVISED_DUE_DATE,'YYYY-MM-DD') AS DUE,
@@ -51,6 +50,13 @@ LEFT JOIN (
     SELECT c.ORDER_NO, MAX(c.FINISH_TIME) AS PACK_CLK
     FROM GD_SHOP_FLOOR_CLOCKING c
     WHERE c.OPERATION_NO = {packop} AND c.FINISH_TIME IS NOT NULL
+      AND EXISTS (
+          SELECT 1
+          FROM SO_OPER_DISPATCH_LIST_CFV o
+          WHERE o.ORDER_NO = c.ORDER_NO
+            AND o.OPERATION_NO = c.OPERATION_NO
+            AND o.OPER_STATUS_CODE_DB = 90
+      )
     GROUP BY c.ORDER_NO
 ) p ON p.ORDER_NO = s.ORDER_NO
 WHERE s.PROJECT_ID = '{project}' AND s.PART_NO IN ({parts})
@@ -215,9 +221,11 @@ async def sync_positions(db: AsyncSession) -> dict:
 
 # ---------- Button 2: process new ships ----------
 def _pull_closed(client: IfsMcpClient, program: str) -> dict:
-    """Blocking pull of SHIPPED SOs since SHIP_SINCE (pack-op clocked OR closed).
-    {so: dict(closed, due, pack, ship, serial)}. `ship` = pack date if present else close date —
-    the date used as the actual ship for accuracy scoring."""
+    """Pull shipped SOs whose terminal operation or shop order is closed.
+
+    The terminal operation's latest finished clock is the physical ship date. Administrative
+    close is a fallback because it can lag the floor event.
+    """
     proj, parts = PSVC.ifs_meta()[program]
     parts_in = ",".join(f"'{p}'" for p in parts)
 
@@ -243,60 +251,96 @@ def _pull_closed(client: IfsMcpClient, program: str) -> dict:
     return out
 
 
-async def _already_closed_sos(db: AsyncSession) -> set:
+async def _recorded_ship_state(db: AsyncSession) -> dict[str, PositionState]:
     rows = (await db.execute(
-        select(PositionState.so).where(PositionState.closed.isnot(None)))).scalars().all()
-    return set(rows)
+        select(PositionState).where(PositionState.closed.isnot(None)))).scalars().all()
+    return {row.so: row for row in rows}
+
+
+def _shipment_change(so: str, data: dict, prior: PositionState | None) -> dict | None:
+    """Describe a new ship or a corrected terminal-completion date."""
+    ship = _pd(data.get("ship"))
+    if ship is None:
+        return None
+    previous_ship = (prior.pack or prior.closed) if prior else None
+    if prior is not None and previous_ship == ship:
+        return None
+    return {
+        "so": so,
+        "serial": data["serial"],
+        "closed": data.get("closed"),
+        "pack": data.get("pack"),
+        "ship": ship.isoformat(),
+        "previous_ship": previous_ship.isoformat() if previous_ship else None,
+        "action": "new" if prior is None or prior.closed is None else "corrected",
+    }
 
 
 async def preview_ships(db: AsyncSession) -> dict:
     """Read-only: which SOs newly closed since last sync, and would any program cross threshold."""
     client = await _client(db)
     await PS.seed_from_baseline(db)
-    known = await _already_closed_sos(db)
+    recorded = await _recorded_ship_state(db)
     from app.services import accuracy_forward as AF
     counts = AF.forward_counts()
     new_by_prog, would_train = {}, []
     for program in PROGRAMS():
         pulled = await asyncio.to_thread(_pull_closed, client, program)
-        fresh = [dict(so=so, serial=d["serial"], closed=d["closed"])
-                 for so, d in pulled.items() if so not in known]
+        fresh = [change for so, data in pulled.items()
+                 if (change := _shipment_change(so, data, recorded.get(so))) is not None]
         if fresh:
             new_by_prog[program] = fresh
     # threshold check
     from ml.model.registry import registry_model
     for program, fresh in new_by_prog.items():
-        projected = counts.get(program, 0) + len(fresh)
+        projected = counts.get(program, 0) + sum(
+            row["action"] == "new" for row in fresh)
         if projected >= registry_model.threshold_for(program):
             would_train.append(program)
     total = sum(len(v) for v in new_by_prog.values())
-    return dict(new_count=total, new_by_program=new_by_prog, would_train=would_train)
+    corrections = sum(
+        row["action"] == "corrected"
+        for rows in new_by_prog.values() for row in rows)
+    return dict(
+        new_count=total,
+        new_ship_count=total - corrections,
+        corrected_count=corrections,
+        new_by_program=new_by_prog,
+        would_train=would_train,
+    )
 
 
 async def process_ships_fast(db: AsyncSession) -> dict:
-    """FAST stage (sync feedback): record newly-closed SOs + backfill their ForecastLog accuracy."""
+    """FAST stage: record new/corrected shipments and reconcile forecast accuracy."""
     client = await _client(db)
     run = await _acquire(db, "ships")
     try:
         await PS.seed_from_baseline(db)
-        known = await _already_closed_sos(db)
+        prior_by_so = await _recorded_ship_state(db)
         recorded = []
         for program in PROGRAMS():
             pulled = await asyncio.to_thread(_pull_closed, client, program)
             for so, d in pulled.items():
-                if so in known:
+                change = _shipment_change(so, d, prior_by_so.get(so))
+                if change is None:
                     continue
                 pack = _pd(d["pack"])
                 ship = _pd(d["ship"])          # pack date preferred, else close date
-                # Record the ship. `closed` in PositionState = the effective ship date so the
-                # unit drops from WIP even when the SO close is still lagging (packed-not-closed).
-                await PS.upsert(db, so, program, d["serial"], closed=ship, pack=pack,
-                                due=_pd(d["due"]), source="ifs-sync")
+                # PositionState.closed is the effective ship date so the unit drops from WIP even
+                # when the administrative SO close lags the completed terminal operation.
+                await PS.upsert(
+                    db, so, program, d["serial"],
+                    maxop=_pack_op(program) if pack else None,
+                    last_clock=ship,
+                    closed=ship,
+                    pack=pack,
+                    due=_pd(d["due"]),
+                    source="ifs-sync",
+                )
                 await db.commit()
                 if ship:
-                    await FL.backfill_close(db, d["serial"], ship)
-                recorded.append(dict(so=so, serial=d["serial"],
-                                     closed=d["closed"], pack=d["pack"], ship=d["ship"]))
+                    await FL.backfill_close(db, d["serial"], ship, so=so)
+                recorded.append(change)
         PS.invalidate_cache()
         # NOTE: run left ACTIVE on purpose; the slow stage finishes it.
         run_id = run.id
