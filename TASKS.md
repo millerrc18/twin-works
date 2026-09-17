@@ -67,15 +67,18 @@ remains in `AGENTS.md`.
   - Design: `docs/plans/rate-readiness-planner.md`. Critic status: Gemini 3.1 Pro returned
     `SATISFIED` after joint-vector search, learning/retention cohorts, pre-solver calibration,
     explicit Pareto dimensions, and measurement-only sustainability were added.
-  - [ ] **RATE-01a - Define demand, staffing, readiness, and feasibility contracts**
+  - [x] **RATE-01a - Define demand, staffing, readiness, and feasibility contracts**
     - Canonicalize monthly/annual rate, product mix, ramp, calendar, shift/overtime, reserve policy,
       explicit published-or-candidate baseline, skill pools, productive hours/FTE, learning curves,
       retention yield, and READY/PROVISIONAL/UNRESOLVED behavior.
     - Acceptance: inactive BCA and mixed contexts are rejected; missing tooling spans cannot produce
       zero-tool recommendations; missing labor denominators cannot produce headcount.
-    - Progress 2026-09-17: pure contracts now validate active programs, monthly/annual/profile
-      demand, product mix, readiness, tool uncertainty, and productive-hours staffing evidence.
-      Explicit persisted baseline-context selection and governed skill/learning records remain open.
+    - Delivered 2026-09-17: active-program and mixed-context gates; monthly/annual/profile demand;
+      product mix; readiness/tool uncertainty; productive-hours staffing contracts; immutable
+      published/candidate baseline snapshots; and effective-dated labor-pool evidence for current
+      FTE, eligible WCs/shifts, learning curves, retention yield, ownership, and review dates.
+      No staffing values are seeded without owner evidence. See
+      `docs/validation/rate-01a-governance.md`.
   - [ ] **RATE-01b - Build deterministic synthetic demand and steady-state measurement**
     - Generate scenario-only releases; combine inherited WIP, shared-program demand, and governed
       external load without double counting. Add warm-up, measurement, cool-down, censoring, and

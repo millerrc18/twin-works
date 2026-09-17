@@ -197,6 +197,9 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
   canonicalization, deterministic product-mix and working-day releases, scenario-only scheduler
   inputs, readiness/tool/staffing gates, and measurement-window sustainability. Solver, persistence,
   calibration, and UI remain gated to later RATE phases.
+- **`rate_governance.py`** — RATE-01a governed context/evidence: immutable published or candidate
+  baseline snapshots, exact epoch hashes, labor-pool staffing assumptions, productive hours/FTE,
+  WC/shift eligibility, learning curves, retention yield, effective dates, and readiness.
 - **`program_service.py`** — the DB-backed program config source (see §5.2). Sync cached
   `load_specs()` (DB row or {} → routers fallback), `program_order`/`names`/`name`/`ifs_meta`/
   `threshold`, `seed_from_routers` (one-time copy of the 3), `create_program` (validated write +
