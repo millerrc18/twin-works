@@ -9,6 +9,8 @@
 - Added the RATE-01a/b planning foundation for deterministic monthly/annual/profile demand,
   working-calendar releases, future-release enforcement, readiness/staffing gates, and
   measurement-only backlog sustainability. No owner-facing sizing recommendation is enabled yet.
+- Completed RATE-01b demand integration and analytical search: WIP/customer netting, shared-program
+  coverage, governed external demand, labor/tool lower bounds, and bounded sustainable-rate search.
 
 ## 2026-09-09
 

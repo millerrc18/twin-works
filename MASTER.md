@@ -200,6 +200,12 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 - **`rate_governance.py`** — RATE-01a governed context/evidence: immutable published or candidate
   baseline snapshots, exact epoch hashes, labor-pool staffing assumptions, productive hours/FTE,
   WC/shift eligibility, learning curves, retention yield, effective dates, and readiness.
+- **`rate_demand.py`** — RATE-01b exact WIP/customer-demand netting, scenario-only release
+  conversion, required shared-program WIP coverage, and immutable external-load folding with
+  tracked-program exclusion, quality weights, stable pool codes, and readiness.
+- **`rate_capacity.py`** — RATE-01b analytical remaining-route labor bounds, half-open pooled-tool
+  concurrency bounds, and bounded exhaustive sustainable-rate search that does not assume
+  monotonic discrete feasibility.
 - **`program_service.py`** — the DB-backed program config source (see §5.2). Sync cached
   `load_specs()` (DB row or {} → routers fallback), `program_order`/`names`/`name`/`ifs_meta`/
   `threshold`, `seed_from_routers` (one-time copy of the 3), `create_program` (validated write +

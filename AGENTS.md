@@ -16,7 +16,7 @@ exclude it without deleting history. RES-01 retains the generic physical-resourc
 The next modeling path is TOOL-01:
 generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
 PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
-**139 passing tests**; the run still emits existing Python 3.14
+**153 passing tests**; the run still emits existing Python 3.14
 `datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
 
 **ACC-01 complete:** `app/services/accuracy_score.py` computes critic-reviewed Accuracy v1.1 at
@@ -52,7 +52,10 @@ mix validation, monthly/annual/profile canonicalization, deterministic working-d
 future `release_at` scheduler enforcement, readiness/tool/headcount gating, and measurement-only
 backlog sustainability. RATE-01a is complete through `rate_governance.py`: immutable baseline
 snapshots plus effective-dated staffing evidence tied to LABOR/HOURS pools. No staffing values are
-seeded without owner evidence. RATE-01b remains non-user-facing and incomplete.
+seeded without owner evidence. RATE-01b is complete through `rate_demand.py` and `rate_capacity.py`:
+WIP/customer netting, shared-program coverage, governed external demand, labor/tool lower bounds,
+and bounded nonmonotonic rate search. The RATE foundation remains non-user-facing; RATE-01c
+calibration is the next gate.
 
 **TOOL-01a/01c evidence:** pools 25-31 record Aeronose assembly jigs (2), one wooden blue holding
 fixture `3700HF0001`, trim fixture (1), shell lamination molds (3), core-forming mold set (1), paint

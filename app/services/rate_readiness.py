@@ -176,7 +176,7 @@ def canonicalize_demand(
     return CanonicalDemand(months=tuple(output))
 
 
-def _working_days(month: date, policy: WorkingCalendar) -> list[date]:
+def working_days(month: date, policy: WorkingCalendar) -> list[date]:
     shutdowns = set(policy.shutdown_dates)
     allowed = set(policy.working_weekdays)
     if not allowed or any(day < 0 or day > 6 for day in allowed):
@@ -196,7 +196,7 @@ def build_release_calendar(
     releases = []
     sequence_by_program: dict[str, int] = {}
     for month in demand.months:
-        days = _working_days(month.month, working_calendar)
+        days = working_days(month.month, working_calendar)
         if month.units and not days:
             raise RatePlanError(f"no working days in {month.month.isoformat()}")
         variants = [

@@ -79,16 +79,19 @@ remains in `AGENTS.md`.
       FTE, eligible WCs/shifts, learning curves, retention yield, ownership, and review dates.
       No staffing values are seeded without owner evidence. See
       `docs/validation/rate-01a-governance.md`.
-  - [ ] **RATE-01b - Build deterministic synthetic demand and steady-state measurement**
+  - [x] **RATE-01b - Build deterministic synthetic demand and steady-state measurement**
     - Generate scenario-only releases; combine inherited WIP, shared-program demand, and governed
       external load without double counting. Add warm-up, measurement, cool-down, censoring, and
       measurement-only throughput/backlog stability.
     - Acceptance: synthetic units never enter operational tables; analytical fixtures match; input
       order is irrelevant; cooldown backlog clearing cannot make an undersized scenario pass.
-    - Progress 2026-09-17: deterministic fractional accumulation, balanced product-mix allocation,
-      working-day release calendars, future `release_at` enforcement in the scheduler, and strict
-      measurement-window backlog checks are implemented. WIP/demand netting, shared/external demand
-      integration, and sustainable-rate search remain open.
+    - Delivered 2026-09-17: deterministic fractional accumulation and product mix; explicit
+      production-release months; working-day calendars; future `release_at` enforcement; exact WIP
+      order/quantity netting; required shared-program WIP coverage; defensive tracked-project
+      exclusion; weighted external pool demand with quality/readiness; measurement-only backlog
+      checks; remaining-route labor and tool-concurrency lower bounds; and bounded exhaustive rate
+      search with `SEARCH_INCOMPLETE` diagnostics. See
+      `docs/validation/rate-01b-demand-capacity.md`.
   - [ ] **RATE-01c - Calibrate throughput, labor productivity, and ramp evidence**
     - Backtest releases, WIP, completions, labor hours, staffing, cycle time, productive-hours/FTE,
       learning curves, and retention yield. Review Aeronose and Elevator intervals with IE/floor owners.

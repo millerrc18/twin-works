@@ -22,17 +22,17 @@ owner-facing recommendation surface.
 
 ## Remaining RATE-01a/b Work
 
-- WIP/customer-demand netting and approved shared/external demand integration.
-- Analytical capacity lower bounds and bounded sustainable-rate search.
-- Scenario persistence, joint solver, and UI remain in RATE-01c through RATE-01g.
+- Scenario/version/run persistence, joint package solver, calibration, and UI remain in RATE-01c
+  through RATE-01g.
 
-RATE-01a is complete. No live staffing assumptions are seeded until their owners provide evidence.
+RATE-01a and RATE-01b are complete. No live staffing assumptions are seeded until their owners
+provide evidence.
 
 ## Verification
 
 - Focused RATE tests cover annual accumulation, profile demand, product mix, calendars, future
   release enforcement, readiness, staffing evidence, and cooldown isolation.
 - Static legacy inputs omit `release_at`, preserving established scheduler behavior.
-- Full regression: 139 passed with the existing warning set.
+- Full regression after RATE-01b: 153 passed with the existing warning set.
 - Focused Ruff: passed.
 - Static golden forecast: exact.

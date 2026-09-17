@@ -42,4 +42,5 @@ assumption immutability applies unchanged.
 
 No production staffing values were invented or seeded as part of RATE-01a.
 
-Full verification: 139 tests passed, Ruff passed, and the static golden forecast remained exact.
+Full verification after RATE-01b: 153 tests passed, Ruff passed, and the static golden forecast
+remained exact.
