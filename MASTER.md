@@ -196,7 +196,7 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 - **`rate_readiness.py`** — RATE-01a/b pure planning contracts: monthly/annual/profile demand
   canonicalization, deterministic product-mix and working-day releases, scenario-only scheduler
   inputs, readiness/tool/staffing gates, and measurement-window sustainability. Solver, persistence,
-  calibration, and UI remain gated to later RATE phases.
+  and UI remain gated to later RATE phases.
 - **`rate_governance.py`** — RATE-01a governed context/evidence: immutable published or candidate
   baseline snapshots, exact epoch hashes, labor-pool staffing assumptions, productive hours/FTE,
   WC/shift eligibility, learning curves, retention yield, effective dates, and readiness.
@@ -206,6 +206,10 @@ bootstrap JSON/tables ──► SnapshotDataSource ┘        │
 - **`rate_capacity.py`** — RATE-01b analytical remaining-route labor bounds, half-open pooled-tool
   concurrency bounds, and bounded exhaustive sustainable-rate search that does not assume
   monotonic discrete feasibility.
+- **`rate_calibration.py` / `rate_calibration_ifs.py`** - RATE-01c monthly historical release,
+  completion, half-open WIP, cycle, labor, and WC diagnostics plus fail-loud staged IFS extraction.
+  `scripts/calibrate_rate_history.py` runs the read-only published-baseline evidence pass; diagnostic
+  thresholds cannot enable recommendations.
 - **`program_service.py`** — the DB-backed program config source (see §5.2). Sync cached
   `load_specs()` (DB row or {} → routers fallback), `program_order`/`names`/`name`/`ifs_meta`/
   `threshold`, `seed_from_routers` (one-time copy of the 3), `create_program` (validated write +
@@ -439,6 +443,26 @@ parity definitions. The 2026-08-31 29-unit run was exact with result hash
 unchanged. Candidate compilation fails when the live one-to-one mapping differs from its immutable
 definition. The 70 inherited review items keep shadow readiness provisional until owners recertify
 them. See `docs/validation/plat-01c-incumbent-parity.md`.
+
+### 5.3b Rate Readiness calibration gate
+
+RATE-01a/b can generate scenario-only demand and analytical bounds, but RATE-01d cannot size a
+release-candidate labor/tool package until RATE-01c passes. Historical calibration starts each
+current top-level order at its first IFS labor clock, recognizes completion only from a closed
+configured terminal operation, and keeps open units in monthly actual WIP through the measurement
+end. The current published route supplies modeled completion and labor; IFS planned labor remains a
+separate diagnostic. Historical route revisions are retained in the evidence rather than silently
+treated as current-route equivalents.
+
+IFS extraction is deliberately staged because the service rejects CTEs and has a 100-row response
+limit. First-clock cohort, order detail, terminal completion, and measurement-bounded non-reversed
+per-order/WC actuals each
+fail on source error or truncation. The 2026-09-17 diagnostic failed for both programs: Elevator
+cycle MAE/bias 45.5/-45.5 days, completion WAPE 200.00%, WIP WAPE 60.28%, labor WAPE 21.88% at n=8;
+Aeronose 75.4/-75.4 days, 58.33%, 86.72%, and 53.55% at n=24. Thresholds are not approved,
+staffing evidence is unresolved, and tooling remains unresolved. These results identify owner/IE
+reconciliation work; they are not hiring, capacity, or tooling recommendations. See
+`docs/validation/rate-01c-labor-calibration.md`.
 
 ### 5.4 Portfolio console and adaptive workspaces (UI-01b/UI-01c)
 The portfolio home uses `portfolio_service.build_portfolio` as one read-model boundary. It resolves

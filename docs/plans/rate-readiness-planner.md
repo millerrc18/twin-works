@@ -6,6 +6,12 @@ Approved for backlog execution 2026-09-14 after a two-pass Gemini 3.1 Pro critiq
 a governed, scenario-only rate planner to TwinWorks. It does not change published forecasts, active
 model epochs, resource assumptions, or IFS.
 
+Implementation progress through 2026-09-17: RATE-01a and RATE-01b are complete. RATE-01c1 now
+provides the historical IFS extraction and labor/throughput diagnostic, but both programs fail the
+initial unapproved diagnostic bands. RATE-01c remains open for owner/IE threshold review,
+historical-route/WC reconciliation, and governed staffing/ramp evidence. RATE-01d and owner-facing
+RATE-01f remain blocked. See `docs/validation/rate-01c-labor-calibration.md`.
+
 ## Product Decision
 
 Add a **Rate Readiness Planner** under the existing Scenarios workspace. A user can enter a monthly
@@ -327,6 +333,12 @@ closed-form fixtures match the simulation; input order does not change results.
 - Establish productive-hours-per-FTE and new-hire learning curves by skill pool, with owners,
   retention/training-completion yields, evidence windows, review cadence, and sensitivity ranges.
 - Review at least one Aeronose and one Elevator historical rate interval with manufacturing/IE.
+
+Progress 2026-09-17: the staged read-only IFS cohort and current published-baseline replay are
+implemented. Elevator n=8 produced cycle MAE 45.5 days, completion WAPE 200.00%, WIP WAPE 60.28%,
+and labor WAPE 21.88%. Aeronose n=24 produced 75.4 days, 58.33%, 86.72%, and 53.55%. Both fail the
+diagnostic timing/WIP bands. The thresholds are not approved, staffing evidence is unresolved, and
+tooling remains unresolved; this is evidence for reconciliation, not a resource recommendation.
 
 Acceptance: baseline throughput, WIP/backlog, labor-hour, and cycle-time errors meet owner-approved
 thresholds; learning curves and staffing denominators are READY or explicitly provisional; the

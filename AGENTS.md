@@ -8,7 +8,7 @@ have actually bitten us. For the full human-facing reference see **MASTER.md**.
 > plan files, legacy workbook artifacts, and the `RTG_` environment prefix.
 ---
 
-## HANDOFF (2026-09-09) - read first if you are picking this up
+## HANDOFF (2026-09-19) - read first if you are picking this up
 
 **Current status:** Active product scope is Elevator, Aeronose, and Aegis. SCOPE-01 is complete:
 `BCAFIN` is inactive, epoch 10 is `ARCHIVED`, and registry/sync/WIP/simulation/forecast surfaces
@@ -16,8 +16,9 @@ exclude it without deleting history. RES-01 retains the generic physical-resourc
 The next modeling path is TOOL-01:
 generic occupancy leases and Aeronose tooling. Feature #81, the read-only Marion factory map,
 PLAT-01a through PLAT-01c, and UI-01a through UI-01c remain complete. The regression suite has
-**153 passing tests**; the run still emits existing Python 3.14
-`datetime.utcnow()` deprecation warnings from `program_service.py` and `position_state.py`.
+**171 passing tests**; the run still emits the existing Starlette/httpx compatibility warning plus
+Python 3.14 `datetime.utcnow()` deprecation warnings from `program_service.py`,
+`position_state.py`, and shipment-sync paths.
 
 **ACC-01 complete:** `app/services/accuracy_score.py` computes critic-reviewed Accuracy v1.1 at
 fixed 7/14/21-day horizons using only `ifs-sync` completed terminal-operation dates. Same-day and
@@ -54,8 +55,19 @@ backlog sustainability. RATE-01a is complete through `rate_governance.py`: immut
 snapshots plus effective-dated staffing evidence tied to LABOR/HOURS pools. No staffing values are
 seeded without owner evidence. RATE-01b is complete through `rate_demand.py` and `rate_capacity.py`:
 WIP/customer netting, shared-program coverage, governed external demand, labor/tool lower bounds,
-and bounded nonmonotonic rate search. The RATE foundation remains non-user-facing; RATE-01c
-calibration is the next gate.
+and bounded nonmonotonic rate search. The RATE foundation remains non-user-facing.
+
+**RATE-01c diagnostic delivered, gate still open:** `rate_calibration.py` reconstructs monthly
+releases, completions, half-open WIP, cycle MAE/bias, completion/WIP/labor WAPE, and WC labor
+rollups. `rate_calibration_ifs.py` uses staged first-clock, order-detail, terminal-completion, and
+measurement-bounded non-reversed labor queries because the IFS service rejects CTEs and caps responses; failures or
+truncation fail loudly. `scripts/calibrate_rate_history.py` produced a read-only published-baseline
+diagnostic for 2026-03-01 through 2026-09-17. Elevator n=8 has cycle MAE/bias 45.5/-45.5 days,
+completion WAPE 200.00%, WIP WAPE 60.28%, and labor WAPE 21.88%. Aeronose n=24 has
+75.4/-75.4 days, 58.33%, 86.72%, and 53.55%. Both fail the diagnostic gate. Thresholds are
+unapproved; staffing and tooling remain `UNRESOLVED`; RATE-01d and owner-facing RATE-01f remain
+blocked. Next: owner/IE interval review, historical-route/WC reconciliation, governed staffing and
+ramp evidence, then rerun. See `docs/validation/rate-01c-labor-calibration.md`.
 
 **TOOL-01a/01c evidence:** pools 25-31 record Aeronose assembly jigs (2), one wooden blue holding
 fixture `3700HF0001`, trim fixture (1), shell lamination molds (3), core-forming mold set (1), paint

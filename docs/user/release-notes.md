@@ -11,6 +11,12 @@
   measurement-only backlog sustainability. No owner-facing sizing recommendation is enabled yet.
 - Completed RATE-01b demand integration and analytical search: WIP/customer netting, shared-program
   coverage, governed external demand, labor/tool lower bounds, and bounded sustainable-rate search.
+- Added the read-only RATE-01c historical calibration diagnostic for Elevator and Aeronose,
+  including fail-loud staged IFS extraction, monthly releases/completions/WIP, cycle error, labor
+  error, and work-center reconciliation evidence.
+- The first diagnostic run did not pass its provisional timing/WIP bands. Threshold approval,
+  staffing/ramp evidence, and tooling evidence remain open, so hiring/tool recommendations and the
+  owner-facing Rate Planner remain disabled.
 
 ## 2026-09-09
 

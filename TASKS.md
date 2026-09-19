@@ -95,7 +95,21 @@ remains in `AGENTS.md`.
   - [ ] **RATE-01c - Calibrate throughput, labor productivity, and ramp evidence**
     - Backtest releases, WIP, completions, labor hours, staffing, cycle time, productive-hours/FTE,
       learning curves, and retention yield. Review Aeronose and Elevator intervals with IE/floor owners.
+    - [x] **RATE-01c1 - Historical labor/throughput diagnostic:** added fail-loud staged IFS
+      extraction, monthly release/completion/WIP reconstruction, cycle MAE/bias, completion/WIP/
+      labor WAPE, current-route versus WC-actual rollups, and immutable published-baseline context.
+      Open orders remain in WIP; current route hours do not overwrite IFS historical plan evidence.
+    - [ ] **RATE-01c2 - Owner calibration and ramp evidence:** approve the measurement contract and
+      error thresholds with manufacturing/IE and program owners; reconcile historical routing/WC
+      deltas; then record productive-hours/FTE, staffing, skill eligibility, learning curves, and
+      retention/training-completion yield through governed evidence.
     - Acceptance: owner-approved error thresholds pass before solver recommendations or production UI.
+    - Progress 2026-09-17: the diagnostic cohort contains 8 completed/30 flow Elevator orders and
+      24 completed/33 flow Aeronose orders. Current published routes finish 45.5 and 75.4 days early
+      on average; completion WAPE is 200.00%/58.33%, WIP WAPE 60.28%/86.72%, and labor WAPE
+      21.88%/53.55%. Both diagnostic gates fail. Thresholds, staffing, and tooling remain unresolved;
+      RATE-01d and owner-facing RATE-01f stay blocked. See
+      `docs/validation/rate-01c-labor-calibration.md`.
   - [ ] **RATE-01d - Implement the bounded joint labor/tool package solver**
     - Search integer capacity vectors with coupled labor/tool clusters, componentwise dominance,
       hard per-pool/global bounds, result caching, and deterministic stress cases.
